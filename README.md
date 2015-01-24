@@ -17,5 +17,5 @@ NEAT has two main tools for each RNAseq and ChIPseq project:
 
 
 ### Tutorial
-Tutorials can be found in the Vignette folder. This accompanies new users through a the entire analysis of a test dataset provided as part of the package.
+Tutorials can be found in the Vignette folder. This accompanies new users through the entire analysis of a test dataset provided as part of the package.
 
