@@ -1,4 +1,4 @@
-# NEAT: NGS pipelines for biologists
+## NEAT: NGS pipelines for biologists
 
 NEAT is a next generation analysis toolkit that supports the analysis of large data. 
 NEAT runs on NGS data produced by ChIPpip and RNApip packages downloadable on GitHub.
@@ -11,9 +11,9 @@ To start using NEAT, please read the README file.
 ### What does NEAT do
 NEAT has two main tools for each RNAseq and ChIPseq project:
 
-[ 1 ]       RNA/ChIPpip_1_Download  -  Downloads RNA/ChIPpip projects from remote sever to local computer
+[ 1 ]       Download  -  Downloads RNA/ChIPpip projects from remote sever to local computer
 
-[ 2 ]       RNA/ChIPpip_2_Analysis  -  Perfroms the analysis
+[ 2 ]       Analysis  -  Perfroms the analysis
 
 
 ### Tutorial
