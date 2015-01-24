@@ -1,6 +1,6 @@
-## NEAT: NGS pipelines for biologists
+## NEAT: NGS pipelines made easy
 
-NEAT is a next generation analysis toolkit that supports the analysis of large data. 
+NEAT is a next generation analysis toolkit that supports the analysis of large data including metagene analysis (VhIPseq) and differential gene expression analysis (RNAseq). 
 NEAT runs on NGS data produced by ChIPpip and RNApip packages downloadable on GitHub.
 NEAT can be run either on a cluster via the command line or directly via the available applescript wrapper. This allows users to generate metagene analysis (for ChIPseq data) as well as differentially regulated gene calling (for RNAseq data) using a simple double click approach. All files including count tables, RPKM values, DEG, venn diagrams, feature-centered enrichment plots, smear plots, etc are automatically saved and archived for a userfriendly and reproducable flow. 
 The NEAT toolkit can easily be implemented in any institution with limited to no programming knowledge.
@@ -11,9 +11,9 @@ To start using NEAT, please read the README file.
 ### What does NEAT do
 NEAT has two main tools for each RNAseq and ChIPseq project:
 
-[ 1 ]       Download  -  Downloads RNA/ChIPpip projects from remote sever to local computer
+[ 1 ]       Download  -  Download RNA/ChIPpip project from remote sever to local computer
 
-[ 2 ]       Analysis  -  Perfroms the analysis
+[ 2 ]       Analysis  -  Metegene analysis, deifferentiatial gene expression ,etc
 
 
 ### Tutorial
