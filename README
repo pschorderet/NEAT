@@ -1,0 +1,45 @@
+#@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+#***************************************************************************************
+#*											*
+#*    NEAT - an easy toolkit for biologists to analysis RNAseq/ChIPseq data		*
+#*											*
+#***************************************************************************************
+#
+#
+# Follow the easy steps below to run NEAT
+#---------------------------------------------------------------------------------------
+#
+# (1) 	Download the entire NEAT folder.
+#	      Copy to any directory of your local computer.
+#
+#---------------------------------------------------------------------------------------
+#
+# (2)	In the RNAme/ChIPme folder, there are two applescripts
+#
+#     1. ChIPmE_1_Download
+#     2. ChIPmE_2_Analysis
+#
+#     These are double clickable. Follow the steps.
+#
+#---------------------------------------------------------------------------------------
+#
+# (Notes for ChIPpip projects)	
+#
+#	(i)	  Ensure you Targets.txt file is properly filled out
+#
+#	(ii)	Ensure you have bed files of features of interest such as TSS, etc.
+#       These can easily be created or requested (contact patrick.schorderet@molbio.mgh.harvard.edu)
+#       They should be stored in the MartObjects directory
+#
+#---------------------------------------------------------------------------------------
+# (Notes for RNApip projects)	
+#
+#	(i)	  Ensure you Targets.txt file is properly filled out
+#
+# (ii)  Create a folder named ReferenceFiles in the NEAT directory
+#       Ensure you have dowloaded the appropriate .gtf file for your genome 
+#       (check that it has the same name as in your Targets.txt file)
+#       
+# (iii) Ensure that the database (found in your Targets.txt file) you are attempting to use exists 
+#
+#---------------------------------------------------------------------------------------
