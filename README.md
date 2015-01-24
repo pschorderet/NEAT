@@ -13,7 +13,7 @@ NEAT has two main tools for each RNAseq and ChIPseq project:
 
 [ 1 ]       Download  -  Download RNA/ChIPpip project from remote sever to local computer
 
-[ 2 ]       Analysis  -  Metegene analysis, deifferentiatial gene expression ,etc
+[ 2 ]       Analysis  -  Metegene analysis, differentiatial gene expression analysis, etc
 
 
 ### Tutorial
