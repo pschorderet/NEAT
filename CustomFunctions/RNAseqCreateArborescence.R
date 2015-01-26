@@ -22,6 +22,9 @@ RNAseqCreateArborescence <- function(path2MainFolder){
       dir.create(path2curfolder)
     }
   }
+  # bam
+  path2curfolder <- paste(path2MainFolder, "bam/", sep="")
+  checkExistenceOfFolder(path2CheckFolder=path2curfolder)
   # CountTables
   path2curfolder <- paste(path2MainFolder, "CountTables/", sep="")
   checkExistenceOfFolder(path2CheckFolder=path2curfolder)

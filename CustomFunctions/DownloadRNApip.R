@@ -1,4 +1,3 @@
-
 #******************************************************************
 
 version <- "1.0.1 Jan 2015"
@@ -9,45 +8,41 @@ version <- "1.0.1 Jan 2015"
 #*                                                                *
 #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
+
 cat(" \n\n======================================================================================", sep="")
 cat(" \n|| * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *  ", sep="")
 cat(" \n||", sep="")
-cat(" \n||\t DownloadChIPpip, version ", version," (© Patrick Schorderet 2014)", sep="")
+cat(" \n||\t DownloadRNApip, version ", version," (© Patrick Schorderet 2014)", sep="")
 cat(" \n||", sep="")
 cat(" \n|| * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * ", sep="")
-cat(" \n======================================================================================\n", sep="")
+cat(" \n======================================================================================\n\n\n", sep="")
 
 
-#@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-#******************************************************************
-#*                                                                *
-#*      Steps before running ChIPseq1.R pipeline for local        *
-#*                                                                *
-#******************************************************************
-#
-#
 #
 # * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * #
 #                                                                 #
 # This script is intended to be run from bash/shell Mac terminal  #
 #                                                                 #
 # The script:                                                     #
-#     - Creates the proper arborescence for ChIPseq.R             #
-#     - Downlaods required files from remote server               #
-#     - Stores files in proper location (see arborescnce below)   #
+#     - Creates the proper arborescence for RNAseq.R              #
+#     - Downlaods filtered .bam files from remote Canute server   #
+#     - Stores files in proper location (see below for arborescence)#
 #                                                                 #
+#   Connect to the ssh                                            #
+#       ssh schorderet@canute.mgh.harvard.edu
+#       quikie-mart7
 #                                                                 #
 #*-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+*
 #                                                                 #
 # Experiment-specific parameters                                  #
 #                                                                 #
 # This needs to be the same name as the MainFolder in Canute!     #
-# NewMainFolderName <- "EXAMPLE/"
+# NewMainFolderName <- "RNA/"
 # LocalPath2NEAT <- "~/NEAT/"
+# Localpath2NewProject <- "~/Desktop/"
 # sshpath <- "schorderet@canute.mgh.harvard.edu"
-# RemotePath2MainFolderName <- "/data/schorderet/projects/EXAMPLE/"
+# RemotePath2MainFolderName <- "/data/schorderet/projects/RNA/"
 #*-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+*
-
 
 #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 #*                                                                *
@@ -61,7 +56,6 @@ NewMainFolderName <- tail(unlist(strsplit(RemotePath2MainFolderName, split="/"))
 if(NewMainFolderName==""){
   NewMainFolderName <- tail(unlist(strsplit(RemotePath2MainFolderName, split="/")), 2)[1]
 }
-#cat(paste("\n NewMainFolderName \t\t ", NewMainFolderName, "\n",sep=""))
 
 #------------------------------------------------------------
 # Create mainFolder 
@@ -77,9 +71,9 @@ if(file.exists(LocalPath2NewProject)==FALSE){cat(" \n * * * * * * * * * * * * * 
 LocalPath2CustomFunctions <- paste( LocalPath2NEAT, "CustomFunctions", "/", sep="")
 LocalPath2Targets <- paste( LocalPath2NewProject, "DataStructure/Targets.txt", sep="")
 LocalPath2bam <- paste( LocalPath2NewProject, "bam/", sep="")
-LocalPath2saf <- paste( LocalPath2bam, "bwa_saf/", sep="" )
+LocalPath2Tophat <- paste( LocalPath2NewProject, "Tophat/", sep="")
 
-source(paste( LocalPath2CustomFunctions, "/ErrorOutput.R", sep=""))
+source(paste( LocalPath2CustomFunctions, "ErrorOutput.R", sep=""))
 
 #------------------------------------------------------------
 # Redirect output to log file
@@ -87,15 +81,15 @@ LocalPath2Logs <- paste(LocalPath2NewProject, "logs/", sep="")
 if(file.exists(LocalPath2Logs)==TRUE){cat(" \n Logs file exists.\n\n", sep="")}
 if(file.exists(LocalPath2Logs)==FALSE){cat(" \n Creating\t", LocalPath2Logs, "\n\n", sep="");dir.create(LocalPath2Logs)}
 sink(paste(LocalPath2Logs, Sys.Date(), "_", format(Sys.time(), "%X"), ".txt", sep=""), append=FALSE, split=FALSE)
-
+#sink()
 #--------------------------------------------------
 # Create proper arborescence
 cat(" \n======================================================================================", sep="")
 cat(" \n|| * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * ", sep="")
 cat(" \n||\t Create / check arborescence of ", LocalPath2NewProject, sep="")
 cat(" \n|| .-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.\n", sep="")
-source(paste(LocalPath2CustomFunctions, "ChIPseqCreateArborescence.R", sep=""))
-ChIPseqCreateArborescence(path2MainFolder=LocalPath2NewProject)
+source(paste(LocalPath2CustomFunctions, "RNAseqCreateArborescence.R", sep=""))
+RNAseqCreateArborescence(path2MainFolder=LocalPath2NewProject)
 
 
 #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
@@ -125,27 +119,15 @@ cat(" \n|| * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 cat(" \n||\t Downloading QC, bigwig, narrowPeaks and broadPeaks folders", sep="")
 cat(" \n|| .-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.\n\n", sep="")
 
-Sys.sleep(3)
 # Download QC folder
 cat(" \n Downloading QC folder from remote server", sep="")
 mycode <- paste("`scp -r ", sshpath, ":", RemotePath2MainFolderName, "/QC/ " , LocalPath2NewProject, "`", sep="")
 cat(mycode)
 system(mycode)
-# Download bigwig folder
-cat(" \n Downloading QCReport.pdf from remote server", sep="")
-mycode <- paste("`scp -r ", sshpath, ":", RemotePath2MainFolderName, "/peakcalling/bigwig " , LocalPath2NewProject, "`", sep="")
-system(mycode)
-# Download broadPeak folder
-cat(" \n Downloading QCReport.pdf from remote server", sep="")
-mycode <- paste("`scp -r ", sshpath, ":", RemotePath2MainFolderName, "/peakcalling/broadPeak " , LocalPath2NewProject, "`", sep="")
-system(mycode)
-# Download narrowPeak folder
-cat(" \n Downloading QCReport.pdf from remote server", sep="")
-mycode <- paste("`scp -r ", sshpath, ":", RemotePath2MainFolderName, "/peakcalling/narrowPeak " , LocalPath2NewProject, "`", sep="")
-system(mycode)
+
 
 #--------------------------------------------------
-# Transfer filtered .bam files found in *RemotePath2MainFolderName*
+# Transfer Tophat folder (including filtered .bam files) found in *RemotePath2MainFolderName*
 #
 cat(" \n\n\n======================================================================================", sep="")
 cat(" \n|| * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * ", sep="")
@@ -156,9 +138,11 @@ if(file.exists(LocalPath2Targets)==FALSE){ErrorOutput(paste("No Targets.txt file
 cat(" \n\n Targets file provided: \n\n", sep="")
 Targets <- read.delim(LocalPath2Targets, comment.char="#")
 print(Targets)
-cat(" \n Downloading .bam files from remote server", sep="")
-mycode <- paste("`scp -r ", sshpath, ":", RemotePath2MainFolderName, "bwa_saf/ " , LocalPath2bam, "`", sep="")
+# Download Tophat folder
+cat(" \n Downloading Tophat folder from remote server", sep="")
+mycode <- paste("`scp -r ", sshpath, ":", RemotePath2MainFolderName, "/Tophat " , LocalPath2NewProject, "`", sep="")
 system(mycode)
+
 
 # Load datasets provided in Targets file
 samples <- Targets$FileName
@@ -181,10 +165,9 @@ for(i in 1:length(allsamples)){
   # Download sample i to .bam folder
   # i=1
   cat("\n Sample: \t",  allsamples[i], "\n", sep="")
-  cat("\n\t Downloading \t", allsamples[i], "\t folder from remote server to local", sep="")
   # Move sample i to .bam folder
   cat("\n\t Moving \t\t ", allsamples[i], ".bam\t to\t" , LocalPath2bam, sep="")
-  movecode <- paste("`mv ", LocalPath2saf, allsamples[i], "/", allsamples[i], ".bam ", LocalPath2bam, "`", sep="")
+  movecode <- paste("`mv ", LocalPath2Tophat, "/", allsamples[i], "/", allsamples[i], ".bam ", LocalPath2bam, "`", sep="")
   movecode
   system(movecode)
   # Delete rest of folder
@@ -193,11 +176,6 @@ for(i in 1:length(allsamples)){
   #system(delcode)
   cat("\n\n .-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.\n", sep="")
 }
-# Delete rest of folder
-cat("\n\t Deleting \t\t ", LocalPath2saf, sep="")
-delcode <- paste("`rm -r ", LocalPath2saf, "`", sep="")
-system(delcode)
-
 
 
 cat(" \n\n\n ======================================================================================", sep="")
@@ -205,7 +183,6 @@ cat(" \n|| * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 cat(" \n||\t Cleaning up local files and folders", sep="")
 cat(" \n|| .-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.\n\n", sep="")
 cat("\n\n\t ", length(allsamples), " files have been added to \t\t", LocalPath2bam, sep="")
-cat("\n\t ", length(allsamples), " folders have been deleted from \t", LocalPath2bam, sep="")
 cat("\n\n .-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.\n", sep="")
 
 
@@ -225,7 +202,7 @@ cat(" \n|| -+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-
 cat(" \n\n\n======================================================================================", sep="")
 cat(" \n|| * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *  ", sep="")
 cat(" \n||", sep="")
-cat(" \n||\t Download ChIPpip, version ", version," (© Patrick Schorderet 2014)", sep="")
+cat(" \n||\t Download RNApip, version ", version," (© Patrick Schorderet 2014)", sep="")
 cat(" \n||", sep="")
 cat(" \n||\t Terminated with no known error.", sep="")
 cat(" \n||", sep="")
@@ -234,3 +211,4 @@ cat(" \n========================================================================
 
 # Close the R session when run from bash
 quit(save = "no", status = 0, runLast = TRUE)
+
