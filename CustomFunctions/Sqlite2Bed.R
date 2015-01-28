@@ -14,18 +14,10 @@
 #------------------------------------------------------------
 # Dependencies
 library(AnnotationDbi); library(Rsamtools); library(GenomicRanges); library(GenomicAlignments); 
-source(paste(path2PepsRScripts, "DoesTheFileExist.R", sep=""))
-source(paste(path2PepsRScripts, "ErrorOutput.R", sep=""))
 
 #------------------------------------------------------------
 # Function
 Sqlite2Bed <- function(TaxonDatabaseKG, TaxonDatabaseDict){
-  
-  cat(" \n\n **********************************************************", sep="")  
-  cat(" \n *", sep="")
-  cat(" \n *\tLoading database for \t", TaxonDatabaseKG, sep="")
-  cat(" \n *", sep="")
-  cat(" \n * * * * * * * * * * * * * * * * * * * * * * * * * * * * * ", sep="")
   
   # Load database
   #---------------------------------------------------------------------
@@ -34,12 +26,23 @@ Sqlite2Bed <- function(TaxonDatabaseKG, TaxonDatabaseDict){
   
   exonRanges <- exonsBy(get(TaxonDatabaseKG), by = "gene")
   symb <- select(get(TaxonDatabaseDict), names(exonRanges), "SYMBOL")
-#   head(symb)
-#   sum(is.na(symb[,2]))
-#   any(duplicated(symb[,2]))
-#   all.equal(names(exonRanges), symb[,1])
+  #   head(symb)
+  #   sum(is.na(symb[,2]))
+  #   any(duplicated(symb[,2]))
+  #   all.equal(names(exonRanges), symb[,1])
   names(exonRanges) <- as.character(symb[,2])
   exonRanges
+  # Finding missing values and renaming them
+  dupl <- which(is.na(names(exonRanges)))
+  names(exonRanges)[dupl] <- paste("missingValue_", dupl, sep="")
+  
+  cat(" \n\n **********************************************************", sep="")  
+  cat(" \n *", sep="")
+  cat(" \n *\tLoading database for \t", TaxonDatabaseKG, sep="")
+  cat(" \n *", sep="")
+  cat(" \n *\t\t",  length(dupl), " duplications renamed (", length(exonRanges), " genes tot)", sep="")
+  cat(" \n *", sep="")
+  cat(" \n * * * * * * * * * * * * * * * * * * * * * * * * * * * * * ", sep="")
   
   return(exonRanges)
   

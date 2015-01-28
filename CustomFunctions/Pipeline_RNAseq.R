@@ -6,70 +6,23 @@
 #*                                                                *
 #******************************************************************
 #
-# Connect to the ssh
-# ssh -X ps607@ssh.research.partners.org
-# Secretcode4
-# ssh schorderet@canute.mgh.harvard.edu
-# quikie-mart7
 
 # * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * #
 #                                                                 #
 # This script is intended to be run from bash/shell Mac terminal  #
 #                                                                 #
-# To check if the script works locally, please  run these         #
+# To check if the script works locally or to run the script       #
+# through R, users will need to specify the following parameters: #
 # parameters first:                                               #
-#     path2RScripts <- "~/PepsRscripts/RScripts/"                 #
-#     MainFolder <- "DIPG_2014-07-07_RNAseq_mm10/"; path2MainFolder <- paste(path2RScripts, MainFolder, sep="") #
-#     MainFolder <- "DIPG_2014-11-18_RNAseq/"; path2MainFolder <- paste(path2RScripts, MainFolder, sep="") #
-#     MainFolder <- "DIPG_RNAseq_consolidated_mm10/"; path2MainFolder <- paste(path2RScripts, MainFolder, sep="") #
+#                                                                 #
+#     path2NEAT <- "~/NEAT/"                                      #
+#     MainFolder <- "RNA/"; path2MainFolder <- paste("~/Desktop/", MainFolder, sep="")
 #     topNgenes <- 2000; toHighlight <- 20;
 #                                                                 #
 # * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * #
 
 version <- "1.0.1 Jan 2015"
 
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-# Arborescence of files:                                          #
-#                                                                 #
-# *...* means the name is variable                                #
-#                                                                 #
-# ~/PepsRscripts/RScripts/                                        #
-#                                                                 #
-#     └─ *MainFolder*                                             #
-#           └─ bam                                                #
-#                 └─ *samples1*.bam                               #
-#                 └─ ...                                          #
-#                                                                 #
-#           └─ DataStructure                                      #
-#                 └─ Targets.txt                                  #
-#                                                                 #
-#           └─ GrangesRData                                       #
-#                 └─ *samples1*.bam.GRangesRData                  #
-#                 └─ ....                                         #
-#                                                                 #
-#           └─ CountTables                                        #
-#                 └─ CountTable_*samples1*_*martObject*_*date*.bed#
-#                 └─ ....                                         #
-#                                                                 #
-#           └─ Plots                                              #
-#                 └─ *FactorN*_*martObject*_*strand*.pdf          #
-#                 └─ ....                                         #
-#                                                                 #
-#     └─ MartObject                                               # 
-#           └─ mm10_Transcripts.bed                               #
-#           └─ ...                                                #
-#                                                                 #
-#     └─ ReferenceFiles                                           #
-#           └─ mm10                                               #
-#               └─ mm9KG.sqlite                                   #
-#               └─ Mus_musculus.NCBIM37.67.allchr.gtf             #
-#               └─ UC_ID_to_GENE_symbol_mm9.txt                   #
-#           └─ ...                                                #
-#                                                                 #
-#     └─ PepsFunctions                                            #
-#           └─ ...                                                #
-#                                                                 #
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
 
 #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
@@ -87,23 +40,23 @@ path2GRangesRData <- paste(path2MainFolder, "GRangesRData/", sep="")
 path2CountTables <- paste(path2MainFolder, "CountTables/", sep="")
 path2Plots <- paste(path2MainFolder, "Plots/", sep="")
 path2Logs <- paste(path2MainFolder, "Logs/", sep="")
-path2Mart <- paste(path2RScripts, "MartObjects/", sep="")
-path2ReferenceFiles <- paste(path2RScripts,"ReferenceFiles/", sep="")
-path2PepsRScripts <- paste(path2RScripts,"PepsFunctions/", sep="")
+path2ReferenceFiles <- paste(path2NEAT,"ReferenceFiles/", sep="")
+path2CustFct <- paste(path2NEAT,"CustomFunctions/", sep="")
 path2Targets <- paste(path2MainFolder, "DataStructure/Targets.txt", sep="")
+path2chrlens <- paste(path2MainFolder, "DataStructure/chr_lens.dat", sep="")
 path2Tophat <- paste(path2MainFolder, "Tophat/", sep="")
 
 # Source pepsfunctions
-source(paste(path2PepsRScripts, "Bam2GRangesRData.R", sep=""))
-source(paste(path2PepsRScripts, "RawMart2FormattedMart.R", sep=""))
-source(paste(path2PepsRScripts, "OutputNumberOfReadsFromGRanges.R", sep=""))
-source(paste(path2PepsRScripts, "Mart2GRanges.R", sep=""))
-source(paste(path2PepsRScripts, "CountOverlaps2matrix.R", sep=""))
-source(paste(path2PepsRScripts, "Tags2GRanges.R", sep=""))
-source(paste(path2PepsRScripts, "DoesTheFileExist.R", sep=""))
-source(paste(path2PepsRScripts, "LoadMartGRanges.R", sep=""))
-source(paste(path2PepsRScripts, "ErrorOutput.R", sep=""))
-source(paste(path2PepsRScripts, "Sqlite2Bed.R", sep=""))
+source(paste(path2CustFct, "Bam2GRangesRData.R", sep=""))
+source(paste(path2CustFct, "CountOverlaps2matrix.R", sep=""))
+source(paste(path2CustFct, "DoesTheFileExist.R", sep=""))
+source(paste(path2CustFct, "ErrorOutput.R", sep=""))
+source(paste(path2CustFct, "LoadMartGRanges.R", sep=""))
+source(paste(path2CustFct, "Mart2GRanges.R", sep=""))
+source(paste(path2CustFct, "OutputNumberOfReadsFromGRanges.R", sep=""))
+source(paste(path2CustFct, "RawMart2FormattedMart.R", sep=""))
+source(paste(path2CustFct, "Sqlite2Bed.R", sep=""))
+source(paste(path2CustFct, "Tags2GRanges.R", sep=""))
 
 #------------------------------------------------------------
 # Redirect output to log file
@@ -125,7 +78,7 @@ cat(" \n ||", sep="")
 cat(" \n ||\t RNAseq analysis version ", version, " (© Patrick Schorderet)", sep="")
 cat(" \n ||", sep="")
 cat(" \n ||\t Path to MainFolder : \t\t\t\t", path2MainFolder, sep="")
-cat(" \n ||\t Path to PepsRscripts : \t\t\t", path2RScripts, sep="")
+cat(" \n ||\t Path to CustomFunctions : \t\t", path2CustFct, sep="")
 cat(" \n ||", sep="")
 cat(" \n ||\t Number of DEG genes : \t\t\t\t", topNgenes, sep="")
 cat(" \n ||\t Number of genes to highlight : \t", toHighlight, sep="")
@@ -140,12 +93,16 @@ cat(" \n\n\n ===================================================================
 cat(" \n || * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * ", sep="")
 cat(" \n ||\t Create / check arborescence of ", paste(path2MainFolder, sep=""), sep="")
 cat(" \n || .-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.\n", sep="")
-source(paste(path2PepsRScripts, "RNAseqCreateArborescence.R", sep=""))
+source(paste(path2CustFct, "RNAseqCreateArborescence.R", sep=""))
 RNAseqCreateArborescence(path2MainFolder=path2MainFolder)
 
 #------------------------------------------------------------
-# Define parameters
-chromosomes = c(paste("chr", seq(1,19),  sep = ""), "chrX", "chrY")
+# Read the chr_lens.dat
+#chromosomesFile <- read.delim(path2chrlens, comment.char="#")
+chromosomesFile <- read.table(path2chrlens, comment.char="#")
+chromosomes <- chromosomesFile$V1
+#chromosomes = c(paste("chr", seq(1,19),  sep = ""), "chrX", "chrY")
+
 
 #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 #                                                                 #
@@ -197,7 +154,7 @@ if(DoesTheFileExist(path2file=bamGRangesRDataPath)!=TRUE){
     for(k in 1:length(bamPath)){    
       cat(" \n\n\n * * * * * * * * * * * * * * * * * * * * * * * * * * * * ", sep="")
       cat(" \n ", k, " / ", length(bamPath) ," :\t", bamPath[k], sep="")
-      Bam2GRangesRData(path2bam=bamPath[k])
+      Bam2GRangesRData(path2bam=bamPath[k], chromosomes=chromosomes)
     }  
   }
 }
@@ -216,9 +173,7 @@ if(DoesTheFileExist(path2file=paste(paste(path2GRangesRData, allsamples, sep="")
 
 #------------------------------------------------------------
 # Quality Control 
-GRallsamples <- sort(ls()[grep(ls(), pattern="bam.GRanges.RData$")]) 
-myGRsamples <- GRallsamples[which(sub(".bam.GRanges.RData$", "", GRallsamples)%in%Targets$FileName)]
-OutputNumberOfReadsFromGRanges(GRallsamples)
+OutputNumberOfReadsFromGRanges(GRangesSamples)
 
 #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 #                                                                 #
@@ -237,7 +192,6 @@ tDbDict <- res[grep("TaxonDatabaseDict", res)]; tDbDict <- gsub("# ","",tDbDict)
 TaxonDatabaseDict <- unlist(strsplit(tDbDict, split = "\\="))[2]
 
 # Load .sqlite file
-#path2SqliteBedObject <- paste(path2ReferenceFiles, refGenome, ".sqlite", sep="")
 exonRanges <- Sqlite2Bed(TaxonDatabaseKG=TaxonDatabaseKG, TaxonDatabaseDict=TaxonDatabaseDict)
 
 #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
@@ -261,23 +215,19 @@ for(i in 1:length(GRangesSamples)){
   cat(" \n *\tCompute overlaps over exons for \t", GRangesSamples[i], sep="")
   cat(" \n *", sep="")
   # Compute overlap
-  # THIS IS DEPRECATED -> CHANGE USNING SUMMARISEOVERLAPS()
   #    Also, summarizeOverlaps deals with GRangesList, so no need to 'consolidate' all exons to genes!
-  overlap <- countOverlaps(exonRanges, get(myGRsamples[i]), ignore.strand = TRUE)
-  # TEST THIS
-  # summarizeOverlaps(eByg, get(myGRsamples[i]), mode="Union", ignore.strand=TRUE, inter.feature=FALSE, singleEnd=TRUE)
+  overlap <- summarizeOverlaps(exonRanges, get(GRangesSamples[i]), mode="Union", ignore.strand=TRUE, inter.feature=FALSE, singleEnd=TRUE)  
+  overlapDF <- as.data.frame(cbind(names(exonRanges), assays(overlap)$counts))
+  colnames(overlapDF) <- c("GeneNames", "Counts")
+  overlapDF[30:40,]
   
-  # Force to data.frame structure
-  overlap <- rbind(names(exonRanges), overlap)
-  overlap <- as.data.frame(t(overlap))  
   # Assign to nameCT
-  colnames(overlap) <- c("GeneNames", "Counts")
-  nameCT <- paste(prenameForCT, myGRsamples[i], ".bed", sep="")
-  assign(nameCT, overlap)
+  nameCT <- paste(prenameForCT, GRangesSamples[i], ".bed", sep="")
+  assign(nameCT, overlapDF)
   GRangesSamplesCT <- c(GRangesSamplesCT, nameCT)
   # Save to .bed file
   cat(" \n *\t\tStore countTable in : \t\t", paste(path2CountTables, nameCT, sep=""), sep="")    
-  write.table(overlap, paste(path2CountTables, nameCT, sep=""), sep = "\t", row.names = FALSE, col.names=TRUE, quote=FALSE, na="")    
+  write.table(overlapDF, paste(path2CountTables, nameCT, sep=""), sep = "\t", row.names = FALSE, col.names=TRUE, quote=FALSE, na="")    
 
   cat(" \n *", sep="")
   cat(" \n * * * * * * * * * * * * * * * * * * * * * * * * * * * * * ", sep="")
@@ -305,11 +255,13 @@ cat(" \n - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 cat(" \n \t Read countTable \t", CTallsamples[1], sep="")
 nameCT <- paste(path2CountTables, CTallsamples[1], sep="")
 CT <- read.table(nameCT, header=TRUE)
+head(CT)
 colnames(CT) <- c("GeneNames", CTallsamples[1])
 CTall <-CT
 # cbind all others
 if(length(CTallsamples)>1){
-  for(k in 2:length(CTallsamples)){    
+  for(k in 2:length(CTallsamples)){
+    # k=2
     cat(" \n \t Read countTable \t", CTallsamples[k], sep="")
     nameCT <- paste(path2CountTables, CTallsamples[k], sep="")
     CT <- read.table(nameCT, header=TRUE)
@@ -318,15 +270,13 @@ if(length(CTallsamples)>1){
   }
 }
 # Save countTable containaing all samples
-cat(" \n - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - \n", sep="")
-cat(" \n *\t\tStore countTable in : \t\t", paste(path2CountTables, "CountTable_OverExons_AllSamples.bed", sep=""), sep="")    
+cat(" \n\n *\t\tStore countTable in : \t\t", paste(path2CountTables, "CountTable_OverExons_AllSamples.bed", sep=""), sep="")    
+cat(" \n\n - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - \n", sep="")
 write.table(CTall, paste(path2CountTables, prenameForCT, "_AllSamples.bed", sep=""), sep = "\t", row.names = FALSE, col.names=TRUE, quote=FALSE, na="")    
 
 # Format into matrix form
 CTall <- as.matrix(CTall[2:(length(CTallsamples)+1)])
 rownames(CTall) <- CT[,1]
-head(CTall)
-#dim(CTall)
 #--------------------------------------------------
 # Compute DGElist
 #--------------------------------------------------
@@ -342,7 +292,7 @@ cat(" \n \t Compute DGEList \t", sep="")
 
 # Get library size
 lib.size <- NULL
-for(i in 1:length(myGRsamples)){lib.size <- c(lib.size, length(get(myGRsamples[i])))}
+for(i in 1:length(GRangesSamples)){lib.size <- c(lib.size, length(get(GRangesSamples[i])))}
 
 #d <- DGEList(counts=CTall, group=factor(Targets$Replicate), genes=rownames(CTall))
 d <- DGEList(counts=CTall, lib.size=lib.size, group=Targets$Replicate, genes=rownames(CTall))
@@ -423,7 +373,8 @@ pdf(paste(path2Plots, Sys.Date(), "_plotSmears.pdf", sep=""), paper='USr', useDi
 #  ! ! ! ! ! ! ! ! This isn't suited for replicates ! ! ! ! ! ! ! !
 # Find all combinations of samples and store in cmp
 cmp <- combinations(n=length(d$samples$group), r=2, v=d$samples$group, repeats.allowed=FALSE)
-symb2ID <- select(get(TaxonDatabaseDict), names(exonRanges), "SYMBOL")
+#symb2ID <- select(get(TaxonDatabaseDict), names(exonRanges), "SYMBOL")
+
 # Run exactTest for each comparison
 for(k in 1:nrow(cmp)){  
 
@@ -545,14 +496,6 @@ cat(" \n\n\n ===================================================================
 cat(" \n || * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * ", sep="")
 cat(" \n ||\t GO terms analysis", sep="")
 cat(" \n || .-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.\n", sep="")
-
-
-
-
-
-
-
-
 
 
 
