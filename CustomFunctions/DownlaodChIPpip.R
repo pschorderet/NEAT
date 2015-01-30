@@ -44,8 +44,9 @@ cat(" \n========================================================================
 # This needs to be the same name as the MainFolder in Canute!     #
 # NewMainFolderName <- "EXAMPLE/"
 # LocalPath2NEAT <- "~/NEAT/"
+# Localpath2NewProject <- "~/Desktop/"
 # sshpath <- "schorderet@canute.mgh.harvard.edu"
-# RemotePath2MainFolderName <- "/data/schorderet/projects/EXAMPLE/"
+# RemotePath2MainFolderName <- "/data/schorderet/ChIPpip/EXAMPLE/"
 #*-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+*
 
 
@@ -77,7 +78,7 @@ if(file.exists(LocalPath2NewProject)==FALSE){cat(" \n * * * * * * * * * * * * * 
 LocalPath2CustomFunctions <- paste( LocalPath2NEAT, "CustomFunctions", "/", sep="")
 LocalPath2Targets <- paste( LocalPath2NewProject, "DataStructure/Targets.txt", sep="")
 LocalPath2bam <- paste( LocalPath2NewProject, "bam/", sep="")
-LocalPath2saf <- paste( LocalPath2bam, "bwa_saf/", sep="" )
+LocalPath2saf <- paste( LocalPath2bam, "aligned/", sep="" )
 
 source(paste( LocalPath2CustomFunctions, "/ErrorOutput.R", sep=""))
 
@@ -125,7 +126,7 @@ cat(" \n|| * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 cat(" \n||\t Downloading QC, bigwig, narrowPeaks and broadPeaks folders", sep="")
 cat(" \n|| .-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.\n\n", sep="")
 
-Sys.sleep(3)
+
 # Download QC folder
 cat(" \n Downloading QC folder from remote server", sep="")
 mycode <- paste("`scp -r ", sshpath, ":", RemotePath2MainFolderName, "/QC/ " , LocalPath2NewProject, "`", sep="")
@@ -157,7 +158,7 @@ cat(" \n\n Targets file provided: \n\n", sep="")
 Targets <- read.delim(LocalPath2Targets, comment.char="#")
 print(Targets)
 cat(" \n Downloading .bam files from remote server", sep="")
-mycode <- paste("`scp -r ", sshpath, ":", RemotePath2MainFolderName, "bwa_saf/ " , LocalPath2bam, "`", sep="")
+mycode <- paste("`scp -r ", sshpath, ":", RemotePath2MainFolderName, "aligned/ " , LocalPath2bam, "`", sep="")
 system(mycode)
 
 # Load datasets provided in Targets file
@@ -184,7 +185,7 @@ for(i in 1:length(allsamples)){
   cat("\n\t Downloading \t", allsamples[i], "\t folder from remote server to local", sep="")
   # Move sample i to .bam folder
   cat("\n\t Moving \t\t ", allsamples[i], ".bam\t to\t" , LocalPath2bam, sep="")
-  movecode <- paste("`mv ", LocalPath2saf, allsamples[i], "/", allsamples[i], ".bam ", LocalPath2bam, "`", sep="")
+  movecode <- paste("`mv ", LocalPath2bam, "aligned/", allsamples[i], "/", allsamples[i], ".bam ", LocalPath2bam, "`", sep="")
   movecode
   system(movecode)
   # Delete rest of folder
@@ -194,8 +195,8 @@ for(i in 1:length(allsamples)){
   cat("\n\n .-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.\n", sep="")
 }
 # Delete rest of folder
-cat("\n\t Deleting \t\t ", LocalPath2saf, sep="")
-delcode <- paste("`rm -r ", LocalPath2saf, "`", sep="")
+cat("\n\t Deleting \t\t ", LocalPath2bam, "aligned/", sep="")
+delcode <- paste("`rm -r ", LocalPath2bam, "aligned/", "`", sep="")
 system(delcode)
 
 
