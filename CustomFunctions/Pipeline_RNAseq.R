@@ -1,4 +1,9 @@
 
+
+
+Pipeline_RNAseq <- function( path2NEAT, path2MainFolder, topNgenes, toHighlight ){
+
+
 #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 #******************************************************************
 #*                                                                *
@@ -525,3 +530,4 @@ cat(" \n =======================================================================
 # Close the R session when run from bash
 quit(save = "no", status = 0, runLast = TRUE)
 
+}

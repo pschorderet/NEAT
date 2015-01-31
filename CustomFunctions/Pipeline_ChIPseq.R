@@ -1,4 +1,7 @@
 
+
+Pipeline_ChIPseq <- function(path2NEAT, path2MainFolder, nameOfBed, binNumber, strand, runmeank, Venn, normInp ){
+
 #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 #******************************************************************
 #*                                                                *
@@ -502,3 +505,6 @@ cat(" \n =======================================================================
 
 # Close the R session when run from bash
 quit(save = "no", status = 0, runLast = TRUE)
+
+
+}

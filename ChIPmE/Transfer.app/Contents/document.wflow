@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
 	<key>AMApplicationBuild</key>
-	<string>409</string>
+	<string>409.1</string>
 	<key>AMApplicationVersion</key>
 	<string>2.5</string>
 	<key>AMDocumentVersion</key>
@@ -51,7 +51,8 @@
 				<key>ActionParameters</key>
 				<dict>
 					<key>source</key>
-					<string># Helps transfer ChIPpip projects from remote server to local computer#----------------------------------------------------------------------set Localpath2RScripts to (choose folder with prompt "Locate the NEAT directory")set Localpath2RScripts to get the POSIX path of Localpath2RScriptsset Localpath2NewProject to (choose folder with prompt "Where do you want to save your ChIPpip project?")set Localpath2NewProject to get the POSIX path of Localpath2NewProjectset question to display dialog "Enter the path to the ChIPpip project on your remote cluster " default answer "~/ChIPpip/EXAMPLE" buttons {"Cancel", "Next"} default button 2set RemotePath2MainFolderName to text returned of questionset question to display dialog "Enter ssh path to remote cluster " default answer "username@server_adress.edu" buttons {"Cancel", "Download ChIPpip project"} default button 2set sshpath to text returned of questiontell application "Terminal"	activate		# Ask user to enter different variables	set the_user to system attribute "USER"	set line1 to "LocalPath2NEAT &lt;- '" &amp; Localpath2RScripts &amp; "'"	set line2 to "Localpath2NewProject &lt;- '" &amp; Localpath2NewProject &amp; "'"	set line3 to "RemotePath2MainFolderName &lt;- '" &amp; RemotePath2MainFolderName &amp; "/'"	set line4 to "sshpath &lt;- '" &amp; sshpath &amp; "'"	set line5 to "source('" &amp; Localpath2RScripts &amp; "CustomFunctions/DownlaodChIPpip.R')"		do script "R"	delay 2	do script line1 in window 1	delay 0.5	do script line2 in window 1	delay 0.5	do script line3 in window 1	delay 0.5	do script line4 in window 1	delay 0.5	do script line5 in window 1	#tell application "Finder" to set visible of process "Terminal" to false	end tell</string>
+					<string># Helps transfer ChIPpip projects from remote server to local computer#----------------------------------------------------------------------set LocalPath2NEAT to (choose folder with prompt "Locate the NEAT directory")set LocalPath2NEAT to get the POSIX path of LocalPath2NEATset Localpath2NewProject to (choose folder with prompt "Where do you want to save your ChIPpip project?")set Localpath2NewProject to get the POSIX path of Localpath2NewProjectset question to display dialog "Enter the path to the ChIPpip project on your remote cluster " default answer "~/ChIPpip/EXAMPLE/" buttons {"Cancel", "Next"} default button 2set RemotePath2MainFolderName to text returned of questionset question to display dialog "Enter ssh path to remote cluster " default answer "username@server_adress.edu" buttons {"Cancel", "Download ChIPpip project"} default button 2set sshpath to text returned of questiontell application "Terminal"	activate		# Ask user to enter different variables	set the_user to system attribute "USER"	set line1 to "source('" &amp; LocalPath2NEAT &amp; "CustomFunctions/DownlaodChIPpip.R')"
+		# DownloadChIPpip(LocalPath2NEAT, Localpath2NewProject, RemotePath2MainFolderName, sshpath){	set line2 to "DownloadChIPpip(LocalPath2NEAT='" &amp; LocalPath2NEAT &amp; "', Localpath2NewProject ='" &amp; Localpath2NewProject &amp; "', RemotePath2MainFolderName ='" &amp; RemotePath2MainFolderName &amp; "/', sshpath ='" &amp; sshpath &amp; "')"		do script "R"	delay 2	do script line1 in window 1	delay 0.5	do script line2 in window 1	#tell application "Finder" to set visible of process "Terminal" to false	end tell</string>
 				</dict>
 				<key>BundleIdentifier</key>
 				<string>com.apple.Automator.RunScript</string>
@@ -105,7 +106,7 @@ end run</string>
 				<key>isViewVisible</key>
 				<true/>
 				<key>location</key>
-				<string>434.000000:645.000000</string>
+				<string>378.500000:891.000000</string>
 				<key>nibPath</key>
 				<string>/System/Library/Automator/Run AppleScript.action/Contents/Resources/Base.lproj/main.nib</string>
 			</dict>

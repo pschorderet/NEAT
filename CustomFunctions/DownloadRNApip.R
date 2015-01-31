@@ -1,3 +1,9 @@
+
+
+
+DownloadRNApip <- function(LocalPath2NEAT, Localpath2NewProject, RemotePath2MainFolderName, sshpath){
+
+
 #******************************************************************
 
 version <- "1.0.1 Jan 2015"
@@ -28,20 +34,15 @@ cat(" \n========================================================================
 #     - Downlaods filtered .bam files from remote Canute server   #
 #     - Stores files in proper location (see below for arborescence)#
 #                                                                 #
-#   Connect to the ssh                                            #
-#       ssh schorderet@canute.mgh.harvard.edu
-#       quikie-mart7
-#                                                                 #
 #*-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+*
 #                                                                 #
 # Experiment-specific parameters                                  #
 #                                                                 #
 # This needs to be the same name as the MainFolder in Canute!     #
-# NewMainFolderName <- "RNA/"
 # LocalPath2NEAT <- "~/NEAT/"
 # Localpath2NewProject <- "~/Desktop/"
-# sshpath <- "schorderet@canute.mgh.harvard.edu"
 # RemotePath2MainFolderName <- "/data/schorderet/projects/RNA/"
+# sshpath <- "schorderet@canute.mgh.harvard.edu"
 #*-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+*
 
 #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
@@ -211,4 +212,6 @@ cat(" \n========================================================================
 
 # Close the R session when run from bash
 quit(save = "no", status = 0, runLast = TRUE)
+
+}
 

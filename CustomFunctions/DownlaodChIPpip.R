@@ -1,4 +1,9 @@
 
+
+
+DownloadChIPpip <- function(LocalPath2NEAT, Localpath2NewProject, RemotePath2MainFolderName, sshpath){
+
+
 #******************************************************************
 
 version <- "1.0.1 Jan 2015"
@@ -235,3 +240,6 @@ cat(" \n========================================================================
 
 # Close the R session when run from bash
 quit(save = "no", status = 0, runLast = TRUE)
+
+
+}

@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
 	<key>AMApplicationBuild</key>
-	<string>409</string>
+	<string>409.1</string>
 	<key>AMApplicationVersion</key>
 	<string>2.5</string>
 	<key>AMDocumentVersion</key>
@@ -51,7 +51,7 @@
 				<key>ActionParameters</key>
 				<dict>
 					<key>source</key>
-					<string>set path2MainFolder to (choose folder with prompt "Locate your RNApip Project Folder")set path2MainFolder to get the POSIX path of path2MainFolderset path2NEAT to (choose folder with prompt "Locate the 'NEAT' folder")set path2NEAT to get the POSIX path of path2NEATtell application "Terminal"	activate		# Ask user to enter different variables	set question to display dialog "Enter variables" default answer "topNgenes	=	100 ;toHighlight	=	10 ;" buttons {"Cancel", "Run RNAseq pipeline"} default button 2	set Variables to text returned of question		set the_user to system attribute "USER"	set line1 to "path2NEAT &lt;- '" &amp; path2NEAT &amp; "'"	set line2 to "path2MainFolder &lt;- '" &amp; path2MainFolder &amp; "'"	set line3 to Variables	set line4 to "source('" &amp; path2NEAT &amp; "CustomFunctions/Pipeline_RNAseq.R')"		do script "R"	delay 2	do script line1 in window 1	delay 0.5	do script line1 in window 1	delay 0.5	do script line2 in window 1	delay 0.5	do script line3 in window 1	delay 0.5	do script line4 in window 1		end tell</string>
+					<string>set path2NEAT to (choose folder with prompt "Locate the 'NEAT' folder")set path2NEAT to get the POSIX path of path2NEATset path2MainFolder to (choose folder with prompt "Locate your RNApip Project Folder")set path2MainFolder to get the POSIX path of path2MainFoldertell application "Terminal"		activate		# Ask user to enter different variables	set question to display dialog "Enter variables" default answer "topNgenes = 100 ,toHighlight = 10 " buttons {"Cancel", "Run RNAseq pipeline"} default button 2	set Variables to text returned of question		set the_user to system attribute "USER"	set line1 to "source('" &amp; path2NEAT &amp; "CustomFunctions/Pipeline_RNAseq.R')"		# Pipeline_RNAseq(path2NEAT, path2MainFolder, topNgenes, toHighlight)		set line2 to "Pipeline_RNAseq(path2NEAT='" &amp; path2NEAT &amp; "', path2MainFolder ='" &amp; path2MainFolder &amp; "', " &amp; Variables &amp; ")"		do script "R"	delay 2	do script line1 in window 1	delay 0.5	do script line2 in window 1	delay 0.5	end tell</string>
 				</dict>
 				<key>BundleIdentifier</key>
 				<string>com.apple.Automator.RunScript</string>
@@ -105,7 +105,7 @@ end run</string>
 				<key>isViewVisible</key>
 				<true/>
 				<key>location</key>
-				<string>434.000000:316.000000</string>
+				<string>517.000000:743.000000</string>
 				<key>nibPath</key>
 				<string>/System/Library/Automator/Run AppleScript.action/Contents/Resources/Base.lproj/main.nib</string>
 			</dict>
