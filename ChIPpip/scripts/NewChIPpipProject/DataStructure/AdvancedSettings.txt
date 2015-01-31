@@ -1,0 +1,27 @@
+#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-|
+#                                                                                                               |
+# Advanced settings file                                                                                        |
+#                                                                                                               |
+#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-|
+#
+# Remote Server
+#
+# Bwa.maxEditDist	=	"1"
+# Align.command.line.1	=	"bwa aln"
+# Align.command.line.2  =	"bwa samse"
+# 	single-end	:	"samse"
+# 	paired-end	:	"sampe"
+#
+#
+# Filter.removePCRdup	=	"1"
+# Filter.makeUniqueRead	=	"1"
+# Filter.splitbychr	=	"1"
+# Filter.enforceinssize	=	"0"
+# Filter.minisize	=	"100"
+# Filter.maxisize	=	"800"
+#
+# PeakCaller.fdr	=	"0.01"
+# PeakCaller.posopt	=	"1"
+# PeakCaller.densityopt	=	"1"
+#
+#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-|
