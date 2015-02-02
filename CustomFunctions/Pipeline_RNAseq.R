@@ -70,6 +70,20 @@ if(file.exists(path2Logs)==FALSE){cat(" \n Creating\t", path2Logs, "\n\n", sep="
 sink(paste(path2Logs, Sys.Date(), "_", format(Sys.time(), "%X"), ".txt", sep=""), append=FALSE, split=FALSE)
 #sink()
 
+# Find Taxon Db name and dictionary
+res <- readLines(path2Targets)
+tDb <- res[grep("TaxonDatabaseKG", res)]; tDb <- gsub("# ","",tDb); tDb <- gsub("\t","",tDb); tDb <- gsub("\"","",tDb)
+TaxonDatabaseKG <- unlist(strsplit(tDb, split = "\\="))[2]
+tDbDict <- res[grep("TaxonDatabaseDict", res)]; tDbDict <- gsub("# ","",tDbDict); tDbDict <- gsub("\t","",tDbDict); tDbDict <- gsub("\"","",tDbDict)
+TaxonDatabaseDict <- unlist(strsplit(tDbDict, split = "\\="))[2]
+
+# Find if run is SE or PE
+PE <- res[grep("Paired_end_run", res)]; PE <- gsub("# ","",PE); PE <- gsub("\t","",PE); PE <- gsub("\"","",PE)
+PE <- unlist(strsplit(PE, split = "\\="))[2];
+if(SE=="0"){ PE <- "TRUE" }
+if(SE=="1"){ PE <- "FALSE" }
+
+
 #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 #*                                                                *
 #*                Create proper arborescence                      *
@@ -87,6 +101,11 @@ cat(" \n ||\t Path to CustomFunctions : \t\t", path2CustFct, sep="")
 cat(" \n ||", sep="")
 cat(" \n ||\t Number of DEG genes : \t\t\t\t", topNgenes, sep="")
 cat(" \n ||\t Number of genes to highlight : \t", toHighlight, sep="")
+cat(" \n ||\t Taxon database : \t\t\t\t\t", TaxonDatabaseKG, sep="")
+cat(" \n ||\t Taxon database dict : \t\t\t\t", TaxonDatabaseDict, sep="")
+cat(" \n ||", sep="")
+if(SE=="TRUE"){ cat(" \n ||\t Single-end sequencing run", sep="") }
+if(SE=="FALSE"){ cat(" \n ||\t Paired-end sequencing run", sep="") }
 cat(" \n ||", sep="")
 cat(paste(" \n ||\t Run date:\t\t\t\t\t\t\t", Sys.Date(), sep=""), sep="")
 cat(" \n ||", sep="")
@@ -187,15 +206,6 @@ OutputNumberOfReadsFromGRanges(GRangesSamples)
 #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 #
 #------------------------------------------------------------
-# Define variables
-
-# Find Taxon Db name and dictionary
-res <- readLines(path2Targets)
-tDb <- res[grep("TaxonDatabaseKG", res)]; tDb <- gsub("# ","",tDb); tDb <- gsub("\t","",tDb); tDb <- gsub("\"","",tDb)
-TaxonDatabaseKG <- unlist(strsplit(tDb, split = "\\="))[2]
-tDbDict <- res[grep("TaxonDatabaseDict", res)]; tDbDict <- gsub("# ","",tDbDict); tDbDict <- gsub("\t","",tDbDict); tDbDict <- gsub("\"","",tDbDict)
-TaxonDatabaseDict <- unlist(strsplit(tDbDict, split = "\\="))[2]
-
 # Load .sqlite file
 exonRanges <- Sqlite2Bed(TaxonDatabaseKG=TaxonDatabaseKG, TaxonDatabaseDict=TaxonDatabaseDict)
 
@@ -221,7 +231,7 @@ for(i in 1:length(GRangesSamples)){
   cat(" \n *", sep="")
   # Compute overlap
   #    Also, summarizeOverlaps deals with GRangesList, so no need to 'consolidate' all exons to genes!
-  overlap <- summarizeOverlaps(exonRanges, get(GRangesSamples[i]), mode="Union", ignore.strand=TRUE, inter.feature=FALSE, singleEnd=TRUE)  
+  overlap <- summarizeOverlaps(exonRanges, get(GRangesSamples[i]), mode="Union", ignore.strand=TRUE, inter.feature=FALSE, singleEnd=SE)  
   overlapDF <- as.data.frame(cbind(names(exonRanges), assays(overlap)$counts))
   colnames(overlapDF) <- c("GeneNames", "Counts")
   overlapDF[30:40,]
