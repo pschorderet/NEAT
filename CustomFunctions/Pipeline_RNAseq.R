@@ -1,8 +1,10 @@
 
-
-
-Pipeline_RNAseq <- function( path2NEAT, path2MainFolder, topNgenes, toHighlight ){
-
+#-----------------------------------------------------------------
+# TEST LINES (DISREGARD)
+#Pipeline_RNAseq <- function( path2NEAT, path2MainFolder, topNgenes, toHighlight ){
+# source('/Users/patrick/Desktop/NEAT/CustomFunctions/Pipeline_RNAseq.R')
+# Pipeline_RNAseq(path2NEAT='/Users/patrick/Desktop/NEAT/', path2MainFolder ='/Users/patrick/Desktop/EXAMPLE/', topNgenes = 100 ,toHighlight = 10 )
+# path2NEAT='/Users/patrick/Desktop/NEAT/'; path2MainFolder ='/Users/patrick/Desktop/EXAMPLE/'; topNgenes = 100; toHighlight = 10; 
 
 #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 #******************************************************************
@@ -78,10 +80,10 @@ tDbDict <- res[grep("TaxonDatabaseDict", res)]; tDbDict <- gsub("# ","",tDbDict)
 TaxonDatabaseDict <- unlist(strsplit(tDbDict, split = "\\="))[2]
 
 # Find if run is SE or PE
-PE <- res[grep("Paired_end_run", res)]; PE <- gsub("# ","",PE); PE <- gsub("\t","",PE); PE <- gsub("\"","",PE)
-PE <- unlist(strsplit(PE, split = "\\="))[2];
-if(SE=="0"){ PE <- "TRUE" }
-if(SE=="1"){ PE <- "FALSE" }
+SE <- res[grep("Paired_end_run", res)]; SE <- gsub("# ","",SE); SE <- gsub("\t","",SE); SE <- gsub("\"","",SE)
+SE <- unlist(strsplit(SE, split = "\\="))[2];
+if(SE=="0"){ SE <- "TRUE" }
+if(SE=="1"){ SE <- "FALSE" }
 
 
 #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
@@ -97,15 +99,16 @@ cat(" \n ||", sep="")
 cat(" \n ||\t RNAseq analysis version ", version, " (© Patrick Schorderet)", sep="")
 cat(" \n ||", sep="")
 cat(" \n ||\t Path to MainFolder : \t\t\t\t", path2MainFolder, sep="")
-cat(" \n ||\t Path to CustomFunctions : \t\t", path2CustFct, sep="")
+cat(" \n ||\t Path to CustomFunctions : \t\t\t", path2CustFct, sep="")
 cat(" \n ||", sep="")
 cat(" \n ||\t Number of DEG genes : \t\t\t\t", topNgenes, sep="")
 cat(" \n ||\t Number of genes to highlight : \t", toHighlight, sep="")
 cat(" \n ||\t Taxon database : \t\t\t\t\t", TaxonDatabaseKG, sep="")
 cat(" \n ||\t Taxon database dict : \t\t\t\t", TaxonDatabaseDict, sep="")
 cat(" \n ||", sep="")
-if(SE=="TRUE"){ cat(" \n ||\t Single-end sequencing run", sep="") }
-if(SE=="FALSE"){ cat(" \n ||\t Paired-end sequencing run", sep="") }
+cat(" \n ||\t Sequencing run type : \t\t\t\t", sep="")
+if(SE=="TRUE"){ cat("Single-end", sep="") }
+if(SE=="FALSE"){ cat("Paired-end", sep="") }
 cat(" \n ||", sep="")
 cat(paste(" \n ||\t Run date:\t\t\t\t\t\t\t", Sys.Date(), sep=""), sep="")
 cat(" \n ||", sep="")
@@ -197,6 +200,7 @@ if(DoesTheFileExist(path2file=paste(paste(path2GRangesRData, allsamples, sep="")
 
 #------------------------------------------------------------
 # Quality Control 
+path2GRangesSamples <- paste(paste(path2GRangesRData, allsamples, sep=""), ".bam.GRanges.RData", sep="")
 OutputNumberOfReadsFromGRanges(GRangesSamples)
 
 #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
@@ -540,4 +544,4 @@ cat(" \n =======================================================================
 # Close the R session when run from bash
 quit(save = "no", status = 0, runLast = TRUE)
 
-}
+#}

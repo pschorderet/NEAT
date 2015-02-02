@@ -1,6 +1,6 @@
 
 
-Pipeline_ChIPseq <- function(path2NEAT, path2MainFolder, nameOfBed, binNumber, strand, runmeank, Venn, normInp ){
+#Pipeline_ChIPseq <- function(path2NEAT, path2MainFolder, nameOfBed, binNumber, strand, runmeank, Venn, normInp ){
 
 #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 #******************************************************************
@@ -507,4 +507,4 @@ cat(" \n =======================================================================
 quit(save = "no", status = 0, runLast = TRUE)
 
 
-}
+#}

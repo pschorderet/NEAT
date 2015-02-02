@@ -1,0 +1,35 @@
+#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-|
+#                                                                                                               |
+# Project ID: "<MAIN_TITLE>"
+#                                                                                                               |
+#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-|
+#
+# Remote Server
+#
+# My_email	=	"your.email@harvard.edu"	
+#
+# My_project_title	=	"<MAIN_TITLE>"
+# Reference_genome	=	"mm9"
+# Path_to_proj_folder	=	"<PATH_TO_PROJECTFOLDER>"
+# Path_to_RNApip	=	"<PATH_TO_RNAPIP>"
+# Path_to_orifastq.gz	=	"/data/schorderet/RNApip/scripts/testdata"
+# Path_to_chrLens.dat	=	"/data/schorderet/reference_files/mm9/chr_lens.dat"
+# Path_to_RefGen.fa	=	"/data/ergun/ref/mm9/bowtie/"
+# Path_to_gtfFile	=	"/data/ergun/ref/mm9/mm9_gtf/Mus_musculus.NCBIM37.67.allchr.gtf";
+# Paired_end_run	=	"0"
+#
+# Steps_to_execute	=	" unzip + qc + map + filter "
+#
+# Remove_from_bigwig	=	" random, chrM"
+#
+#
+# Local
+#
+# TaxonDatabaseKG	=	"TxDb.Mmusculus.UCSC.mm9.knownGene"
+# TaxonDatabaseDict	=	"org.Mm.eg.db"
+#
+#---------------------------------------------------------------------------------------------------------------|
+#
+OriFileName	FileName	OriInpName	InpName	Factor	Replicate	FileShort	Experiment	Date
+PSa29-5_R1	PSa29-5_noDox_K4me3	-	-	RNA	1	noDox	1	2015-01-01
+PSa29-6_R1	PSa29-6_Dox_K4me3	-	-	RNA	2	Dox	1	2015-01-01
