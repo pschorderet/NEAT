@@ -1,4 +1,4 @@
-#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-|
+'#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-|
 #                                                                                                               |
 # Project ID: "<MAIN_TITLE>"
 #                                                                                                               |
@@ -6,21 +6,21 @@
 #
 # Remote Server
 #
-# My_email	=	" your.email@harvard.edu "	
+# My_email	=	"your.email@harvard.edu"	
 #
-# My_project_title	=	" <MAIN_TITLE> "
-# Reference_genome	=	" mm9 "
-# Path_to_proj_folder	=	" <PATH_TO_PROJECTFOLDER> "
-# Path_to_ChIPpip	=	" <PATH_TO_CHIPPIP> "
-# Path_to_orifastq.gz	=	" <PATH_TO_CHIPPIP>/scripts/testdata/ "
-# Path_to_chrLens.dat	=	" /data/schorderet/reference_files/mm9/chr_lens.dat "
-# Path_to_RefGen.fa	=	" /data/ref/mm9/bwa/mm9.fa "
-# Aligner_algorithm	=	" BWA "
-# Paired_end_run	=	" 0 "
+# My_project_title	=	"<MAIN_TITLE>"
+# Reference_genome	=	"mm9"
+# Path_to_proj_folder	=	"<PATH_TO_PROJECTFOLDER>"
+# Path_to_ChIPpip	=	"<PATH_TO_CHIPPIP>"
+# Path_to_orifastq.gz	=	"<PATH_TO_CHIPPIP>/scripts/testdata/"
+# Path_to_chrLens.dat	=	"/data/schorderet/reference_files/mm9/chr_lens.dat"
+# Path_to_RefGen.fa	=	"/data/ref/mm9/bwa/mm9.fa"
+# Aligner_algorithm	=	"BWA"
+# Paired_end_run	=	"0"
 #
-# Steps_to_execute	=	" unzip + qc + map + filter + peakcalling + cleanbigwig "
+# Steps_to_execute	=	"unzip + qc + map + filter + peakcalling + cleanbigwig"
 #
-# Remove_from_bigwig	=	" random, chrM "
+# Remove_from_bigwig	=	"random, chrM "
 #
 #
 # Local
