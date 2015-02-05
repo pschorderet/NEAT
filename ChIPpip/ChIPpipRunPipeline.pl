@@ -27,7 +27,7 @@ my ($unzip, $qc, $map, $filter, $peakcalling, $cleanbigwig, $cleanfolders)      
 my (@sc, @lines2remove)                                                                         = ();
 # Find paths to different folders in the Targets.txt file
 while(<INPUT>) {
-        if (/# My_email/) {
+        if (/# My_personal_email/) {
                 $_ =~ m/"(.+?)"/;
                 $email = "$1";
         }
@@ -39,45 +39,35 @@ while(<INPUT>) {
                 $_ =~ m/"(.+?)"/;
                 $genome = "$1";
         }
-	if (/# Path_to_proj_folder/) {
+	if (/# Remote_path_to_proj/) {
                 $_ =~ m/"(.+?)"/;
                 $userFolder = "$1";
         }
-	if (/# Path_to_ChIPpip/) {
+	if (/# Remote_path_to_NEAT/) {
                 $_ =~ m/"(.+?)"/;
                 $path2ChIPseq = "$1";
-                $path2ChIPseqScripts = join("", $path2ChIPseq, "/scripts");
+                $path2ChIPseqScripts = join("", $path2ChIPseq, "/ChIPpip/scripts");
         }
-	if (/# Path_to_orifastq.gz/) {
+	if (/# Remote_path_to_orifastq.gz/) {
                 $_ =~ m/"(.+?)"/;
                 $path2fastqgz = "$1";
         }
-	if (/# Path_to_chrLens.dat/) {
+	if (/# Remote_path_to_chrLens.dat/) {
                 $_ =~ m/"(.+?)"/;
                 $chrlens = "$1";
         }
-	if (/# Path_to_RefGen.fa/) {
+	if (/# Remote_path_to_RefGen.fasta/) {
                 $_ =~ m/"(.+?)"/;
                 $refGenome = "$1";
         }
-	if (/# Aligner_algorithm/) {
+	if (/# Aligner_algo_short/) {
                 $_ =~ m/"(.+?)"/;
                 $aligner = "$1";
         }
 
-	if (/# Paired_end_run/) {
+	if (/# Paired_end_seq_run/) {
                 $_ =~ m/"(.+?)"/;
                 $PE = "$1";
-        }
-	if (/# Steps_to_execute/) {
-                $_ =~ m/"(.+?)"/;
-                @steps2execute = ();
-                if (grep /\bunzip\b/i, $_ )             { $unzip                = "TRUE"; push @steps2execute, "Unzip";         }
-                if (grep /\bqc\b/i, $_ )                { $qc                   = "TRUE"; push @steps2execute, "QC";            }
-                if (grep /\bmap\b/i, $_ )               { $map                  = "TRUE"; push @steps2execute, "Map";           }
-                if (grep /\bfilter\b/i, $_ )            { $filter               = "TRUE"; push @steps2execute, "Filter";        }
-                if (grep /\bpeakcalling\b/i, $_ )	{ $peakcalling          = "TRUE"; push @steps2execute, "Peakcalling";   }
-                if (grep /\bcleanbigwig\b/i, $_ )	{ $cleanbigwig          = "TRUE"; push @steps2execute, "Cleanbigwig";   }
         }
 	if (/# Remove_from_bigwig/) {
                 $_ =~ m/"(.+?)"/;
@@ -87,6 +77,16 @@ while(<INPUT>) {
                         $line =~ s/\s+//g;
                         push(@lines2remove, $line);
                 }
+        }
+	if (/# Steps_to_execute_pipe/) {
+                $_ =~ m/"(.+?)"/;
+                @steps2execute = ();
+                if (grep /\bunzip\b/i, $_ )             { $unzip                = "TRUE"; push @steps2execute, "Unzip";         }
+                if (grep /\bqc\b/i, $_ )                { $qc                   = "TRUE"; push @steps2execute, "QC";            }
+                if (grep /\bmap\b/i, $_ )               { $map                  = "TRUE"; push @steps2execute, "Map";           }
+                if (grep /\bfilter\b/i, $_ )            { $filter               = "TRUE"; push @steps2execute, "Filter";        }
+                if (grep /\bpeakcalling\b/i, $_ )	{ $peakcalling          = "TRUE"; push @steps2execute, "Peakcalling";   }
+                if (grep /\bcleanbigwig\b/i, $_ )	{ $cleanbigwig          = "TRUE"; push @steps2execute, "Cleanbigwig";   }
         }
 
 } # end of Targets.txt
@@ -156,25 +156,25 @@ my @Targets4 = `cut -f4 $Targets`;
 my @orisamples;
 foreach $line (@Targets1) {
         $line =~ /^$/ and die "Targets 1: Blank line detected at $.\n\n";
-        $line =~ /^[# = " OriFileName FileName OriInpName InpName]/ and next;
+        $line =~ /^[# : = " OriFileName FileName OriInpName InpName]/ and next;
         push(@orisamples, $line);
 }
 my @samples;
 foreach $line (@Targets2) {
         $line =~ /^$/ and die "Targets 1: Blank line detected at $.\n\n";
-        $line =~ /^[# = " OriFileName FileName OriInpName InpName]/ and next;
+        $line =~ /^[# : = " OriFileName FileName OriInpName InpName]/ and next;
         push(@samples, $line);
 }
 my @oriinputs;
 foreach $line (@Targets3) {
         $line =~ /^$/ and die "Targets 3: Blank line detected at $.\n\n";
-        $line =~ /^[# = " OriFileName FileName OriInpName InpName]/ and next;
+        $line =~ /^[# : = " OriFileName FileName OriInpName InpName]/ and next;
         push(@oriinputs, $line);
 }
 my @inputs;
 foreach $line (@Targets4) {
         $line =~ /^$/ and next;
-        $line =~ /^[# = " OriFileName FileName OriInpName InpName]/ and next;
+        $line =~ /^[# : = " OriFileName FileName OriInpName InpName]/ and next;
         push(@inputs, $line);
 }
 

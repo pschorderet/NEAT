@@ -1,34 +1,51 @@
-#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-|
-#                                                                                                               |
-# Project ID: "<MAIN_TITLE>"
-#                                                                                                               |
-#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-|
+#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-|
+#                                                                                     |
+# My project Title	=	"<PROJECT_NAME>"
+# Date of creation	=	"<DATE>"
+#                                                                                     |
+#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-|
 #
-# Remote Server
+#------------------------------------------------
+#---------------- GENERAL INFO ------------------
 #
-# My_email	=	"your.email@harvard.edu"	
-#
-# My_project_title	=	"<MAIN_TITLE>"
+# My_personal_email	=	"<my.email@harvard.edu>"	
+# My_personal_ssh	=	"schorderet@canute.mgh.harvard.edu"
+# 
+# My_project_title	=	"<PROJECT_NAME>"
 # Reference_genome	=	"mm9"
-# Path_to_proj_folder	=	"<PATH_TO_PROJECTFOLDER>"
-# Path_to_ChIPpip	=	"<PATH_TO_CHIPPIP>"
-# Path_to_orifastq.gz	=	"<PATH_TO_CHIPPIP>/scripts/testdata/"
-# Path_to_chrLens.dat	=	"/data/schorderet/reference_files/mm9/chr_lens.dat"
-# Path_to_RefGen.fa	=	"/data/ref/mm9/bwa/mm9.fa"
-# Aligner_algorithm	=	"BWA"
-# Paired_end_run	=	"0"
 #
-# Steps_to_execute	=	"unzip + qc + map + filter + peakcalling + cleanbigwig"
+#------------------------------------------------
+#----------------- LOCAL INFO -------------------
 #
-# Remove_from_bigwig	=	"random, chrM "
+# Local_path_to_proj	=	"<LOCAL_PATH_TO_PROJECT>"
+# Local_path_to_NEAT	=	"<LOCAL_PATH_TO_NEAT>"
+# Proj_TaxonDatabase	=	"TxDb.Mmusculus.UCSC.mm9.knownGene"
+# Proj_TaxonDatabaseDic	=	"org.Mm.eg.db"
 #
 #
-# Local
+#------------------------------------------------
+#---------------- REMOTE INFO -------------------
 #
-# TaxonDatabaseKG	=	"TxDb.Mmusculus.UCSC.mm9.knownGene"
-# TaxonDatabaseDict	=	"org.Mm.eg.db"
+# Remote_path_to_proj	=	"/home/schorderet/NEAT/ChIPpip"
+# Remote_path_to_NEAT	=	"/home/schorderet/NEAT"
 #
-#---------------------------------------------------------------------------------------------------------------|
+# Remote_path_to_orifastq.gz	=	"/home/schorderet/NEAT/ChIPpip/scripts/testdata"
+# Remote_path_to_chrLens.dat	=	"/data/schorderet/reference_files/mm9/chr_lens.dat"
+# Remote_path_to_RefGen.fasta	=	"/data/ref/mm9/bwa/mm9.fa"
+#
+#------------------------------------------------
+#----------------- PARAMETERS -------------------
+#
+# Aligner_algo_short	=	"BWA"
+# Paired_end_seq_run	=	"0"
+# Remove_from_bigwig	=	"random, chrM"
+#
+# Steps_to_execute_pipe	=	"unzip + qc + map + filter + peakcalling + cleanbigwig"
+#
+#
+#
+#------------------------------------------------
+#---------------- SAMPLES INFO ------------------
 #
 OriFileName	FileName	OriInpName	InpName	Factor	Replicate	FileShort	Experiment	Date
 PSa36-1_R1	PSa36-1_noDox_K4me3	PSa37-3_R1	PSa37-3_noDox_Inp	K4me3	1	noDox	1	2015-01-01

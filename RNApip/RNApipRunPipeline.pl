@@ -29,7 +29,7 @@ my ($unzip, $qc, $map, $filter)                                                 
 my (@sc, @lines2remove)                                                                                                                         = ();
 # Find paths to different folders in the Targets.txt file
 while(<INPUT>) {
-        if (/# My_email/) {
+	if (/# My_personal_email/) {
                 $_ =~ m/"(.+?)"/;
                 $email = "$1";
         }
@@ -41,40 +41,40 @@ while(<INPUT>) {
                 $_ =~ m/"(.+?)"/;
                 $genome = "$1";
         }
-	if (/# Path_to_proj_folder/) {
+	if (/# Remote_path_to_proj/) {
                 $_ =~ m/"(.+?)"/;
                 $userFolder = "$1";
         }
-	if (/# Path_to_RNApip/) {
+	if (/# Remote_path_to_NEAT/) {
                 $_ =~ m/"(.+?)"/;
                 $path2RNAseq = "$1";
-                $path2RNAseqScripts = join("", $path2RNAseq, "/scripts");
+                $path2RNAseqScripts = join("", $path2RNAseq, "/RNApip/scripts");
         }
-	if (/# Path_to_orifastq.gz/) {
+	if (/# Remote_path_to_orifastq.gz/) {
                 $_ =~ m/"(.+?)"/;
                 $path2fastqgz = "$1";
         }
-	if (/# Path_to_chrLens.dat/) {
+	if (/# Remote_path_to_chrLens.dat/) {
                 $_ =~ m/"(.+?)"/;
                 $chrlens = "$1";
         }
-	if (/# Path_to_RefGen.fa/) {
+	if (/# Remote_path_to_RefGen.fasta/) {
                 $_ =~ m/"(.+?)"/;
                 $refGenome = "$1";
         }
-	if (/# Path_to_gtfFile/) {
-                $_ =~ m/"(.+?)"/;
-                $path2gtfFile = "$1";
-        }
-	if (/# Aligner_algorithm/) {
+	if (/# Aligner_algo_short/) {
                 $_ =~ m/"(.+?)"/;
                 $aligner = "$1";
         }
-	if (/# Paired_end_run/) {
+	if (/# Paired_end_seq_run/) {
                 $_ =~ m/"(.+?)"/;
                 $PE = "$1";
         }
-	if (/# Steps_to_execute/) {
+	if (/# Remote_path_to_ann_gtf_file/) {
+                $_ =~ m/"(.+?)"/;
+                $path2gtfFile = "$1";
+        }
+	if (/# Steps_to_execute_pipe/) {
                 $_ =~ m/"(.+?)"/;
                 @steps2execute = ();
                 if (grep /\bunzip\b/i, $_ )             { $unzip                = "TRUE"; push @steps2execute, "Unzip";         }

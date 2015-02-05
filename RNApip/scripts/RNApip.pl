@@ -29,62 +29,61 @@ my ($unzip, $qc, $map, $filter)															= ("FALSE", "FALSE", "FALSE", "FAL
 my (@sc, @lines2remove)																= ();
 # Find paths to different folders in the Targets.txt file
 while(<INPUT>) {
-	if (/# My_email/) {
+        if (/# My_personal_email/) {
                 $_ =~ m/"(.+?)"/;
-                $email = "$1";	
-	}
-	if (/# My_project_title/) {
-		$_ =~ m/"(.+?)"/;
-		$expFolder = "$1";
-	}
+                $email = "$1";
+        }
+        if (/# My_project_title/) {
+                $_ =~ m/"(.+?)"/;
+                $expFolder = "$1";
+        }
 	if (/# Reference_genome/) {
-		$_ =~ m/"(.+?)"/;
-		$genome = "$1";
+                $_ =~ m/"(.+?)"/;
+                $genome = "$1";
+        }
+	if (/# Remote_path_to_proj/) {
+                $_ =~ m/"(.+?)"/;
+                $userFolder = "$1";
+        }
+	if (/# Remote_path_to_NEAT/) {
+                $_ =~ m/"(.+?)"/;
+                $path2RNAseq = "$1";
+                $path2RNAseqScripts = join("", $path2RNAseq, "/RNApip/scripts");
 	}
-	if (/# Path_to_proj_folder/) {	
-		$_ =~ m/"(.+?)"/;
-		$userFolder = "$1";
-	}
-	if (/# Path_to_RNApip/) {
-		$_ =~ m/"(.+?)"/;
-		$path2RNAseq = "$1";
-		$path2RNAseqScripts = join("", $path2RNAseq, "/scripts");
-	}
-	if (/# Path_to_orifastq.gz/) {
-		$_ =~ m/"(.+?)"/;
-		$path2fastqgz = "$1";
-	}
-	if (/# Path_to_chrLens.dat/) {
+        if (/# Remote_path_to_orifastq.gz/) {
+                $_ =~ m/"(.+?)"/;
+                $path2fastqgz = "$1";
+        }
+	if (/# Remote_path_to_chrLens.dat/) {
                 $_ =~ m/"(.+?)"/;
                 $chrlens = "$1";
         }
-	if (/# Path_to_RefGen.fa/) {
+	if (/# Remote_path_to_RefGen.fasta/) {
                 $_ =~ m/"(.+?)"/;
                 $refGenome = "$1";
         }
-	if (/# Path_to_gtfFile/) {
-                $_ =~ m/"(.+?)"/;
-                $path2gtfFile = "$1";
-        }
-	if (/# Aligner_algorithm/) {
+	if (/# Aligner_algo_short/) {
                 $_ =~ m/"(.+?)"/;
                 $aligner = "$1";
         }
-	if (/# Paired_end_run/) {
+	if (/# Paired_end_seq_run/) {
                 $_ =~ m/"(.+?)"/;
                 $PE = "$1";
         }
-	if (/# Steps_to_execute/) {
-		$_ =~ m/"(.+?)"/;
-        	@steps2execute = ();
-		if (grep /\bunzip\b/i, $_ )		{ $unzip 		= "TRUE"; push @steps2execute, "Unzip";		}
-		if (grep /\bqc\b/i, $_ )		{ $qc			= "TRUE"; push @steps2execute, "QC";		}
-		if (grep /\bmap\b/i, $_ )		{ $map	 		= "TRUE"; push @steps2execute, "Map";		}
-		if (grep /\bfilter\b/i, $_ )            { $filter               = "TRUE"; push @steps2execute, "Filter";    	}
+        if (/# Remote_path_to_ann_gtf_file/) {
+                $_ =~ m/"(.+?)"/;
+                $path2gtfFile = "$1";
+        }
+        if (/# Steps_to_execute_pipe/) {
+                $_ =~ m/"(.+?)"/;
+                @steps2execute = ();
+                if (grep /\bunzip\b/i, $_ )             { $unzip                = "TRUE"; push @steps2execute, "Unzip";         }
+                if (grep /\bqc\b/i, $_ )                { $qc                   = "TRUE"; push @steps2execute, "QC";            }
+                if (grep /\bmap\b/i, $_ )               { $map                  = "TRUE"; push @steps2execute, "Map";           }
+                if (grep /\bfilter\b/i, $_ )            { $filter               = "TRUE"; push @steps2execute, "Filter";        }
         }
 
 } # end of Targets.txt
-
 
 
 my $AdvSettings = "$path2expFolder/DataStructure/AdvancedSettings.txt";

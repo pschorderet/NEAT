@@ -282,7 +282,7 @@ for(i in levels(Targets$Factor)){
     dupindex <- which(possibleDupIndex==currentDupNum)
     
     # 3 Replicates
-    if(length(dupindex)==3){ ErrorOutput("Pipeline cannot deal with more than 2 replicates per condition.") }
+    if(length(dupindex)==3){ ErrorOutput("Pipeline cannot deal with more than 2 replicates per condition. \nCheck your Target.txt file for details.") }
     if(length(dupindex)==2){      
       cat(" \n Replicate found:\n", sep="")
       for(l in sameFactorSamples[dupindex]){cat("\t\t Rep \t", l, "\n", sep="")}
