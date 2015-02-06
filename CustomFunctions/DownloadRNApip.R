@@ -50,9 +50,7 @@ LocalPath2CustomFunctions <- paste( LocalPath2NEAT, "CustomFunctions", "/", sep=
 LocalPath2Targets <- paste( LocalPath2NewProject, "DataStructure/Targets.txt", sep="")
 LocalPath2bam <- paste( LocalPath2NewProject, "bam/", sep="")
 LocalPath2Tophat <- paste( LocalPath2NewProject, "Tophat/", sep="")
-
 source(paste( LocalPath2CustomFunctions, "ErrorOutput.R", sep=""))
-
 
 #--------------------------------------------------
 # Read Targets.txt file and find ssh parameters

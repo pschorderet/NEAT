@@ -46,6 +46,14 @@ cat(" \n========================================================================
 #*                                                                *
 #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
+#--------------------------------------------------
+# Define Paths using user's parameters
+LocalPath2CustomFunctions <- paste( LocalPath2NEAT, "CustomFunctions", "/", sep="")
+LocalPath2Targets <- paste( LocalPath2NewProject, "DataStructure/Targets.txt", sep="")
+LocalPath2bam <- paste( LocalPath2NewProject, "bam/", sep="")
+LocalPath2saf <- paste( LocalPath2bam, "aligned/", sep="" )
+source(paste( LocalPath2CustomFunctions, "/ErrorOutput.R", sep=""))
+
 res <- readLines(LocalPath2Targets)
 for(i in 1:length(res)){
   newLine <- res[i]
@@ -70,15 +78,6 @@ for(i in 1:length(res)){
 cat(paste(" LocalPath2NewProject \t\t ", LocalPath2NewProject, "\n",sep=""))
 if(file.exists(LocalPath2NewProject)==TRUE){cat(" \n * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * \n\n ", ProjectName, " exists. \n Reading the Targets.txt file \n\n * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * \n\n\n ", sep="");}
 if(file.exists(LocalPath2NewProject)==FALSE){cat(" \n * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * \n\n Creating\t", ProjectName, "\n\n * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * \n ", sep="");dir.create(LocalPath2NewProject)}
-
-#--------------------------------------------------
-# Define Paths using user's parameters
-LocalPath2CustomFunctions <- paste( LocalPath2NEAT, "CustomFunctions", "/", sep="")
-LocalPath2Targets <- paste( LocalPath2NewProject, "DataStructure/Targets.txt", sep="")
-LocalPath2bam <- paste( LocalPath2NewProject, "bam/", sep="")
-LocalPath2saf <- paste( LocalPath2bam, "aligned/", sep="" )
-
-source(paste( LocalPath2CustomFunctions, "/ErrorOutput.R", sep=""))
 
 #------------------------------------------------------------
 # Redirect output to log file
@@ -169,7 +168,7 @@ cat(" \n\n Targets file provided: \n\n", sep="")
 Targets <- read.delim(LocalPath2Targets, comment.char="#")
 print(Targets)
 cat(" \n Downloading .bam files from remote server", sep="")
-mycode <- paste("`scp -r ", sshpath, ":", RemotePath2MainFolderName, "aligned/ " , LocalPath2bam, "`", sep="")
+mycode <- paste("`scp -r ", sshpath, ":", RemotePath2MainFolderName, "/", ProjectName, "/aligned " , LocalPath2bam, "`", sep="")
 system(mycode)
 
 # Load datasets provided in Targets file
