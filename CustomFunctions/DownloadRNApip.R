@@ -143,7 +143,7 @@ print(Targets)
 
 # Download Tophat folder
 cat(" \n Downloading Tophat folder from remote server", sep="")
-mycode <- paste("`scp -r ", sshpath, ":", RemotePath2MainFolderName, "/", ProjectName, "/Tophat " , LocalPath2NewProject, "`", sep="")
+mycode <- paste("`scp -r ", sshpath, ":", RemotePath2MainFolderName, "/", ProjectName, "/Tophat " , LocalPath2bam, "`", sep="")
 system(mycode)
 
 # Load datasets provided in Targets file
@@ -169,12 +169,14 @@ for(i in 1:length(allsamples)){
   cat("\n Sample: \t",  allsamples[i], "\n", sep="")
   # Move sample i to .bam folder
   cat("\n\t Moving \t\t ", allsamples[i], ".bam\t to\t" , LocalPath2bam, sep="")
-  movecode <- paste("`mv ", LocalPath2Tophat, "/", allsamples[i], "/", allsamples[i], ".bam ", LocalPath2bam, "`", sep="")
+  movecode <- paste("`mv ", LocalPath2bam, "/Tophat/", allsamples[i], "/", allsamples[i], ".bam ", LocalPath2bam, "`", sep="")
   movecode
   system(movecode)
   cat("\n\n .-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.\n", sep="")
 }
-
+cat("\n\t Deleting \t\t ", LocalPath2bam, "Tophat/", sep="")
+delcode <- paste("`rm -r ", LocalPath2bam, "Tophat/", "`", sep="")
+system(delcode)
 
 cat(" \n\n\n ======================================================================================", sep="")
 cat(" \n|| * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * ", sep="")
