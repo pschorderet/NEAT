@@ -1,8 +1,6 @@
 
 
-
-DownloadChIPpip <- function(LocalPath2NEAT, Localpath2NewProject, RemotePath2MainFolderName, sshpath){
-
+DownloadChIPpip <- function(LocalPath2NEAT, LocalPath2NewProject, RemotePath2MainFolderName){
 
 #******************************************************************
 
@@ -22,15 +20,6 @@ cat(" \n||", sep="")
 cat(" \n|| * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * ", sep="")
 cat(" \n======================================================================================\n", sep="")
 
-
-#@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-#******************************************************************
-#*                                                                *
-#*      Steps before running ChIPseq1.R pipeline for local        *
-#*                                                                *
-#******************************************************************
-#
-#
 #
 # * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * #
 #                                                                 #
@@ -47,11 +36,11 @@ cat(" \n========================================================================
 # Experiment-specific parameters                                  #
 #                                                                 #
 # This needs to be the same name as the MainFolder in Canute!     #
-# NewMainFolderName <- "EXAMPLE/"
+# NewMainFolderName <- "MY_NEW_CHIP_PROJECT/"
 # LocalPath2NEAT <- "~/NEAT/"
 # Localpath2NewProject <- "~/Desktop/"
 # sshpath <- "schorderet@canute.mgh.harvard.edu"
-# RemotePath2MainFolderName <- "/data/schorderet/ChIPpip/EXAMPLE/"
+# RemotePath2MainFolderName <- "/data/schorderet/ChIPpip/MY_NEW_CHIP_PROJECT/"
 #*-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+*
 
 
@@ -70,12 +59,10 @@ if(NewMainFolderName==""){
 #cat(paste("\n NewMainFolderName \t\t ", NewMainFolderName, "\n",sep=""))
 
 #------------------------------------------------------------
-# Create mainFolder 
+# Read main folder
 
-LocalPath2NewProject <- paste( Localpath2NewProject, NewMainFolderName, "/", sep="")
-#LocalPath2NewProject <- paste( LocalPath2NEAT, NewMainFolderName, "/", sep="")
 cat(paste(" LocalPath2NewProject \t\t ", LocalPath2NewProject, "\n",sep=""))
-if(file.exists(LocalPath2NewProject)==TRUE){cat(" \n * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * \n\n ", NewMainFolderName, " already exists. \n\n * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * \n\n\n ", sep=""); stop()}
+if(file.exists(LocalPath2NewProject)==TRUE){cat(" \n * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * \n\n ", NewMainFolderName, " exists. \n Reading the Targets.txt file \n\n * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * \n\n\n ", sep="");}
 if(file.exists(LocalPath2NewProject)==FALSE){cat(" \n * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * \n\n Creating\t", NewMainFolderName, "\n\n * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * \n ", sep="");dir.create(LocalPath2NewProject)}
 
 #--------------------------------------------------
@@ -103,6 +90,17 @@ cat(" \n|| .-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.
 source(paste(LocalPath2CustomFunctions, "ChIPseqCreateArborescence.R", sep=""))
 ChIPseqCreateArborescence(path2MainFolder=LocalPath2NewProject)
 
+#--------------------------------------------------
+# Read Targets.txt file and find ssh parameters
+res <- readLines(LocalPath2Targets)
+for(i in 1:length(res)){
+  newLine <- res[i]
+  # Store some variables
+  if(length(grep("My_personal_ssh", newLine))==1) { 
+    currentline <- gsub("# ", "", newLine); currentline <- gsub("\t", "", currentline); currentline <- gsub("\"", "", currentline);
+    sshpath <- unlist(strsplit(currentline, split = "\\="))[2]
+  }    
+}
 
 #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 #*                                                                *
@@ -121,7 +119,6 @@ cat(" \n|| .-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.
 cat(" \n Downloading Targtes.txt file from remote server", sep="")
 system(mycode)
 cat(mycode)
-# quikie-mart7
 
 #--------------------------------------------------
 # Transfer QC bigwig, narrowPeak and broadPeak folders from *RemotePath2MainFolderName*

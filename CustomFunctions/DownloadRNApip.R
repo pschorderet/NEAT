@@ -1,11 +1,9 @@
 
 
-
-DownloadRNApip <- function(LocalPath2NEAT, Localpath2NewProject, RemotePath2MainFolderName, sshpath){
-
+DownloadRNApip <- function(LocalPath2NEAT, LocalPath2NewProject, RemotePath2MainFolderName){
 
 #******************************************************************
-
+  
 version <- "1.0.1 Jan 2015"
 
 #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
@@ -14,7 +12,6 @@ version <- "1.0.1 Jan 2015"
 #*                                                                *
 #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
-
 cat(" \n\n======================================================================================", sep="")
 cat(" \n|| * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *  ", sep="")
 cat(" \n||", sep="")
@@ -22,7 +19,6 @@ cat(" \n||\t DownloadRNApip, version ", version," (© Patrick Schorderet 2014)",
 cat(" \n||", sep="")
 cat(" \n|| * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * ", sep="")
 cat(" \n======================================================================================\n\n\n", sep="")
-
 
 #
 # * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * #
@@ -59,13 +55,12 @@ if(NewMainFolderName==""){
 }
 
 #------------------------------------------------------------
-# Create mainFolder 
+# Read main folder
 
-LocalPath2NewProject <- paste( Localpath2NewProject, NewMainFolderName, "/", sep="")
-#LocalPath2NewProject <- paste( LocalPath2NEAT, NewMainFolderName, "/", sep="")
 cat(paste(" LocalPath2NewProject \t\t ", LocalPath2NewProject, "\n",sep=""))
-if(file.exists(LocalPath2NewProject)==TRUE){cat(" \n * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * \n\n ", NewMainFolderName, " already exists. \n\n * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * \n\n\n ", sep=""); stop()}
+if(file.exists(LocalPath2NewProject)==TRUE){cat(" \n * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * \n\n ", NewMainFolderName, " exists. \n Reading the Targets.txt file \n\n * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * \n\n\n ", sep="");}
 if(file.exists(LocalPath2NewProject)==FALSE){cat(" \n * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * \n\n Creating\t", NewMainFolderName, "\n\n * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * \n ", sep="");dir.create(LocalPath2NewProject)}
+
 
 #--------------------------------------------------
 # Define Paths using user's parameters
@@ -82,7 +77,7 @@ LocalPath2Logs <- paste(LocalPath2NewProject, "logs/", sep="")
 if(file.exists(LocalPath2Logs)==TRUE){cat(" \n Logs file exists.\n\n", sep="")}
 if(file.exists(LocalPath2Logs)==FALSE){cat(" \n Creating\t", LocalPath2Logs, "\n\n", sep="");dir.create(LocalPath2Logs)}
 sink(paste(LocalPath2Logs, Sys.Date(), "_", format(Sys.time(), "%X"), ".txt", sep=""), append=FALSE, split=FALSE)
-#sink()
+
 #--------------------------------------------------
 # Create proper arborescence
 cat(" \n======================================================================================", sep="")
@@ -92,6 +87,17 @@ cat(" \n|| .-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.
 source(paste(LocalPath2CustomFunctions, "RNAseqCreateArborescence.R", sep=""))
 RNAseqCreateArborescence(path2MainFolder=LocalPath2NewProject)
 
+#--------------------------------------------------
+# Read Targets.txt file and find ssh parameters
+res <- readLines(LocalPath2Targets)
+for(i in 1:length(res)){
+  newLine <- res[i]
+  # Store some variables
+  if(length(grep("My_personal_ssh", newLine))==1) { 
+    currentline <- gsub("# ", "", newLine); currentline <- gsub("\t", "", currentline); currentline <- gsub("\"", "", currentline);
+    sshpath <- unlist(strsplit(currentline, split = "\\="))[2]
+  }    
+}
 
 #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 #*                                                                *
@@ -110,14 +116,13 @@ cat(" \n|| .-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.
 cat(" \n Downloading Targtes.txt file from remote server", sep="")
 system(mycode)
 cat(mycode)
-# quikie-mart7
 
 #--------------------------------------------------
 # Transfer QC bigwig, narrowPeak and broadPeak folders from *RemotePath2MainFolderName*
 #
 cat(" \n\n\n======================================================================================", sep="")
 cat(" \n|| * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * ", sep="")
-cat(" \n||\t Downloading QC, bigwig, narrowPeaks and broadPeaks folders", sep="")
+cat(" \n||\t Downloading QC folder", sep="")
 cat(" \n|| .-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.\n\n", sep="")
 
 # Download QC folder
@@ -139,11 +144,11 @@ if(file.exists(LocalPath2Targets)==FALSE){ErrorOutput(paste("No Targets.txt file
 cat(" \n\n Targets file provided: \n\n", sep="")
 Targets <- read.delim(LocalPath2Targets, comment.char="#")
 print(Targets)
+
 # Download Tophat folder
 cat(" \n Downloading Tophat folder from remote server", sep="")
 mycode <- paste("`scp -r ", sshpath, ":", RemotePath2MainFolderName, "/Tophat " , LocalPath2NewProject, "`", sep="")
 system(mycode)
-
 
 # Load datasets provided in Targets file
 samples <- Targets$FileName
@@ -171,10 +176,6 @@ for(i in 1:length(allsamples)){
   movecode <- paste("`mv ", LocalPath2Tophat, "/", allsamples[i], "/", allsamples[i], ".bam ", LocalPath2bam, "`", sep="")
   movecode
   system(movecode)
-  # Delete rest of folder
-  #cat("\n\t Deleting \t\t ", LocalPath2saf, allsamples[i], sep="")
-  #delcode <- paste("`rm -r ", LocalPath2saf, allsamples[i], "/`", sep="")
-  #system(delcode)
   cat("\n\n .-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.\n", sep="")
 }
 
