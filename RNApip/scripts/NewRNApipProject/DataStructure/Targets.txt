@@ -36,7 +36,7 @@
 #
 # Remote_path_to_orifastq.gz	=	"/home/schorderet/NEAT/RNApip/scripts/testdata"
 # Remote_path_to_chrLens.dat	=	"/data/schorderet/reference_files/mm9/chr_lens.dat"
-# Remote_path_to_RefGen.fasta	=	"/data/ref/mm9/bwa/mm9.fa"
+# Remote_path_to_RefGen.fasta	=	"/data/ergun/ref/mm9/bowtie/"
 # Remote_path_to_ann_gtf_file	=	"/data/ergun/ref/mm9/mm9_gtf/Mus_musculus.NCBIM37.67.allchr.gtf";
 #
 #------------------------------------------------
