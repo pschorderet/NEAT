@@ -51,7 +51,7 @@
 				<key>ActionParameters</key>
 				<dict>
 					<key>source</key>
-					<string># Helps transfer ChIPpip projects from remote server to local computer#----------------------------------------------------------------------set LocalPath2NEAT to (choose folder with prompt "Locate the NEAT directory")set LocalPath2NEAT to get the POSIX path of LocalPath2NEATset Localpath2NewProject to (choose folder with prompt "Where do you want to save your RNApip project?")set Localpath2NewProject to get the POSIX path of Localpath2NewProjectset question to display dialog "Enter the path to the RNApip project on your remote cluster " default answer "~/NEAT/RNApip/MY_NEW_RNA_PROJECT" buttons {"Cancel", "Next"} default button 2set RemotePath2MainFolderName to text returned of questionset question to display dialog "Enter ssh path to remote cluster " default answer "username@server_adress.edu" buttons {"Cancel", "Download RNApip project"} default button 2set sshpath to text returned of questiontell application "Terminal"	activate		# Ask user to enter different variables	set the_user to system attribute "USER"	set line1 to "source('" &amp; LocalPath2NEAT &amp; "CustomFunctions/DownloadRNApip.R')"		# DownloadRNApip(LocalPath2NEAT, Localpath2NewProject, RemotePath2MainFolderName, sshpath){	set line2 to "DownloadRNApip(LocalPath2NEAT='" &amp; LocalPath2NEAT &amp; "', Localpath2NewProject ='" &amp; Localpath2NewProject &amp; "', RemotePath2MainFolderName ='" &amp; RemotePath2MainFolderName &amp; "/', sshpath ='" &amp; sshpath &amp; "')"		do script "R"	delay 2	do script line1 in window 1	delay 0.5	do script line2 in window 1	#tell application "Finder" to set visible of process "Terminal" to false	end tell</string>
+					<string># Helps transfer RNApip projects from remote server to local computer#----------------------------------------------------------------------set LocalPath2NEAT to (choose folder with prompt "Locate the NEAT directory")set LocalPath2NEAT to get the POSIX path of LocalPath2NEATset Localpath2NewProject to (choose folder with prompt "Where do you want to save your RNApip project?")set Localpath2NewProject to get the POSIX path of Localpath2NewProjecttell application "Terminal"	activate		# Ask user to enter different variables	set the_user to system attribute "USER"	set line1 to "source('" &amp; LocalPath2NEAT &amp; "CustomFunctions/DownloadRNApip.R')"		set line2 to "DownloadRNApip(LocalPath2NEAT='" &amp; LocalPath2NEAT &amp; "', LocalPath2NewProject ='" &amp; Localpath2NewProject &amp; "')"		do script "R"	delay 1	do script line1 in window 1	delay 0.5	do script line2 in window 1	#tell application "Finder" to set visible of process "Terminal" to false	end tell</string>
 				</dict>
 				<key>BundleIdentifier</key>
 				<string>com.apple.Automator.RunScript</string>
@@ -105,7 +105,7 @@ end run</string>
 				<key>isViewVisible</key>
 				<true/>
 				<key>location</key>
-				<string>561.500000:662.000000</string>
+				<string>561.500000:782.000000</string>
 				<key>nibPath</key>
 				<string>/System/Library/Automator/Run AppleScript.action/Contents/Resources/Base.lproj/main.nib</string>
 			</dict>

@@ -46,7 +46,7 @@
 # Paired_end_seq_run	=	"0"
 # Remove_from_bigwig	=	"random, chrM"
 #
-# Steps_to_execute_pipe	=	"unzip + qc + map"
+# Steps_to_execute_pipe	=	"unzip + qc + map + filter"
 #
 #
 #------------------------------------------------

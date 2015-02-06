@@ -1,6 +1,6 @@
 
 
-DownloadRNApip <- function(LocalPath2NEAT, LocalPath2NewProject, RemotePath2MainFolderName){
+DownloadRNApip <- function(LocalPath2NEAT, LocalPath2NewProject){
 
 #******************************************************************
   
@@ -33,12 +33,9 @@ cat(" \n========================================================================
 #*-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+*
 #                                                                 #
 # Experiment-specific parameters                                  #
-#                                                                 #
-# This needs to be the same name as the MainFolder in Canute!     #
+#                                                               
 # LocalPath2NEAT <- "~/NEAT/"
-# Localpath2NewProject <- "~/Desktop/"
-# RemotePath2MainFolderName <- "/data/schorderet/projects/RNA/"
-# sshpath <- "schorderet@canute.mgh.harvard.edu"
+# LocalPath2NewProject <- "~/Desktop/MY_NEW_RNA_PROJECT/"
 #*-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+*
 
 #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
@@ -46,21 +43,6 @@ cat(" \n========================================================================
 #*                Load and set parameters                         *
 #*                                                                *
 #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-
-cat(paste("\n RemotePath2MainFolderName \t ", RemotePath2MainFolderName, "\n",sep=""))
-
-NewMainFolderName <- tail(unlist(strsplit(RemotePath2MainFolderName, split="/")), 1)
-if(NewMainFolderName==""){
-  NewMainFolderName <- tail(unlist(strsplit(RemotePath2MainFolderName, split="/")), 2)[1]
-}
-
-#------------------------------------------------------------
-# Read main folder
-
-cat(paste(" LocalPath2NewProject \t\t ", LocalPath2NewProject, "\n",sep=""))
-if(file.exists(LocalPath2NewProject)==TRUE){cat(" \n * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * \n\n ", NewMainFolderName, " exists. \n Reading the Targets.txt file \n\n * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * \n\n\n ", sep="");}
-if(file.exists(LocalPath2NewProject)==FALSE){cat(" \n * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * \n\n Creating\t", NewMainFolderName, "\n\n * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * \n ", sep="");dir.create(LocalPath2NewProject)}
-
 
 #--------------------------------------------------
 # Define Paths using user's parameters
@@ -70,6 +52,34 @@ LocalPath2bam <- paste( LocalPath2NewProject, "bam/", sep="")
 LocalPath2Tophat <- paste( LocalPath2NewProject, "Tophat/", sep="")
 
 source(paste( LocalPath2CustomFunctions, "ErrorOutput.R", sep=""))
+
+
+#--------------------------------------------------
+# Read Targets.txt file and find ssh parameters
+
+res <- readLines(LocalPath2Targets)
+for(i in 1:length(res)){
+  newLine <- res[i]
+  # Store some variables
+  if(length(grep("My_personal_ssh", newLine))==1) { 
+    currentline <- gsub("# ", "", newLine); currentline <- gsub("\t", "", currentline); currentline <- gsub("\"", "", currentline);
+    sshpath <- unlist(strsplit(currentline, split = "\\="))[2]
+  }    
+  if(length(grep("My_project_title", newLine))==1) { 
+    currentline <- gsub("# ", "", newLine); currentline <- gsub("\t", "", currentline); currentline <- gsub("\"", "", currentline);
+    ProjectName <- unlist(strsplit(currentline, split = "\\="))[2]
+  }
+  if(length(grep("Remote_path_to_proj", newLine))==1) { 
+    currentline <- gsub("# ", "", newLine); currentline <- gsub("\t", "", currentline); currentline <- gsub("\"", "", currentline);
+    RemotePath2MainFolderName <- unlist(strsplit(currentline, split = "\\="))[2]
+  }   
+}
+
+#------------------------------------------------------------
+# Read main folder
+cat(paste(" LocalPath2NewProject \t\t ", LocalPath2NewProject, "\n",sep=""))
+if(file.exists(LocalPath2NewProject)==TRUE){cat(" \n * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * \n\n ", ProjectName, " exists. \n Reading the Targets.txt file \n\n * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * \n\n\n ", sep="");}
+if(file.exists(LocalPath2NewProject)==FALSE){cat(" \n * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * \n\n Creating\t", ProjectName, "\n\n * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * \n ", sep="");dir.create(LocalPath2NewProject)}
 
 #------------------------------------------------------------
 # Redirect output to log file
@@ -87,18 +97,6 @@ cat(" \n|| .-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.
 source(paste(LocalPath2CustomFunctions, "RNAseqCreateArborescence.R", sep=""))
 RNAseqCreateArborescence(path2MainFolder=LocalPath2NewProject)
 
-#--------------------------------------------------
-# Read Targets.txt file and find ssh parameters
-res <- readLines(LocalPath2Targets)
-for(i in 1:length(res)){
-  newLine <- res[i]
-  # Store some variables
-  if(length(grep("My_personal_ssh", newLine))==1) { 
-    currentline <- gsub("# ", "", newLine); currentline <- gsub("\t", "", currentline); currentline <- gsub("\"", "", currentline);
-    sshpath <- unlist(strsplit(currentline, split = "\\="))[2]
-  }    
-}
-
 #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 #*                                                                *
 #*             Transfer data from remote server                   *
@@ -108,7 +106,7 @@ for(i in 1:length(res)){
 #--------------------------------------------------
 # Transfer file DataStructure from Canute to Datastructure/ folder
 #
-mycode <- paste("`scp -r ", sshpath, ":", RemotePath2MainFolderName, "DataStructure/ " , LocalPath2NewProject, "`", sep="")
+mycode <- paste("`scp -r ", sshpath, ":", RemotePath2MainFolderName, "/", ProjectName, "/DataStructure/ " , LocalPath2NewProject, "`", sep="")
 cat(" \n\n\n======================================================================================", sep="")
 cat(" \n|| * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * ", sep="")
 cat(" \n||\t Opening SSH connection (please enter your password in the terminal window...)", sep="")
@@ -127,7 +125,7 @@ cat(" \n|| .-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.
 
 # Download QC folder
 cat(" \n Downloading QC folder from remote server", sep="")
-mycode <- paste("`scp -r ", sshpath, ":", RemotePath2MainFolderName, "/QC/ " , LocalPath2NewProject, "`", sep="")
+mycode <- paste("`scp -r ", sshpath, ":", RemotePath2MainFolderName, "/", ProjectName, "/QC/ " , LocalPath2NewProject, "`", sep="")
 cat(mycode)
 system(mycode)
 
@@ -147,7 +145,7 @@ print(Targets)
 
 # Download Tophat folder
 cat(" \n Downloading Tophat folder from remote server", sep="")
-mycode <- paste("`scp -r ", sshpath, ":", RemotePath2MainFolderName, "/Tophat " , LocalPath2NewProject, "`", sep="")
+mycode <- paste("`scp -r ", sshpath, ":", RemotePath2MainFolderName, "/", ProjectName, "/Tophat " , LocalPath2NewProject, "`", sep="")
 system(mycode)
 
 # Load datasets provided in Targets file
