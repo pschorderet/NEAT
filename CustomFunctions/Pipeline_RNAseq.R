@@ -74,13 +74,13 @@ sink(paste(path2Logs, Sys.Date(), "_", format(Sys.time(), "%X"), ".txt", sep="")
 
 # Find Taxon Db name and dictionary
 res <- readLines(path2Targets)
-tDb <- res[grep("TaxonDatabaseKG", res)]; tDb <- gsub("# ","",tDb); tDb <- gsub("\t","",tDb); tDb <- gsub("\"","",tDb)
+tDb <- res[grep("Proj_TaxonDatabase", res)]; tDb <- gsub("# ","",tDb); tDb <- gsub("\t","",tDb); tDb <- gsub("\"","",tDb)
 TaxonDatabaseKG <- unlist(strsplit(tDb, split = "\\="))[2]
-tDbDict <- res[grep("TaxonDatabaseDict", res)]; tDbDict <- gsub("# ","",tDbDict); tDbDict <- gsub("\t","",tDbDict); tDbDict <- gsub("\"","",tDbDict)
+tDbDict <- res[grep("Proj_TaxonDatabaseDic", res)]; tDbDict <- gsub("# ","",tDbDict); tDbDict <- gsub("\t","",tDbDict); tDbDict <- gsub("\"","",tDbDict)
 TaxonDatabaseDict <- unlist(strsplit(tDbDict, split = "\\="))[2]
 
 # Find if run is SE or PE
-SE <- res[grep("Paired_end_run", res)]; SE <- gsub("# ","",SE); SE <- gsub("\t","",SE); SE <- gsub("\"","",SE)
+SE <- res[grep("Paired_end_seq_run", res)]; SE <- gsub("# ","",SE); SE <- gsub("\t","",SE); SE <- gsub("\"","",SE)
 SE <- unlist(strsplit(SE, split = "\\="))[2];
 if(SE=="0"){ SE <- "TRUE" }
 if(SE=="1"){ SE <- "FALSE" }
