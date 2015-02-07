@@ -1,5 +1,4 @@
 
-
 #Pipeline_ChIPseq <- function(path2NEAT, path2MainFolder, nameOfBed, binNumber, strand, runmeank, Venn, normInp ){
 
 #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
@@ -9,7 +8,6 @@
 #*                                                                *
 #******************************************************************
 #
-
 # * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * #
 #                                                                 #
 # This script is intended to be run from bash/shell Mac terminal  #
@@ -26,7 +24,6 @@
 # * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * #
 
 version <- "1.0.1 Jan 2015"
-
 
 #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 #*                                                                *
@@ -61,7 +58,6 @@ source(paste(path2CustFct, "Mart2GRanges.R", sep=""))
 source(paste(path2CustFct, "OutputNumberOfReadsFromGRanges.R", sep=""))
 source(paste(path2CustFct, "RawMart2FormattedMart.R", sep=""))
 source(paste(path2CustFct, "Tags2GRanges.R", sep=""))
-
 
 #------------------------------------------------------------
 # Redirect output to log file
@@ -126,7 +122,6 @@ PlotAxes <- function(mat, binrange=0, yrange=0, strand="+"){
   if(length(yrange)>1){axis(2, at=yrange, labels=round(yrange,5))}  
 }
 
-
 #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 #                                                                 #
 #                  Read Targets.txt                               #
@@ -154,8 +149,6 @@ chromosomesFile <- read.table(path2chrlens, comment.char="#")
 chromosomes <- chromosomesFile$V1
 #chromosomes = c(paste("chr", seq(1,19),  sep = ""), "chrX", "chrY")
 
-
-
 #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 #                                                                 #
 #                  Load GRanges data                              #
@@ -169,7 +162,6 @@ allsamples <- c(levels(Targets$FileName), levels(Targets$InpName))
 if(length(which(allsamples=="-")) != 0){
   allsamples <- allsamples[-which(allsamples=="-")]    
 }
-
 
 #------------------------------------------------------------
 # Check existence of .bam.GRanges.RData or .bam files
@@ -424,8 +416,7 @@ for(i in levels(Targets$Factor)){
   }
   box()
   PlotAxes(mat=get(activeCTNames[1]), yrange=c(miny, maxy), strand=strand)  
-  legend(1, maxy, legend=legends, lty=1, lwd=3, col=cols)
-  
+  legend(1, maxy, legend=legends, lty=1, lwd=3, col=cols)  
   
   #--------------------------------------------------------
   # Prepare and plot Venn diagrams
@@ -479,7 +470,6 @@ for(i in levels(Targets$Factor)){
 } # end of for(i in levels(Targets$Factor))
 dev.off()
 
-
 #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 #                                                                 #
 #                  Session info and closure                       #
@@ -505,6 +495,5 @@ cat(" \n =======================================================================
 
 # Close the R session when run from bash
 quit(save = "no", status = 0, runLast = TRUE)
-
 
 #}

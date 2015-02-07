@@ -1,0 +1,16 @@
+#----------------------------------------------------------
+#
+#    NEAT requires the following R packages
+#    To install them, copy paste this  text file into R
+#
+#----------------------------------------------------------
+
+install.packages('AnnotationDbi');
+install.packages('caTools');
+install.packages('edgeR');
+install.packages('GenomicRanges');
+install.packages('GenomicAlignments');
+install.packages('gtools');
+install.packages('Rsamtools');
+install.packages('VennDiagram');
+

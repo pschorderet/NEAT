@@ -1,9 +1,6 @@
 
 #-----------------------------------------------------------------
 # TEST LINES (DISREGARD)
-#Pipeline_RNAseq <- function( path2NEAT, path2MainFolder, topNgenes, toHighlight ){
-# source('/Users/patrick/Desktop/NEAT/CustomFunctions/Pipeline_RNAseq.R')
-# Pipeline_RNAseq(path2NEAT='/Users/patrick/Desktop/NEAT/', path2MainFolder ='/Users/patrick/Desktop/EXAMPLE/', topNgenes = 100 ,toHighlight = 10 )
 # path2NEAT='/Users/patrick/Desktop/NEAT/'; path2MainFolder ='/Users/patrick/Desktop/EXAMPLE/'; topNgenes = 100; toHighlight = 10; 
 
 #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
@@ -13,7 +10,6 @@
 #*                                                                *
 #******************************************************************
 #
-
 # * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * #
 #                                                                 #
 # This script is intended to be run from bash/shell Mac terminal  #
@@ -29,8 +25,6 @@
 # * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * #
 
 version <- "1.0.1 Jan 2015"
-
-
 
 #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 #*                                                                *
@@ -85,7 +79,6 @@ SE <- unlist(strsplit(SE, split = "\\="))[2];
 if(SE=="0"){ SE <- "TRUE" }
 if(SE=="1"){ SE <- "FALSE" }
 
-
 #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 #*                                                                *
 #*                Create proper arborescence                      *
@@ -129,7 +122,6 @@ RNAseqCreateArborescence(path2MainFolder=path2MainFolder)
 chromosomesFile <- read.table(path2chrlens, comment.char="#")
 chromosomes <- chromosomesFile$V1
 #chromosomes = c(paste("chr", seq(1,19),  sep = ""), "chrX", "chrY")
-
 
 #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 #                                                                 #
@@ -252,7 +244,6 @@ for(i in 1:length(GRangesSamples)){
   cat(" \n * * * * * * * * * * * * * * * * * * * * * * * * * * * * * ", sep="")
 }
 
-
 #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 #                                                                 #
 #                      Compute DEG                                #
@@ -323,7 +314,6 @@ d <- DGEList(counts=CTall, lib.size=lib.size, group=Targets$Replicate, genes=row
 cat(" \n \t Compute Normalization factor", sep="")
 d <- calcNormFactors(d)
 
-
 # If there are no replicates
 if(length(which(duplicated(Targets$Replicate)==FALSE))!=length(Targets$Replicate)){
   cat(" \n \t Estimate common dispersion", sep="")
@@ -342,7 +332,6 @@ if(length(which(duplicated(Targets$Replicate)==FALSE))!=length(Targets$Replicate
   bcv <- 0.2
   cat(" \n \t\t No replicates, tagwise dispersion cannot be computed", sep="")
 }
-
 
 #--------------------------------------------------
 # Generate count table of RPKM
@@ -366,7 +355,6 @@ path2CountTable <- paste(path2CountTables, "CountTable_OverGenes_RPKM.bed", sep=
 cat(" \n \t Store RPKMs in ", path2CountTable, sep="")
 write.table(RPKMf, path2CountTable, sep = "\t", row.names = TRUE, col.names=TRUE, quote=FALSE)
 
-
 #--------------------------------------------------
 # Read in RPKM and counts data.frames generated above
 RPKM = read.delim(path2CountTable, row.names=1)
@@ -377,7 +365,6 @@ pairs(Q_samples)
 pairs(Q_samples, col=rgb(255,0,0,20,maxColorValue=255), pch=16)
 cat("\n\n", sep="")
 dev.off()
-
 
 #--------------------------------------------------
 # Start analysis DEG using EdgeR
@@ -502,8 +489,6 @@ plot.new()
 grid.draw(venn.plot)
 dev.off() # "_Venn.pdf"
 
-
-
 #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 #                                                                 #
 #                  GO terms analysis                              #
@@ -515,8 +500,6 @@ cat(" \n\n\n ===================================================================
 cat(" \n || * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * ", sep="")
 cat(" \n ||\t GO terms analysis", sep="")
 cat(" \n || .-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.\n", sep="")
-
-
 
 #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 #                                                                 #
