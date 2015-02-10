@@ -10,7 +10,7 @@ To start using NEAT, please read the README files corresponding to your experiem
 ### What NEAT does
 NEAT has been developed as two main modules each conatining two sub-modules:
 
-[ 1 ]       Section 1: Build a pipeline (ChIPpip or RNApip)
+[ 1 ]       Build a pipeline (ChIPpip or RNApip)
 
     (i)     Unzip and rename
 
@@ -24,7 +24,7 @@ NEAT has been developed as two main modules each conatining two sub-modules:
 
     (vi)    Bigwig
 
-[ 2 ]       Section 2: Analyze a project (ChIPmE or RNAmE)
+[ 2 ]       Analyze a project (ChIPmE or RNAmE)
 
     (i)     Create human-readable data (pdf, xls sheets, etc)
 
