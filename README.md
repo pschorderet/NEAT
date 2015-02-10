@@ -11,7 +11,7 @@ To start using NEAT, please follow the tutorials found in the 'Vignette' folder
 
 
 ### What NEAT can do
-NEAT has been developed as two main modules each conatining two sub-modules:
+NEAT has been developed as two main modules:
 
 [ 1 ]       Build a pipeline
 
