@@ -13,7 +13,7 @@ To start using NEAT, please follow the tutorials found in the 'Vignette' folder
 ### What NEAT can do
 NEAT has been developed as two main modules each conatining two sub-modules:
 
-[ 1 ]       Build a pipeline (ChIPpip or RNApip)
+[ 1 ]       Build a pipeline
 
     (i)     Unzip and rename
 
@@ -21,13 +21,13 @@ NEAT has been developed as two main modules each conatining two sub-modules:
 
     (iii)   Map
 
-    (iv)    FIlter
+    (iv)    Filter
 
     (v)     Peakcalling
 
     (vi)    Bigwig
 
-[ 2 ]       Analyze a project (ChIPmE or RNAmE)
+[ 2 ]       Analyze a project
 
     (i)     Create human-readable data (pdf graphes, xls sheets, etc)
 
