@@ -7,18 +7,18 @@ NEAT has been developped in collaboration with wet-lab scientists as well as bio
 To start using NEAT, please read the README files corresponding to your experiemental setup found in the RNApip and ChIPpip folders.
 
 
-### How to run NEAT
+### What NEAT does
 NEAT has been developed as two main modules each conatining two sub-modules:
 
 [ 1 ]       Section 1: Build a pipeline (ChIPpip or RNApip)
 
-    (i)    Unzip and rename
+    (i)     Unzip and rename
 
-    (ii)   QC
+    (ii)    QC
 
-    (iii)  Map
+    (iii)   Map
 
-    (iv)   FIlter
+    (iv)    FIlter
 
     (v)     Peakcalling
 
