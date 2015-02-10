@@ -26,13 +26,13 @@ NEAT has been developed as two main modules each conatining two sub-modules:
 
 [ 2 ]       Analyze a project (ChIPmE or RNAmE)
 
-    (i)     Create human-readable data (pdf, xls sheets, etc)
+    (i)     Create human-readable data (pdf graphes, xls sheets, etc)
 
 ### Tutorial
 Novice users can follow through the entire analysis of a test dataset provided as part of the package. Please follow the tutorials found in the 'vignette' folder
 
 
 
-
+#### Devel mode
 NEAT is still under developent. If you encounter any bug, please contact us.
 
