@@ -31,3 +31,8 @@ NEAT has been developed as two main modules each conatining two sub-modules:
 ### Tutorial
 Novice users can follow through the entire analysis of a test dataset provided as part of the package. Please follow the tutorials found in the 'vignette' folder
 
+
+
+
+NEAT is still under developent. If you encounter any bug, please contact us.
+
