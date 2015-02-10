@@ -9,7 +9,8 @@ NEAT has been developped in collaboration with wet-lab scientists as well as bio
 
 To start using NEAT, please follow the tutorials found in the 'Vignette' folder
 
-### What NEAT does
+
+### What NEAT can do
 NEAT has been developed as two main modules each conatining two sub-modules:
 
 [ 1 ]       Build a pipeline (ChIPpip or RNApip)
@@ -29,6 +30,7 @@ NEAT has been developed as two main modules each conatining two sub-modules:
 [ 2 ]       Analyze a project (ChIPmE or RNAmE)
 
     (i)     Create human-readable data (pdf graphes, xls sheets, etc)
+
 
 ### Tutorial
 Novice users can follow through the entire analysis of a test dataset provided as part of the package. Please follow the tutorials found in the 'vignette' folder
