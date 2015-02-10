@@ -51,7 +51,7 @@
 				<key>ActionParameters</key>
 				<dict>
 					<key>source</key>
-					<string># Install NEAT and R packages#----------------------------------------------------------------------set LocalPath2NEAT to (choose folder with prompt "Locate the NEAT directory")set LocalPath2NEAT to get the POSIX path of LocalPath2NEATset question to display dialog "Enter the path to install NEAT on your remote server" default answer "username@serveraddress.edu:~/home/" buttons {"Cancel", "Install NEAT"} default button 2set Path2RemoteFolder to text returned of questiontell application "Terminal"	activate	tell application "Finder" to set visible of process "Terminal" to false	set the_user to system attribute "USER"		set line1 to "source('" &amp; LocalPath2NEAT &amp; "CustomFunctions/InstallNEAT.R')"	set line2 to "InstallNEAT()"		do script "R"	delay 1	do script line1 in window 1	delay 0.5	do script line2 in window 1end telltell application "Terminal"	do script " "	activate		set line1 to "rsync -avz ~/Desktop/NEAT " &amp; Path2RemoteFolder	do script line1 in window 1end tell</string>
+					<string># Install NEAT and R packages#----------------------------------------------------------------------#set LocalPath2NEAT to (choose folder with prompt "Locate the NEAT directory")#set LocalPath2NEAT to get the POSIX path of LocalPath2NEATset LocalPath2NEAT to do shell script "sed 's/\\/$//' &lt;&lt;&lt; " &amp; quoted form of POSIX path of (choose folder with prompt "Locate the NEAT directory")set question to display dialog "Enter the path to install NEAT on your remote server" default answer "username@serveraddress.edu:~/home/" buttons {"Cancel", "Install NEAT"} default button 2set Path2RemoteFolder to text returned of questiontell application "Terminal"	activate	tell application "Finder" to set visible of process "Terminal" to false	set the_user to system attribute "USER"		set line1 to "source('" &amp; LocalPath2NEAT &amp; "/CustomFunctions/InstallNEAT.R')"	set line2 to "InstallNEAT()"		do script "R"	delay 1	do script line1 in window 1	delay 0.5	do script line2 in window 1end telltell application "Terminal"	do script " "	activate		set line1 to "rsync -avz " &amp; LocalPath2NEAT &amp; " " &amp; Path2RemoteFolder	do script line1 in window 1end tell</string>
 				</dict>
 				<key>BundleIdentifier</key>
 				<string>com.apple.Automator.RunScript</string>
@@ -107,7 +107,7 @@ end run</string>
 				<key>isViewVisible</key>
 				<true/>
 				<key>location</key>
-				<string>449.000000:627.000000</string>
+				<string>449.000000:644.000000</string>
 				<key>nibPath</key>
 				<string>/System/Library/Automator/Run AppleScript.action/Contents/Resources/Base.lproj/main.nib</string>
 			</dict>
