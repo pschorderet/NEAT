@@ -37,6 +37,6 @@ Novice users can follow through the entire analysis of a test dataset provided a
 
 
 
-#### Devel mode
+### Devel mode
 NEAT is still under developent. If you encounter any bug, please contact us.
 
