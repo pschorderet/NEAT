@@ -198,6 +198,9 @@ for(i in 1:length(allsamples)){
   movecode <- paste("`mv ", LocalPath2bam, "aligned/", allsamples[i], "/", allsamples[i], ".bam ", LocalPath2bam, "`", sep="")
   movecode
   system(movecode)
+  movecode <- paste("`mv ", LocalPath2bam, "aligned/", allsamples[i], "/", allsamples[i], ".bai ", LocalPath2bam, "`", sep="")
+  movecode
+  system(movecode)
   # Delete rest of folder
   #cat("\n\t Deleting \t\t ", LocalPath2saf, allsamples[i], sep="")
   #delcode <- paste("`rm -r ", LocalPath2saf, allsamples[i], "/`", sep="")
