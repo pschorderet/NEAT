@@ -29,7 +29,7 @@ my ($unzip, $qc, $map, $filter)                                                 
 my (@sc, @lines2remove)                                                                                                                         = ();
 # Find paths to different folders in the Targets.txt file
 while(<INPUT>) {
-	if (/# My_personal_email/) {
+        if (/# My_personal_email/) {
                 $_ =~ m/"(.+?)"/;
                 $email = "$1";
         }
@@ -47,8 +47,8 @@ while(<INPUT>) {
         }
 	if (/# Remote_path_to_NEAT/) {
                 $_ =~ m/"(.+?)"/;
-                $path2RNAseq = "$1";
-                $path2RNAseqScripts = join("", $path2RNAseq, "/RNApip/scripts");
+                $path2RNAseq = "$1\/RNApip";
+                $path2RNAseqScripts = join("", $path2RNAseq, "/scripts");
         }
 	if (/# Remote_path_to_orifastq.gz/) {
                 $_ =~ m/"(.+?)"/;
@@ -62,6 +62,10 @@ while(<INPUT>) {
                 $_ =~ m/"(.+?)"/;
                 $refGenome = "$1";
         }
+	if (/# Remote_path_to_ann_gtf_file/) {
+                $_ =~ m/"(.+?)"/;
+                $path2gtfFile = "$1";
+        }
 	if (/# Aligner_algo_short/) {
                 $_ =~ m/"(.+?)"/;
                 $aligner = "$1";
@@ -69,10 +73,6 @@ while(<INPUT>) {
 	if (/# Paired_end_seq_run/) {
                 $_ =~ m/"(.+?)"/;
                 $PE = "$1";
-        }
-	if (/# Remote_path_to_ann_gtf_file/) {
-                $_ =~ m/"(.+?)"/;
-                $path2gtfFile = "$1";
         }
 	if (/# Steps_to_execute_pipe/) {
                 $_ =~ m/"(.+?)"/;
@@ -175,7 +175,7 @@ print "\n";
 #print "\n Current working dir:\t $path2expFolder";
 #print "\n";
 print "\n .........................................";
-print "\n Performing following tasks:";
+print "\n Performing following modules:";
 print "\n .........................................";
 print "\n unzip:\t\t\t $unzip";
 print "\n qc:\t\t\t $qc";
@@ -261,6 +261,3 @@ close $IterateSH;
 print "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n";
 print "\n Exiting INITIAL section with no known error \n";
 print "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n\n\n";
-
-exit 1;
-

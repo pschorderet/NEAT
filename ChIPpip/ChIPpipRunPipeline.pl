@@ -26,6 +26,7 @@ my ($expFolder, $genome, $userFolder, $path2ChIPseqScripts, $path2ChIPseq, $path
 my ($unzip, $qc, $map, $filter, $peakcalling, $cleanbigwig, $cleanfolders)                      = ("FALSE", "FALSE", "FALSE", "FALSE", "FALSE", "FALSE", "FALSE");
 my (@sc, @lines2remove)                                                                         = ();
 # Find paths to different folders in the Targets.txt file
+
 while(<INPUT>) {
         if (/# My_personal_email/) {
                 $_ =~ m/"(.+?)"/;
@@ -45,8 +46,8 @@ while(<INPUT>) {
         }
 	if (/# Remote_path_to_NEAT/) {
                 $_ =~ m/"(.+?)"/;
-                $path2ChIPseq = "$1";
-                $path2ChIPseqScripts = join("", $path2ChIPseq, "/ChIPpip/scripts");
+                $path2ChIPseq = "$1\/ChIPpip";
+                $path2ChIPseqScripts = join("", $path2ChIPseq, "/scripts");
         }
 	if (/# Remote_path_to_orifastq.gz/) {
                 $_ =~ m/"(.+?)"/;
@@ -64,7 +65,6 @@ while(<INPUT>) {
                 $_ =~ m/"(.+?)"/;
                 $aligner = "$1";
         }
-
 	if (/# Paired_end_seq_run/) {
                 $_ =~ m/"(.+?)"/;
                 $PE = "$1";
@@ -92,10 +92,11 @@ while(<INPUT>) {
 } # end of Targets.txt
 
 
+
 my $AdvSettings = "$path2expFolder/DataStructure/AdvancedSettings.txt";
 open(INPUT, $AdvSettings) || die "Error opening $AdvSettings : $!\n\n\n";
 
-my ($removepcrdup, $makeunique, $ndiff, $aligncommand1, $aligncommand2, $fdr, $posopt, $densityopt, $enforceisize)		= ("NA", "NA", "NA", "NA", "NA", "NA", "NA", "NA", "NA");
+my ($removepcrdup, $makeunique, $ndiff, $aligncommand1, $fdr, $posopt, $densityopt, $enforceisize)		= ("NA", "NA", "NA", "NA", "NA", "NA", "NA", "NA");
 
 while(<INPUT>) {
 
@@ -107,10 +108,6 @@ while(<INPUT>) {
                 $_ =~ m/"(.+?)"/;
                 $aligncommand1 = "$1";
 	}
-	if (/# Align.command.line.2/) {
-                $_ =~ m/"(.+?)"/;
-                $aligncommand2 = "$1";
-        }
 	if (/# Filter.removePCRdup/) {
                 $_ =~ m/"(.+?)"/;
                 $removepcr = "$1";
@@ -137,7 +134,6 @@ while(<INPUT>) {
         }
 
 } # end of AdvancedSettings.txt
-
 
 
 #*----------------------------------------------------------------------*
@@ -178,22 +174,21 @@ foreach $line (@Targets4) {
         push(@inputs, $line);
 }
 
-
 #*----------------------------------------------------------------------*
 # Define paths
-
-my $path2expFolder 	= "$userFolder/$expFolder";
-$Targets 		= "$path2expFolder/DataStructure/Targets.txt";
+my $path2expFolder	= "$userFolder/$expFolder";
+$Targets                = "$path2expFolder/DataStructure/Targets.txt";
 
 #*----------------------------------------------------------------------*
 
 chdir "$path2expFolder";
-`clear`;
-print "\n\n\n#################################################################################################";
-print "\n#												#";
-print "\n#				ChIPseq pipeline v1.0.1 (Jan 2015)				#";
-print "\n#												#";
-print "\n#################################################################################################\n";
+
+print "\n##################################################################################################";
+print "\n# ";
+print "\n#	The pipeline will run the following tasks:\t\t";
+print join("  -  ", @steps2execute);
+print "\n# ";
+print "\n##################################################################################################\n\n";
 print "\n";
 print "\n My email:\t\t $email";
 print "\n";
@@ -209,17 +204,13 @@ print "\n refGenome:\t\t $refGenome";
 print "\n";
 print "\n Paired end sequencing:\t $PE";
 print "\n Aligner algorithm:\t $aligner";
-print "\n Align command line 1:\t $aligncommand1";
-print "\n Align command line 2:\t $aligncommand2";
-print "\n";
 print "\n Remove pcr dupl:\t $removepcr";
 print "\n Make unique reads:\t $makeunique";
-print "\n PeakCaller.fdr:\t $fdr";
 print "\n";
 #print "\n Current working dir:\t $path2expFolder";
 #print "\n";
 print "\n .........................................";
-print "\n Performing following tasks:";
+print "\n Performing following modules:";
 print "\n .........................................";
 print "\n unzip:\t\t\t $unzip";
 print "\n qc:\t\t\t $qc";
@@ -231,7 +222,7 @@ print "\n .........................................";
 print "\n";
 print "\n Samples: ";
 foreach my $i (0 .. $#samples) {
-	print "\n\t $samples[$i] \t - \t $inputs[$i]";
+        print "\n\t $samples[$i] \t - \t $inputs[$i]";
 }
 print "\n";
 #print "\n----------------------------------------\n";

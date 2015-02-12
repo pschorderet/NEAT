@@ -45,8 +45,8 @@ while(<INPUT>) {
         }
 	if (/# Remote_path_to_NEAT/) {
                 $_ =~ m/"(.+?)"/;
-                $path2ChIPseq = "$1";
-                $path2ChIPseqScripts = join("", $path2ChIPseq, "/ChIPpip/scripts");
+                $path2ChIPseq = "$1\/ChIPpip";
+                $path2ChIPseqScripts = join("", $path2ChIPseq, "/scripts");
         }
 	if (/# Remote_path_to_orifastq.gz/) {
                 $_ =~ m/"(.+?)"/;
@@ -78,7 +78,7 @@ while(<INPUT>) {
                         push(@lines2remove, $line);
                 }
         }
-	if (/# Steps_to_execute_pipe/) {
+        if (/# Steps_to_execute_pipe/) {
                 $_ =~ m/"(.+?)"/;
                 @steps2execute = ();
                 if (grep /\bunzip\b/i, $_ )             { $unzip                = "TRUE"; push @steps2execute, "Unzip";         }
@@ -91,63 +91,45 @@ while(<INPUT>) {
 
 } # end of Targets.txt
 
-
-
 my $AdvSettings = "$path2expFolder/DataStructure/AdvancedSettings.txt";
 open(INPUT, $AdvSettings) || die "Error opening $AdvSettings : $!\n\n\n";
 
-my ($removepcrdup, $makeunique, $ndiff, $aligncommand1, $aligncommand2, $fdr, $posopt, $densityopt, $enforceisize)		= ("NA", "NA", "NA", "NA", "NA", "NA", "NA", "NA", "NA");
+my ($removepcrdup, $makeunique, $ndiff, $aligncommand1, $fdr, $posopt, $densityopt, $enforceisize)              = ("NA", "NA", "NA", "NA", "NA", "NA", "NA", "NA");
 
 while(<INPUT>) {
 
-	if (/# Bwa.maxEditDist/) {
-		$_ =~ m/"(.+?)"/;
-		$ndiff = "$1";
+        if (/# Bwa.maxEditDist/) {
+                $_ =~ m/"(.+?)"/;
+                $ndiff = "$1";
 	}
-	if (/# Align.command.line.1/) {
-		$_ =~ m/"(.+?)"/;
-		$aligncommand1 = "$1";
+        if (/# Align.command.line.1/) {
+                $_ =~ m/"(.+?)"/;
+                $aligncommand1 = "$1";
 	}
-	if (/# Align.command.line.2/) {
-		$_ =~ m/"(.+?)"/;
-		$aligncommand2 = "$1";
+        if (/# Filter.removePCRdup/) {
+                $_ =~ m/"(.+?)"/;
+                $removepcr = "$1";
+	}
+        if (/# Filter.makeUniqueRead/) {
+                $_ =~ m/"(.+?)"/;
+                $makeunique = "$1";
         }
- 	if (/# Filter.removePCRdup/) {
-		$_ =~ m/"(.+?)"/;
-		$removepcr = "$1";
-	}
-	if (/# Filter.makeUniqueRead/) {
-		$_ =~ m/"(.+?)"/;
-		$makeunique = "$1";
- 	}
-	if (/# Filter.splitbychr/) {
-		$_ =~ m/"(.+?)"/;
-		$splitbychr = "$1";
-	}
-	if (/# Filter.enforceinssize/) {
-		$_ =~ m/"(.+?)"/;
-		$enforceisize = "$1";
-	}
-	if (/# Filter.minisize/) {
-		$_ =~ m/"(.+?)"/;
-		$minisize = "$1";
-	}
-	if (/# Filter.maxisize/) {
-		$_ =~ m/"(.+?)"/;
-		$maxisize = "$1";
-	}
-	if (/# PeakCaller.fdr/) {
-		$_ =~ m/"(.+?)"/;
-		$fdr = "$1";
-	}
-	if (/# PeakCaller.posopt/) {
-		$_ =~ m/"(.+?)"/;
-		$posopt = "$1";
-	}
-	if (/# PeakCaller.densityopt/) {
-		$_ =~ m/"(.+?)"/;
-		$densityopt = "$1";
-	}
+        if (/# PeakCaller.fdr/) {
+                $_ =~ m/"(.+?)"/;
+                $fdr = "$1";
+        }
+        if (/# PeakCaller.posopt/) {
+                $_ =~ m/"(.+?)"/;
+                $posopt = "$1";
+        }
+        if (/# PeakCaller.densityopt/) {
+                $_ =~ m/"(.+?)"/;
+                $densityopt = "$1";
+        }
+        if (/# PeakCaller.enfSize/) {
+                $_ =~ m/"(.+?)"/;
+                $enforceisize = "$1";
+        }
 
 } # end of AdvancedSettings.txt
 
@@ -165,15 +147,12 @@ my @Targets4 = `cut -f4 $Targets`;
         chomp(@Targets4);
 
 # Store original file names in orisamples
-
 my @orisamples;
 foreach $line (@Targets1) {
         $line =~ /^$/ and die "Targets 1: Blank line detected at $.\n\n";
         $line =~ /^[# : = " OriFileName FileName OriInpName InpName]/ and next;
         push(@orisamples, $line);
 }
-
-# Store original file names in samples
 my @samples;
 foreach $line (@Targets2) {
         $line =~ /^$/ and die "Targets 1: Blank line detected at $.\n\n";
@@ -193,7 +172,6 @@ foreach $line (@Targets4) {
         push(@inputs, $line);
 }
 
-
 #*----------------------------------------------------------------------*
 # Remove duplicated elements in the list @samples and @inputs
 %seen           = ();
@@ -210,13 +188,10 @@ my $cutoff	= 0.0;
 my @chrs        = `cut -f1 $chrlens`;
 chomp(@chrs);
 
-
-
 #*----------------------------------------------------------------------*
 # Define paths
-
-my $path2expFolder = "$userFolder/$expFolder";
-$Targets = "$path2expFolder/DataStructure/Targets.txt";
+my $path2expFolder 	= "$userFolder/$expFolder";
+$Targets 		= "$path2expFolder/DataStructure/Targets.txt";
 
 #*----------------------------------------------------------------------*
 
@@ -243,17 +218,13 @@ print "\n refGenome:\t\t $refGenome";
 print "\n";
 print "\n Paired end sequencing:\t $PE";
 print "\n Aligner algorithm:\t $aligner";
-print "\n Align command line 1:\t $aligncommand1";
-print "\n Align command line 2:\t $aligncommand2";
-print "\n";
 print "\n Remove pcr dupl:\t $removepcr";
 print "\n Make unique reads:\t $makeunique";
-print "\n PeakCaller.fdr:\t $fdr";
 print "\n";
-print "\n Current working dir:\t $path2expFolder";
-print "\n";
+#print "\n Current working dir:\t $path2expFolder";
+#print "\n";
 print "\n .........................................";
-print "\n Performing following tasks:";
+print "\n Performing following modules:";
 print "\n .........................................";
 print "\n unzip:\t\t\t $unzip";
 print "\n qc:\t\t\t $qc";
@@ -262,13 +233,14 @@ print "\n filter:\t\t $filter";
 print "\n peakcalling:\t\t $peakcalling";
 print "\n cleanbigwig:\t\t $cleanbigwig \t (remove: @lines2remove)";
 print "\n .........................................";
+print "\n";
 print "\n Samples: ";
 foreach my $i (0 .. $#samples) {
-        print "\n\t $samples[$i] \t - \t $inputs[$i]";
+        print "\n\t $samples[$i]";
 }
 print "\n";
-#print "\n";
 #print "\n----------------------------------------\n";
+
 
 
 #*----------------------------------------------------------------------*
@@ -503,7 +475,7 @@ if( $map =~ "TRUE" ){
 			`echo "$cmd" >> $QSUBint`;
 			$cmd		= "$aligncommand1 -n $ndiff $refGenome $path2fastq/$samplesInputs[$i]\_2.fastq > $path2currentSampleDir/$samplesInputs[$i]\_2.sai";
 			`echo "$cmd" >> $QSUBint`;
-			$cmd		= "$aligncommand2 $refGenome $path2currentSampleDir/$samplesInputs[$i]\_1.sai $path2currentSampleDir/$samplesInputs[$i]\_2.sai $path2fastq/$samplesInputs\_1.fastq $path2fastq/$samplesInputs[$i]\_2.fastq > $path2currentSampleDir/$samplesInputs[$i]\.sam";
+			$cmd		= "sampe $refGenome $path2currentSampleDir/$samplesInputs[$i]\_1.sai $path2currentSampleDir/$samplesInputs[$i]\_2.sai $path2fastq/$samplesInputs\_1.fastq $path2fastq/$samplesInputs[$i]\_2.fastq > $path2currentSampleDir/$samplesInputs[$i]\.sam";
 			`echo "$cmd" >> $QSUBint`;
 			#--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--
 
@@ -513,7 +485,7 @@ if( $map =~ "TRUE" ){
 			#-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+          IMPORTANT CODE HERE         -+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 			my $cmd		= "$aligncommand1 -n $ndiff $refGenome $path2fastq/$samplesInputs[$i]\.fastq > $path2currentSampleDir/$samplesInputs[$i]\.sai";
 			`echo "$cmd" >> $QSUBint`;
-			my $cmd2	= "$aligncommand2 $refGenome $path2currentSampleDir/$samplesInputs[$i]\.sai $path2fastq/$samplesInputs[$i]\.fastq > $path2currentSampleDir/$samplesInputs[$i]\.sam";
+			my $cmd2	= "samse $refGenome $path2currentSampleDir/$samplesInputs[$i]\.sai $path2fastq/$samplesInputs[$i]\.fastq > $path2currentSampleDir/$samplesInputs[$i]\.sam";
 			`echo "$cmd2" >> $QSUBint`;
 			#--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--
 
