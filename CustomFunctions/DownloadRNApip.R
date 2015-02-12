@@ -172,6 +172,10 @@ for(i in 1:length(allsamples)){
   movecode <- paste("`mv ", LocalPath2bam, "/Tophat/", allsamples[i], "/", allsamples[i], ".bam ", LocalPath2bam, "`", sep="")
   movecode
   system(movecode)
+  movecode <- paste("`mv ", LocalPath2bam, "/Tophat/", allsamples[i], "/", allsamples[i], ".bai ", LocalPath2bam, "`", sep="")
+  movecode
+  system(movecode)
+  
   cat("\n\n .-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.\n", sep="")
 }
 cat("\n\t Deleting \t\t ", LocalPath2bam, "Tophat/", sep="")
