@@ -475,7 +475,7 @@ if( $map =~ "TRUE" ){
 			`echo "$cmd" >> $QSUBint`;
 			$cmd		= "$aligncommand1 -n $ndiff $refGenome $path2fastq/$samplesInputs[$i]\_2.fastq > $path2currentSampleDir/$samplesInputs[$i]\_2.sai";
 			`echo "$cmd" >> $QSUBint`;
-			$cmd		= "sampe $refGenome $path2currentSampleDir/$samplesInputs[$i]\_1.sai $path2currentSampleDir/$samplesInputs[$i]\_2.sai $path2fastq/$samplesInputs\_1.fastq $path2fastq/$samplesInputs[$i]\_2.fastq > $path2currentSampleDir/$samplesInputs[$i]\.sam";
+			$cmd		= "bwa sampe $refGenome $path2currentSampleDir/$samplesInputs[$i]\_1.sai $path2currentSampleDir/$samplesInputs[$i]\_2.sai $path2fastq/$samplesInputs\_1.fastq $path2fastq/$samplesInputs[$i]\_2.fastq > $path2currentSampleDir/$samplesInputs[$i]\.sam";
 			`echo "$cmd" >> $QSUBint`;
 			#--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--
 
@@ -485,7 +485,7 @@ if( $map =~ "TRUE" ){
 			#-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+          IMPORTANT CODE HERE         -+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 			my $cmd		= "$aligncommand1 -n $ndiff $refGenome $path2fastq/$samplesInputs[$i]\.fastq > $path2currentSampleDir/$samplesInputs[$i]\.sai";
 			`echo "$cmd" >> $QSUBint`;
-			my $cmd2	= "samse $refGenome $path2currentSampleDir/$samplesInputs[$i]\.sai $path2fastq/$samplesInputs[$i]\.fastq > $path2currentSampleDir/$samplesInputs[$i]\.sam";
+			my $cmd2	= "bwa samse $refGenome $path2currentSampleDir/$samplesInputs[$i]\.sai $path2fastq/$samplesInputs[$i]\.fastq > $path2currentSampleDir/$samplesInputs[$i]\.sam";
 			`echo "$cmd2" >> $QSUBint`;
 			#--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--
 
