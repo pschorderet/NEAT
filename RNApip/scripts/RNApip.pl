@@ -606,6 +606,17 @@ if( $filter =~ "TRUE" ){
 if($unzip =~ "FALSE"  &&  $qc =~ "FALSE"  &&  $map =~ "FALSE"  &&  $filter =~ "FALSE" ){
 
 	print "\n\n*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-\n";
+        print "\n Moving .bam and .bai files from the Tophat to the aligned folder \n";
+
+	my $path2aligned	= "$path2expFolder/aligned";
+	`mkdir $path2aligned`;
+	foreach my $i (0 .. $#samples) {
+		`mkdir $path2aligned/$samples[$i]`;
+		`mv $path2Tophat/$samples[$i]/$samples[$i].bam $path2aligned/$samples[$i]/`;
+		`mv $path2Tophat/$samples[$i]/$samples[$i].bai $path2aligned/$samples[$i]/`;
+	}
+
+	print "\n\n*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-\n";
 	print "\n Exiting \n";
 
 	my $iterateJobName	= "Iterate_exit";
@@ -650,4 +661,6 @@ exit 0;
 
 print "\n*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-\n\n";
 
-#*---------------------------------------------------------------
+#*----------------------------------------------------------------------*
+
+
