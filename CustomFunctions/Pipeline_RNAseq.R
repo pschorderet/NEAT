@@ -19,7 +19,7 @@
 # parameters first:                                               #
 #                                                                 #
 #     path2NEAT <- "~/NEAT/"                                      #
-#     MainFolder <- "RNA/"; path2MainFolder <- paste("~/Desktop/", MainFolder, sep="")
+#     MainFolder <- "MY_NEW_RNA_PROJECT/"; path2MainFolder <- paste("~/Desktop/", MainFolder, sep="")
 #     topNgenes <- 2000; toHighlight <- 20;
 #                                                                 #
 # * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * #
@@ -230,7 +230,6 @@ for(i in 1:length(GRangesSamples)){
   overlap <- summarizeOverlaps(exonRanges, get(GRangesSamples[i]), mode="Union", ignore.strand=TRUE, inter.feature=FALSE, singleEnd=SE)  
   overlapDF <- as.data.frame(cbind(names(exonRanges), assays(overlap)$counts))
   colnames(overlapDF) <- c("GeneNames", "Counts")
-  overlapDF[30:40,]
   
   # Assign to nameCT
   nameCT <- paste(prenameForCT, GRangesSamples[i], ".bed", sep="")
@@ -418,6 +417,8 @@ for(k in 1:nrow(cmp)){
     detags <- rownames(d)[as.logical(de)]
     # plotSmear(comp, main=title, cex.main=0.6, col="Green")
     plotSmear(comp, de.tags=detags, main=title, cex.main=0.6, col=rgb(0,255,0,50,maxColorValue=255))
+    xcoord <- c((par()$xaxp[1]+(par()$xaxp[3]*0.6)), (par()$xaxp[1]+(par()$xaxp[3]*0.8)))
+    ycoord <- c(par()$yaxp[2], par()$yaxp[2])
     
     # Add name of genes
     comp.tags <- topTags(comp, n=topNgenes)$table
@@ -432,12 +433,12 @@ for(k in 1:nrow(cmp)){
     if(dim(down)[1]!=0){
       points(x=down$logCPM, y=down$logFC, cex.main=0.6, col="Blue", pch=21)
       text(x=down$logCPM, y=down$logFC, labels=down$genes, cex=0.5, pos=4, srt=-40)
-      text(x=10, y=6, labels=paste(c("Downregulated\n", sort(down$genes)), sep="", collapse="\n"), cex=0.5, adj = c( 0, 1 ))    
+      text(x=xcoord[1], y=ycoord[2], labels=paste(c("Downregulated\n", sort(down$genes)), sep="", collapse="\n"), cex=0.5, adj = c( 0, 1 ))    
     }
     if(dim(up)[1]!=0){
       points(x=up$logCPM, y=up$logFC, cex.main=0.6, col="Blue", pch=21)
       text(x=up$logCPM, y=up$logFC, labels=up$genes, cex=0.5, pos=4, srt=40)
-      text(x=12, y=6, labels=paste(c("Upregulated\n", sort(up$genes)), sep="", collapse="\n"), cex=0.5, adj = c( 0, 1 ))    
+      text(x=xcoord[2], y=ycoord[2], labels=paste(c("Upregulated\n", sort(up$genes)), sep="", collapse="\n"), cex=0.5, adj = c( 0, 1 ))    
     }
     
     # GO term analysis
