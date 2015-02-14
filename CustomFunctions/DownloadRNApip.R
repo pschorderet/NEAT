@@ -49,7 +49,7 @@ cat(" \n========================================================================
 LocalPath2CustomFunctions <- paste( LocalPath2NEAT, "CustomFunctions", "/", sep="")
 LocalPath2Targets <- paste( LocalPath2NewProject, "DataStructure/Targets.txt", sep="")
 LocalPath2bam <- paste( LocalPath2NewProject, "bam/", sep="")
-LocalPath2Tophat <- paste( LocalPath2NewProject, "Tophat/", sep="")
+LocalPath2aligned <- paste( LocalPath2NewProject, "Tophat/", sep="")
 source(paste( LocalPath2CustomFunctions, "ErrorOutput.R", sep=""))
 
 #--------------------------------------------------
@@ -129,21 +129,21 @@ system(mycode)
 
 
 #--------------------------------------------------
-# Transfer Tophat folder (including filtered .bam files) found in *RemotePath2MainFolderName*
+# Transfer aligned folder (including filtered .bam files) found in *RemotePath2MainFolderName*
 #
 cat(" \n\n\n======================================================================================", sep="")
 cat(" \n|| * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * ", sep="")
 cat(" \n||\t Downloading and opening Targets.txt files from remote server", sep="")
 cat(" \n|| .-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.\n\n", sep="")
 
-if(file.exists(LocalPath2Targets)==FALSE){ErrorOutput(paste("No Targets.txt file in\t", LocalPath2Targets, sep="")) }
+if(file.exists(LocalPath2Targets)==FALSE) { ErrorOutput(paste("No Targets.txt file in\t", LocalPath2Targets, sep="")) }
 cat(" \n\n Targets file provided: \n\n", sep="")
 Targets <- read.delim(LocalPath2Targets, comment.char="#")
 print(Targets)
 
 # Download Tophat folder
 cat(" \n Downloading Tophat folder from remote server", sep="")
-mycode <- paste("`scp -r ", sshpath, ":", RemotePath2MainFolderName, "/", ProjectName, "/Tophat " , LocalPath2bam, "`", sep="")
+mycode <- paste("`scp -r ", sshpath, ":", RemotePath2MainFolderName, "/", ProjectName, "/aligned " , LocalPath2bam, "`", sep="")
 system(mycode)
 
 # Load datasets provided in Targets file
@@ -169,17 +169,17 @@ for(i in 1:length(allsamples)){
   cat("\n Sample: \t",  allsamples[i], "\n", sep="")
   # Move sample i to .bam folder
   cat("\n\t Moving \t\t ", allsamples[i], ".bam\t to\t" , LocalPath2bam, sep="")
-  movecode <- paste("`mv ", LocalPath2bam, "/Tophat/", allsamples[i], "/", allsamples[i], ".bam ", LocalPath2bam, "`", sep="")
+  movecode <- paste("`mv ", LocalPath2bam, "/aligned/", allsamples[i], "/", allsamples[i], ".bam ", LocalPath2bam, "`", sep="")
   movecode
   system(movecode)
-  movecode <- paste("`mv ", LocalPath2bam, "/Tophat/", allsamples[i], "/", allsamples[i], ".bai ", LocalPath2bam, "`", sep="")
+  movecode <- paste("`mv ", LocalPath2bam, "/aligned/", allsamples[i], "/", allsamples[i], ".bai ", LocalPath2bam, "`", sep="")
   movecode
   system(movecode)
   
   cat("\n\n .-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.\n", sep="")
 }
-cat("\n\t Deleting \t\t ", LocalPath2bam, "Tophat/", sep="")
-delcode <- paste("`rm -r ", LocalPath2bam, "Tophat/", "`", sep="")
+cat("\n\t Deleting \t\t ", LocalPath2bam, "aligned/", sep="")
+delcode <- paste("`rm -r ", LocalPath2bam, "aligned/", "`", sep="")
 system(delcode)
 
 cat(" \n\n\n ======================================================================================", sep="")

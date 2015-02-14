@@ -7,12 +7,6 @@
 
 InstallNEAT <- function(){
 
-  # Open R and install packages
-# 	local({r <- getOption("repos")
-# 		r["CRAN"] <- "http://cran.r-project.org" 
-# 		options(repos=r)
-# 	})
-
   # Install packages
   cat("\n------------------------------------------------------------", sep='')
   cat("\n Installing various R packages required for NEAT \n\n", sep='')

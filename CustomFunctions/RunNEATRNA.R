@@ -51,11 +51,14 @@ for(i in 2:length(res)){
 #
 # Check for the existence of the project folder on remote server. If it does not exist, copy it
 mycode <- paste("rsync -avz ", LocalPath2Project, " ", sshpath, ":", RemotePath2MainFolderName, "/", sep="")
-cat("\n Copying project folder to remote server", sep="")
+cat("\n-------------------------------------------\n", sep="")
+cat("\nCopying project folder to remote server", sep="")
+cat("\n", mycode , "\n\n\n", sep="")
 system(mycode)
 
 # Run pipeline
 mycode <- paste("ssh ", sshpath, " 'perl ", RemotePath2NEAT, "/RNApip/RNApipRunPipeline.pl ", RemotePath2MainFolderName, "/", NewProjectName, "'", sep="")
+cat("\n-------------------------------------------\n", sep="")
 cat("\n Running the pipeline", sep="")
-system(mycode)  
-
+cat("\n", mycode , "\n\n\n", sep="")
+system(mycode)
