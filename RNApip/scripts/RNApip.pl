@@ -544,7 +544,7 @@ if( $filter =~ "TRUE" ){
 		#-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 		#-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+          IMPORTANT CODE HERE         -+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 		my $cmd         = "mv $path2Tophat/$samples[$i]/$samples[$i]\.bam $path2Tophat/$samples[$i]/$samples[$i]\_unsorted.bam";
-                `echo "$cmd" >> $QSUBintRename`;
+                `echo "$cmd" >> $QSUBint`;
 		if( $removepcr ){
 			# bam to sorted bam
 			my $cmd		= "samtools sort $path2Tophat/$samples[$i]/$samples[$i]\_unsorted.bam $path2Tophat/$samples[$i]/$samples[$i]\_sortedwpcr";
