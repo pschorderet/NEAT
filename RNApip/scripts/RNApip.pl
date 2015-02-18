@@ -145,6 +145,7 @@ print "\n path2fastq.gz:\t\t $path2fastqgz";
 print "\n Targets:\t\t $path2expFolder/DataStructure/Targets.txt";
 print "\n chrlens:\t\t $chrlens";
 print "\n refGenome:\t\t $refGenome";
+print "\n path2gtf:\t\t $path2gtfFile";
 print "\n";
 print "\n Paired end sequencing:\t $PE";
 print "\n Aligner algorithm:\t $aligner";
@@ -405,7 +406,7 @@ if( $map =~ "TRUE" ){
 
 
 	#*----------------------------------------------------------------------*
-	# Create a folder named * mysample * within each bwa_sam, bwa_saf and bwa_sai folders
+	# Create a folder named * mysample *
 
 	print "\n\n-------------------------------------\n\n Mapping samples: ";
 	foreach my $i (0 .. $#samples) {
@@ -417,7 +418,8 @@ if( $map =~ "TRUE" ){
 		`cp $scrhead $QSUBint`;
 		my $QSUBintRename	= "$tmpscr/$myJobName/$samples[$i]\_$myJobName2\.sh";
 		`cp $scrhead $QSUBintRename`;
-		
+
+
 		# Create a folder for each sample to store files
 		unless (-d "$path2Tophat/$samples[$i]")		{`mkdir $path2Tophat/$samples[$i]`;}
 		
@@ -441,7 +443,7 @@ if( $map =~ "TRUE" ){
 		#---------------------------------------------
 		# Rename samples
 		#
-		my $cmd		= "mv $path2Tophat/$samples[$i]/accepted_hits.bam $path2Tophat/$samples[$i]/$samples[$i]\_unfiltered.bam";
+		$cmd		= "mv $path2Tophat/$samples[$i]/accepted_hits.bam $path2Tophat/$samples[$i]/$samples[$i]\.bam";
 		`echo "$cmd" >> $QSUBintRename`;
 
 		#---------------------------------------------
@@ -453,10 +455,12 @@ if( $map =~ "TRUE" ){
 		
 		my $cmd1	= "$jobName=`qsub -o $path2qsub -e $path2qsub $QSUBint`";
 		$jobName = "\$".$jobName ;
-		my $cmd2	= "$jobName2=`qsub -o $path2qsub -e $path2qsub -W depend=afterok\:$jobName $QSUBintRename`";
+		my $cmd2	= "$jobName2=`qsub -o $path2qsub -e $path2qsub -W depend=afterany\:$jobName $QSUBintRename`";
+
 		open $QSUB, ">>", "$QSUB" or die "Can't open '$QSUB'";
 		print $QSUB "$cmd1\n";
 		print $QSUB "$cmd2\n";
+
 		close $QSUB;
 
 	}
@@ -473,7 +477,8 @@ if( $map =~ "TRUE" ){
 
 	# Add the next job line to the $mapQSUB
 	foreach( @myJobs2 ){ $_ = "\$".$_ ; }
-	my $myJobsVec	= join(":", @myJobs2);
+	my $myJobsVec   = join(":", @myJobs2);
+
 	my $finalcmd	= "FINAL=\`qsub -N $iterateJobName -o $path2qsub -e $path2qsub -W depend=afterok\:$myJobsVec $IterateSH`";
 	open $QSUB, ">>", "$QSUB" or die "Can't open '$QSUB'";
 	print $QSUB "$finalcmd\n";
@@ -524,7 +529,6 @@ if( $filter =~ "TRUE" ){
 	print "\n Store all of the following '$myJobName' jobs in $QSUB \n";
 	my @myJobs;
 
-
 	print "\n\n-------------------------------------\n\n Filtering samples: ";
 	foreach my $i (0 .. $#samples) {
 
@@ -536,21 +540,25 @@ if( $filter =~ "TRUE" ){
 
 		# -----------------------------------------
                 # Remove pcr duplications
+
 		#-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 		#-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+          IMPORTANT CODE HERE         -+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+		my $cmd         = "mv $path2Tophat/$samples[$i]/$samples[$i]\.bam $path2Tophat/$samples[$i]/$samples[$i]\_unsorted.bam";
+                `echo "$cmd" >> $QSUBintRename`;
 		if( $removepcr ){
 			# bam to sorted bam
-			my $cmd = "samtools sort $path2Tophat/$samples[$i]/$samples[$i]\_unfiltered.bam $path2Tophat/$samples[$i]/$samples[$i]\_sortedwpcr";
+			my $cmd		= "samtools sort $path2Tophat/$samples[$i]/$samples[$i]\_unsorted.bam $path2Tophat/$samples[$i]/$samples[$i]\_sortedwpcr";
 			`echo "$cmd" >> $QSUBint`;
-			$cmd = "samtools rmdup -s $path2Tophat/$samples[$i]/$samples[$i]\_sortedwpcr.bam $path2Tophat/$samples[$i]/$samples[$i].bam";
+			$cmd		= "samtools rmdup -s $path2Tophat/$samples[$i]/$samples[$i]\_sortedwpcr.bam $path2Tophat/$samples[$i]/$samples[$i].bam";
 			`echo "$cmd" >> $QSUBint`;
+			
 		} else {
 			# bam to sorted bam
 			my $cmd = "samtools sort $path2Tophat/$samples[$i]/$samples[$i]\_unfiltered.bam $path2Tophat/$samples[$i]/$samples[$i].bam";
 			`echo "$cmd" >> $QSUBint`;
 		}
 
-		my $cmd= "samtools index $path2Tophat/$samples[$i]/$samples[$i].bam $path2Tophat/$samples[$i]/$samples[$i].bai";
+		my $cmd= "`samtools index $path2Tophat/$samples[$i]/$samples[$i].bam $path2Tophat/$samples[$i]/$samples[$i].bai`";
 		`echo "$cmd" >> $QSUBint`;
 		#--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--
 

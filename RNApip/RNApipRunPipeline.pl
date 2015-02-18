@@ -165,6 +165,7 @@ print "\n path2fastq.gz:\t\t $path2fastqgz";
 print "\n Targets:\t\t $path2expFolder/DataStructure/Targets.txt";
 print "\n chrlens:\t\t $chrlens";
 print "\n refGenome:\t\t $refGenome";
+print "\n path2gtf:\t\t $path2gtfFile";
 print "\n";
 print "\n Paired end sequencing:\t $PE";
 print "\n Aligner algorithm:\t $aligner";
@@ -261,3 +262,6 @@ close $IterateSH;
 print "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n";
 print "\n Exiting INITIAL section with no known error \n";
 print "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n\n\n";
+
+exit 1;
+
