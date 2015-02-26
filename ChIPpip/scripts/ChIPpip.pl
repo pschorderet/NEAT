@@ -252,9 +252,9 @@ my $path2QC			= "$path2expFolder/QC";
 my $path2aligned		= "$path2expFolder/aligned";
 my $path2peakcalling            = "$path2expFolder/peakcalling";
 my $scrhead 			= "$path2ChIPseqScripts/QSUB_header.sh";
-my $path2iterate		= "$tmpscr/iterate/";
+my $path2iterate		= "$tmpscr/iterate";
 my $ChIPseqMainIterative	= "$path2iterate/ChIPseq.sh";
-my $IterateSH			= "$path2iterate/IterateSH.sh";
+my $IterateSH			= "$path2iterate/Iterate\_$expFolder.sh";
 
 
 #************************************************************************
@@ -271,7 +271,7 @@ if( $unzip =~ "TRUE" ){
 	print "\n\n*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*- \n";
 	print "\n Unzipping and renaming files using Targets.txt \n";
 
-	my $iterateJobName	= "Iterate_unzip";
+	my $iterateJobName	= "Iterate_unzip_$expFolder";
 	my $myJobName		= "unzip";
 	my $path2qsub		= "$tmpscr/$myJobName/qsub";
 
@@ -371,7 +371,7 @@ if( $qc =~ "TRUE" ) {
 	print "\n\n*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*- \n";
 	print "\n QC fastq files \n";
 
-	my $iterateJobName	= "Iterate_QC";
+	my $iterateJobName	= "Iterate_QC_$expFolder";
 	my $myJobName		= "QC";
 	my $path2qsub		= "$tmpscr/$myJobName/qsub";
 
@@ -440,7 +440,7 @@ if( $map =~ "TRUE" ){
 	print "\n\n*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-\n";
 	print "\n Mapping fastq files\n";
 
-	my $iterateJobName	= "Iterate_map";
+	my $iterateJobName	= "Iterate_map_$expFolder";
 	my $myJobName		= "map";
 	my $path2qsub		= "$tmpscr/$myJobName/qsub";
 
@@ -549,7 +549,7 @@ if( $filter =~ "TRUE" ){
  	print "\n\n*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-\n";
         print "\n Filtering reads\n";
 
-	my $iterateJobName	= "Iterate_filter";
+	my $iterateJobName	= "Iterate_filter_$expFolder";
 	my $myJobName		= "filter";
 	my $path2qsub		= "$tmpscr/$myJobName/qsub";
 
@@ -767,7 +767,7 @@ if( $peakcalling =~ "TRUE" ){
 	print "\n\n*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-\n";
 	print "\n Run PeakCaller (SPP)\n";
 
-	my $iterateJobName	= "Iterate_peakcalling";
+	my $iterateJobName	= "Iterate_peakcalling_$expFolder";
 	my $myJobName		= "peakcalling";
 	my $path2qsub		= "$tmpscr/$myJobName/qsub";
 
@@ -866,7 +866,7 @@ if( $cleanbigwig =~ "TRUE" ){
 	print "\n\n*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-\n";
 	print "\n Bigwig file cleaning\n";
 
-	my $iterateJobName	= "Iterate_cleanbigwig";
+	my $iterateJobName	= "Iterate_cleanbigwig_$expFolder";
 	my $myJobName		= "cleanbigwig";
 	my $myJobName2		= "wigToBigwig";
 	my $path2qsub		= "$tmpscr/$myJobName/qsub";
@@ -993,10 +993,25 @@ if( $cleanbigwig =~ "TRUE" ){
 
 if($unzip =~ "FALSE"  &&  $qc =~ "FALSE"  &&  $map =~ "FALSE"  &&  $filter =~ "FALSE"  &&  $peakcalling =~ "FALSE"  &&  $cleanbigwig =~ "FALSE"){
 
+
+	print "\n\n*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-\n";
+        print "\n Moving .bam and .bai files from the Tophat to the aligned folder \n";
+
+	my $path2aligned		= "$path2expFolder/aligned";
+	unless( -d "$path2aligned" )	{ `mkdir $path2aligned`;	}
+	my $path2bam			= "$path2aligned/bam";
+        unless( -d "$path2bam" )	{ `mkdir $path2bam`;		}	
+
+        foreach my $i (0 .. $#samplesInputs) {
+                `mv $path2aligned/$samplesInputs[$i]/$samplesInputs[$i].bam $path2bam/`;
+                `mv $path2aligned/$samplesInputs[$i]/$samplesInputs[$i].bai $path2bam/`;
+        }
+
+
 	print "\n\n*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-\n";
 	print "\n Exiting \n";
 
-	my $iterateJobName	= "Iterate_exit";
+	my $iterateJobName	= "Iterate_exit_$expFolder";
 	my $myJobName           = "exit";
 	my $path2qsub           = "$tmpscr/$myJobName/qsub";
 
@@ -1017,7 +1032,6 @@ if($unzip =~ "FALSE"  &&  $qc =~ "FALSE"  &&  $map =~ "FALSE"  &&  $filter =~ "F
 	`echo "$cmd" >> $QSUB`;
 	`chmod 777 $QSUB`;
 
-
         #*----------------------------------------------------------------------*
         # Submit jobs to run
 
@@ -1032,9 +1046,6 @@ if($unzip =~ "FALSE"  &&  $qc =~ "FALSE"  &&  $map =~ "FALSE"  &&  $filter =~ "F
 	exit 0;
 
 }
-
-
-
 
 exit 0;
 

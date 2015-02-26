@@ -258,15 +258,16 @@ my $nameOfChIPseqFile	= "ChIPpip";
 
 # ------ ChIPseqMainCopy.pl to iterate later
 `cp $path2ChIPseqScripts/$nameOfChIPseqFile\.pl $path2iterate/`;
+`mv $path2iterate/$nameOfChIPseqFile\.pl $path2iterate/$nameOfChIPseqFile\_$expFolder\.pl`;
 
 # ------ Copy chr_lens.dat file to $path2DataStructure
 `cp $chrlens $path2DataStructure`;
 
 # ------ ChIPseqMainIterative.sh to iterate later
-my $ChIPseqMainIterative = "$path2iterate/$nameOfChIPseqFile\.sh";
+my $ChIPseqMainIterative = "$path2iterate/$nameOfChIPseqFile\_$expFolder\.sh";
 `cp $scrhead $ChIPseqMainIterative`;
 open $ChIPseqMainIterative, ">>", "$ChIPseqMainIterative" or die "Can't open '$ChIPseqMainIterative'\n";
-print $ChIPseqMainIterative "`echo \"perl $path2iterate\/$nameOfChIPseqFile\.pl $path2expFolder\"`";
+print $ChIPseqMainIterative "`echo \"perl $path2iterate\/$nameOfChIPseqFile\_$expFolder\.pl $path2expFolder\"`";
 close $ChIPseqMainIterative;
 # Change permissions of file so that it can be executed later on
 `chmod 777 $ChIPseqMainIterative`;
@@ -276,8 +277,8 @@ close $ChIPseqMainIterative;
 # Prepar file containing the jobs to run
 
 # Add the first iteration of the script to $SubmitJobsToCluster
-my $firstcmd    = "FIRST=`qsub -N Iterate -o $path2qsub -e $path2qsub $ChIPseqMainIterative`";
-my $IterateSH	= "$path2iterate/IterateSH.sh";
+my $firstcmd    = "FIRST=`qsub -N Iterate\_$expFolder -o $path2qsub -e $path2qsub $ChIPseqMainIterative`";
+my $IterateSH	= "$path2iterate/Iterate\_$expFolder.sh";
 open $IterateSH, ">", "$IterateSH" or die "Can't open '$IterateSH'";
 print $IterateSH "#!/bin/bash\n";
 print $IterateSH "$firstcmd\n";
@@ -297,7 +298,4 @@ close $IterateSH;
 
 print "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n";
 print "\n Exiting INITIAL section with no known error \n";
-print "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n\n\n";
-
-exit 1;
-
+print "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n\n\n

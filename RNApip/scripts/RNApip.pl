@@ -218,9 +218,9 @@ my $path2QC			= "$path2expFolder/QC";
 my $path2HTSeq			= "$path2expFolder/HTSeq";
 my $path2Tophat			= "$path2expFolder/Tophat";
 my $scrhead 			= "$path2RNAseqScripts/QSUB_header.sh";
-my $path2iterate		= "$tmpscr/iterate/";
+my $path2iterate		= "$tmpscr/iterate";
 my $RNAseqMainIterative		= "$path2iterate/RNAseq.sh";
-my $IterateSH			= "$path2iterate/IterateSH.sh";
+my $IterateSH			= "$path2iterate/Iterate_$expFolder.sh";
 
 
 #************************************************************************
@@ -237,7 +237,7 @@ if( $unzip =~ "TRUE" ){
 	print "\n\n*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*- \n";
 	print "\n Unzipping and renaming files using Targets.txt \n";
 
-	my $iterateJobName	= "Iterate_unzip";
+	my $iterateJobName	= "Iterate_unzip_$expFolder";
 	my $myJobName		= "unzip";
 	my $path2qsub		= "$tmpscr/$myJobName/qsub";
 
@@ -318,7 +318,7 @@ if( $qc =~ "TRUE" ) {
 	print "\n\n*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*- \n";
 	print "\n QC fastq files \n";
 
-	my $iterateJobName	= "Iterate_QC";
+	my $iterateJobName	= "Iterate_QC_$expFolder";
 	my $myJobName		= "QC";
 	my $path2qsub		= "$tmpscr/$myJobName/qsub";
 
@@ -387,7 +387,7 @@ if( $map =~ "TRUE" ){
 	print "\n\n*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-\n";
 	print "\n Mapping fastq files using Tophat\n";
 
-	my $iterateJobName	= "Iterate_map";
+	my $iterateJobName	= "Iterate_map_$expFolder";
 	my $myJobName		= "map";
 	my $myJobName2		= "rename";
 	my $path2qsub		= "$tmpscr/$myJobName/qsub";
@@ -514,7 +514,7 @@ if( $filter =~ "TRUE" ){
  	print "\n\n*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-\n";
         print "\n Filtering reads\n";
 
-	my $iterateJobName	= "Iterate_filter";
+	my $iterateJobName	= "Iterate_filter_$expFolder";
 	my $myJobName		= "filter";
 	my $path2qsub		= "$tmpscr/$myJobName/qsub";
 
@@ -558,7 +558,7 @@ if( $filter =~ "TRUE" ){
 			`echo "$cmd" >> $QSUBint`;
 		}
 
-		my $cmd= "`samtools index $path2Tophat/$samples[$i]/$samples[$i].bam $path2Tophat/$samples[$i]/$samples[$i].bai`";
+		$cmd= "`samtools index $path2Tophat/$samples[$i]/$samples[$i].bam $path2Tophat/$samples[$i]/$samples[$i].bai`";
 		`echo "$cmd" >> $QSUBint`;
 		#--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--
 
@@ -588,7 +588,7 @@ if( $filter =~ "TRUE" ){
 	# Add the next job line to the $QSUB
 	foreach( @myJobs ){ $_ = "\$".$_ ; }
 	my $myJobsVec   = join(":", @myJobs);
-	my $finalcmd    = "FINAL=\`qsub -N $iterateJobName -o $path2qsub -e $path2qsub -W depend=afterok\:$myJobsVec $IterateSH`";
+	my $finalcmd    = "FINAL=\`qsub -N $iterateJobName -o $path2qsub -e $path2qsub -W depend=afterany\:$myJobsVec $IterateSH`";
 	open $QSUB, ">>", "$QSUB" or die "Can't open '$QSUB'";
 	print $QSUB "$finalcmd\n";
 	close $QSUB;
@@ -616,18 +616,21 @@ if($unzip =~ "FALSE"  &&  $qc =~ "FALSE"  &&  $map =~ "FALSE"  &&  $filter =~ "F
 	print "\n\n*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-\n";
         print "\n Moving .bam and .bai files from the Tophat to the aligned folder \n";
 
-	my $path2aligned	= "$path2expFolder/aligned";
-	`mkdir $path2aligned`;
+
+	my $path2aligned                = "$path2expFolder/aligned";
+        unless( -d "$path2aligned" )    { `mkdir $path2aligned`;        }
+        my $path2bam                    = "$path2aligned/bam";
+        unless( -d "$path2bam" )        { `mkdir $path2bam`;            }
+
 	foreach my $i (0 .. $#samples) {
-		`mkdir $path2aligned/$samples[$i]`;
-		`mv $path2Tophat/$samples[$i]/$samples[$i].bam $path2aligned/$samples[$i]/`;
-		`mv $path2Tophat/$samples[$i]/$samples[$i].bai $path2aligned/$samples[$i]/`;
+		`mv $path2Tophat/$samples[$i]/$samples[$i].bam $path2bam/`;
+		`mv $path2Tophat/$samples[$i]/$samples[$i].bai $path2bam/`;
 	}
 
 	print "\n\n*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-\n";
 	print "\n Exiting \n";
 
-	my $iterateJobName	= "Iterate_exit";
+	my $iterateJobName	= "Iterate_exit_$expFolder";
 	my $myJobName           = "exit";
 	my $path2qsub           = "$tmpscr/$myJobName/qsub";
 
