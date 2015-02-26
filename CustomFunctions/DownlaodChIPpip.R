@@ -36,7 +36,8 @@ cat(" \n========================================================================
 # Experiment-specific parameters                                  #
 #                                                                 #
 # LocalPath2NEAT <- "~/NEAT/"
-# Localpath2NewProject <- "~/Desktop/MY_NEW_CHIP_PROJECT/"
+# LocalPath2NewProject <- "~/Desktop/MY_NEW_CHIP_PROJECT/"
+# LocalPath2NewProject <- "~/Documents/Sciences/Kingston/DIPG/DIPG_2014-07-07_ChIPseq/"
 #*-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+*
 
 
@@ -134,93 +135,29 @@ cat(mycode)
 #
 cat(" \n\n\n======================================================================================", sep="")
 cat(" \n|| * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * ", sep="")
-cat(" \n||\t Downloading QC, bigwig, narrowPeaks and broadPeaks folders", sep="")
+cat(" \n||\t Downloading QC, bigwig, narrowPeaks, broadPeaks and bam folders", sep="")
 cat(" \n|| .-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.\n\n", sep="")
-
 
 # Download QC folder
 cat(" \n Downloading QC folder from remote server", sep="")
 mycode <- paste("`scp -r ", sshpath, ":", RemotePath2MainFolderName, "/", ProjectName, "/QC " , LocalPath2NewProject, "`", sep="")
 system(mycode)
 # Download bigwig folder
-cat(" \n Downloading QCReport.pdf from remote server", sep="")
+cat(" \n Downloading bigwig folder from remote server", sep="")
 mycode <- paste("`scp -r ", sshpath, ":", RemotePath2MainFolderName, "/", ProjectName, "/peakcalling/bigwig " , LocalPath2NewProject, "`", sep="")
 system(mycode)
 # Download broadPeak folder
-cat(" \n Downloading QCReport.pdf from remote server", sep="")
+cat(" \n Downloading broadPeak folder from remote server", sep="")
 mycode <- paste("`scp -r ", sshpath, ":", RemotePath2MainFolderName, "/", ProjectName, "/peakcalling/broadPeak " , LocalPath2NewProject, "`", sep="")
 system(mycode)
 # Download narrowPeak folder
-cat(" \n Downloading QCReport.pdf from remote server", sep="")
+cat(" \n Downloading narrowPeaks foler from remote server", sep="")
 mycode <- paste("`scp -r ", sshpath, ":", RemotePath2MainFolderName, "/", ProjectName, "/peakcalling/narrowPeak " , LocalPath2NewProject, "`", sep="")
 system(mycode)
-
-#--------------------------------------------------
-# Transfer filtered .bam files found in *RemotePath2MainFolderName*
-#
-cat(" \n\n\n======================================================================================", sep="")
-cat(" \n|| * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * ", sep="")
-cat(" \n||\t Downloading and opening Targets.txt files from remote server", sep="")
-cat(" \n|| .-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.\n\n", sep="")
-
-if(file.exists(LocalPath2Targets)==FALSE){ErrorOutput(paste("No Targets.txt file in\t", LocalPath2Targets, sep="")) }
-cat(" \n\n Targets file provided: \n\n", sep="")
-Targets <- read.delim(LocalPath2Targets, comment.char="#")
-print(Targets)
-cat(" \n Downloading .bam files from remote server", sep="")
-mycode <- paste("`scp -r ", sshpath, ":", RemotePath2MainFolderName, "/", ProjectName, "/aligned " , LocalPath2bam, "`", sep="")
+# Download bam folder
+cat(" \n Downloading bam folder from remote server", sep="")
+mycode <- paste("`scp -r ", sshpath, ":", RemotePath2MainFolderName, "/", ProjectName, "/aligned/bam/ ", LocalPath2NewProject, "`", sep="")
 system(mycode)
-
-# Load datasets provided in Targets file
-samples <- Targets$FileName
-allsamples <- c(levels(Targets$FileName), levels(Targets$InpName))
-# Remove '-' when no input is provided
-if(length(which(allsamples=="-")) != 0){
-  allsamples <- allsamples[-which(allsamples=="-")]    
-}
-
-
-#--------------------------------------------------
-# At local level
-#
-cat(" \n\n\n ======================================================================================", sep="")
-cat(" \n|| * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * ", sep="")
-cat(" \n||\t Downloading and reformating files and folders at local level", sep="")
-cat(" \n|| .-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.\n\n", sep="")
-# Move .bam files before deleting entire folder
-for(i in 1:length(allsamples)){
-  # Download sample i to .bam folder
-  # i=1
-  cat("\n Sample: \t",  allsamples[i], "\n", sep="")
-  cat("\n\t Downloading \t", allsamples[i], "\t folder from remote server to local", sep="")
-  # Move sample i to .bam folder
-  cat("\n\t Moving \t\t ", allsamples[i], ".bam\t to\t" , LocalPath2bam, sep="")
-  movecode <- paste("`mv ", LocalPath2bam, "aligned/", allsamples[i], "/", allsamples[i], ".bam ", LocalPath2bam, "`", sep="")
-  movecode
-  system(movecode)
-  movecode <- paste("`mv ", LocalPath2bam, "aligned/", allsamples[i], "/", allsamples[i], ".bai ", LocalPath2bam, "`", sep="")
-  movecode
-  system(movecode)
-  # Delete rest of folder
-  #cat("\n\t Deleting \t\t ", LocalPath2saf, allsamples[i], sep="")
-  #delcode <- paste("`rm -r ", LocalPath2saf, allsamples[i], "/`", sep="")
-  #system(delcode)
-  cat("\n\n .-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.\n", sep="")
-}
-# Delete rest of folder
-cat("\n\t Deleting \t\t ", LocalPath2bam, "aligned/", sep="")
-delcode <- paste("`rm -r ", LocalPath2bam, "aligned/", "`", sep="")
-system(delcode)
-
-
-
-cat(" \n\n\n ======================================================================================", sep="")
-cat(" \n|| * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * ", sep="")
-cat(" \n||\t Cleaning up local files and folders", sep="")
-cat(" \n|| .-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.\n\n", sep="")
-cat("\n\n\t ", length(allsamples), " files have been added to \t\t", LocalPath2bam, sep="")
-cat("\n\t ", length(allsamples), " folders have been deleted from \t", LocalPath2bam, sep="")
-cat("\n\n .-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.\n", sep="")
 
 
 #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
