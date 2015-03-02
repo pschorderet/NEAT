@@ -558,7 +558,7 @@ if( $filter =~ "TRUE" ){
 			`echo "$cmd" >> $QSUBint`;
 		}
 
-		$cmd= "`samtools index $path2Tophat/$samples[$i]/$samples[$i].bam $path2Tophat/$samples[$i]/$samples[$i].bai`";
+		$cmd= "samtools index $path2Tophat/$samples[$i]/$samples[$i].bam $path2Tophat/$samples[$i]/$samples[$i].bai";
 		`echo "$cmd" >> $QSUBint`;
 		#--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--
 
