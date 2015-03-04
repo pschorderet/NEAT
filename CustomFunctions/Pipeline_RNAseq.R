@@ -2,6 +2,7 @@
 #-----------------------------------------------------------------
 # TEST LINES (DISREGARD)
 # path2NEAT='/Users/patrick/Desktop/NEAT/'; path2MainFolder ='/Users/patrick/Desktop/EXAMPLE/'; topNgenes = 100; toHighlight = 10; 
+# path2NEAT='/Users/patrick/NEAT/'; path2MainFolder ='~/Documents/Sciences/Kingston/DIPG/DIPG_2014-07-07_RNAseq/'; topNgenes = 100; toHighlight = 10; 
 
 #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 #******************************************************************
@@ -171,6 +172,7 @@ if(DoesTheFileExist(path2file=bamGRangesRDataPath)!=TRUE){
     cat(" \n\n **********************************************************\n", sep="")
     cat(" \n Generating .bam.GRanges.RData files", sep="")
     for(k in 1:length(bamPath)){    
+      # k=1
       cat(" \n\n\n * * * * * * * * * * * * * * * * * * * * * * * * * * * * ", sep="")
       cat(" \n ", k, " / ", length(bamPath) ," :\t", bamPath[k], sep="")
       Bam2GRangesRData(path2bam=bamPath[k], chromosomes=chromosomes)
@@ -228,6 +230,11 @@ for(i in 1:length(GRangesSamples)){
   # Compute overlap
   #    Also, summarizeOverlaps deals with GRangesList, so no need to 'consolidate' all exons to genes!
   overlap <- summarizeOverlaps(exonRanges, get(GRangesSamples[i]), mode="Union", ignore.strand=TRUE, inter.feature=FALSE, singleEnd=SE)  
+  #table(as.vector(seqnames(get(GRangesSamples[i]))))  
+  
+  head(head(assays(overlap)$counts))
+  assays(overlap)$counts[which(rownames(overlap)=="Ccnd1")]
+  
   overlapDF <- as.data.frame(cbind(names(exonRanges), assays(overlap)$counts))
   colnames(overlapDF) <- c("GeneNames", "Counts")
   

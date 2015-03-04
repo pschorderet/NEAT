@@ -19,7 +19,8 @@ Tags2GRanges <- function(tags){
     pos <- tags[[n]]
     GRanges(seqnames=n, range=IRanges(start=pos,end=pos), strand="*")
   })
-  tags.gr[1]
+  
   # Concatenate
   return(do.call(c,tags.gr))
+  # table(as.vector(seqnames(do.call(c,tags.gr))))
 }

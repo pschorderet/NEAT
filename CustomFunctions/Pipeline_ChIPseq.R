@@ -252,7 +252,7 @@ for(i in levels(Targets$Factor)){
   cat(" \n *", sep="")
   cat(" \n *\tFactor: \t", i, sep="")
   cat(" \n *", sep="")
-  cat(" \n * * * * * * * * * * * * * * * * * * * * * * * * * * * * * ", sep="")
+  cat(" \n * * * * * * * * * * * * * * * * * * * * * * * * * * * * *", sep="")
   # i = levels(Targets$Factor)[1]
   sameFactorSamples <- Targets$FileName[which(Targets$Factor==i)]
   
@@ -260,7 +260,7 @@ for(i in levels(Targets$Factor)){
   activeCTNames <- activeCTNamesRep <- NULL
   for(j in sameFactorSamples){
     # j =  sameFactorSamples[1]
-    cat(" \n\n Sample: \t", j, "\n\n", sep="")    
+    cat(" \n\n Sample: \t", j, "\n", sep="")    
     
     #--------------------------------------------------------
     #----------------   Replicates   ------------------------
@@ -329,7 +329,7 @@ for(i in levels(Targets$Factor)){
         # Find corresponding input
         currentGRInp <- get(paste(Targets$InpName[which(Targets$FileName==k)], ".bam.GRanges.RData", sep=""))
         countTableInp <- CountOverlaps2matrix(GRanges1=GRfeat, GRanges2=currentGRInp, binNumber=binNumber, geneNamesSingle=geneNames) 
-        cat(" \n Normlizing to input sample", sep="")
+        cat(" \n\n Normalizing to input sample", sep="")
         countTable <- countTable-countTableInp
       }
       
@@ -337,6 +337,7 @@ for(i in levels(Targets$Factor)){
       assign(nameCountTable, countTable)
       # Save count table to folder CountTables
       cat(" \n Store countTable in : \t\t", paste(path2CountTables, sub(".bed", "", nameCountTable), "_bins", binNumber, "_", Sys.Date(), ".bed", sep=""), sep="")    
+      cat(" - - - - - - - - - - - - - - - - - - - - - - - - - - - - - \n", sep="") 
       write.table(get(nameCountTable), paste(path2CountTables, sub(".bed", "", nameCountTable), "_bins", binNumber, "_", Sys.Date(), ".bed", sep=""), sep = "\t", row.names = TRUE, col.names=TRUE, quote=FALSE, na="")
       # Store name of all active count tables in activeCTNames
       activeCTNames <- c(activeCTNames, nameCountTable)

@@ -25,6 +25,7 @@ Sqlite2Bed <- function(TaxonDatabaseKG, TaxonDatabaseDict){
   library(TaxonDatabaseDict, character.only = TRUE)  # org.Mm.eg.db
   
   exonRanges <- exonsBy(get(TaxonDatabaseKG), by = "gene")
+  
   symb <- select(get(TaxonDatabaseDict), names(exonRanges), "SYMBOL")
   #   head(symb)
   #   sum(is.na(symb[,2]))
