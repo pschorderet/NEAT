@@ -1007,8 +1007,8 @@ if($unzip =~ "FALSE"  &&  $qc =~ "FALSE"  &&  $map =~ "FALSE"  &&  $filter =~ "F
         unless( -d "$path2bam" )	{ `mkdir $path2bam`;		}	
 
         foreach my $i (0 .. $#samplesInputs) {
-                `mv $path2aligned/$samplesInputs[$i]/$samplesInputs[$i].bam $path2bam/`;
-                `mv $path2aligned/$samplesInputs[$i]/$samplesInputs[$i].bai $path2bam/`;
+                `cp $path2aligned/$samplesInputs[$i]/$samplesInputs[$i].bam $path2bam/`;
+                `cp $path2aligned/$samplesInputs[$i]/$samplesInputs[$i].bai $path2bam/`;
         }
 
 

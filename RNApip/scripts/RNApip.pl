@@ -623,8 +623,8 @@ if($unzip =~ "FALSE"  &&  $qc =~ "FALSE"  &&  $map =~ "FALSE"  &&  $filter =~ "F
         unless( -d "$path2bam" )        { `mkdir $path2bam`;            }
 
 	foreach my $i (0 .. $#samples) {
-		`mv $path2Tophat/$samples[$i]/$samples[$i].bam $path2bam/`;
-		`mv $path2Tophat/$samples[$i]/$samples[$i].bai $path2bam/`;
+		`cp $path2Tophat/$samples[$i]/$samples[$i].bam $path2bam/`;
+		`cp $path2Tophat/$samples[$i]/$samples[$i].bai $path2bam/`;
 	}
 
 	print "\n\n*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-\n";
