@@ -64,7 +64,6 @@ while(<INPUT>) {
                 $_ =~ m/"(.+?)"/;
                 $aligner = "$1";
         }
-
 	if (/# Paired_end_seq_run/) {
                 $_ =~ m/"(.+?)"/;
                 $PE = "$1";
@@ -76,18 +75,22 @@ while(<INPUT>) {
                 foreach my $line (@var) {
                         $line =~ s/\s+//g;
                         push(@lines2remove, $line);
-                }
-        }
-        if (/# Steps_to_execute_pipe/) {
+				}
+	}
+	if (/# PeakCaller_R_script/) {
                 $_ =~ m/"(.+?)"/;
-                @steps2execute = ();
-                if (grep /\bunzip\b/i, $_ )             { $unzip                = "TRUE"; push @steps2execute, "Unzip";         }
-                if (grep /\bqc\b/i, $_ )                { $qc                   = "TRUE"; push @steps2execute, "QC";            }
-                if (grep /\bmap\b/i, $_ )               { $map                  = "TRUE"; push @steps2execute, "Map";           }
-                if (grep /\bfilter\b/i, $_ )            { $filter               = "TRUE"; push @steps2execute, "Filter";        }
-                if (grep /\bpeakcalling\b/i, $_ )	{ $peakcalling          = "TRUE"; push @steps2execute, "Peakcalling";   }
-                if (grep /\bcleanbigwig\b/i, $_ )	{ $cleanbigwig          = "TRUE"; push @steps2execute, "Cleanbigwig";   }
-        }
+                $peakcaller = "$1";
+	}
+	if (/# Steps_to_execute_pipe/) {
+				$_ =~ m/"(.+?)"/;
+				@steps2execute = ();
+				if (grep /\bunzip\b/i, $_ )             { $unzip                = "TRUE"; push @steps2execute, "Unzip";         }
+				if (grep /\bqc\b/i, $_ )                { $qc                   = "TRUE"; push @steps2execute, "QC";            }
+				if (grep /\bmap\b/i, $_ )               { $map                  = "TRUE"; push @steps2execute, "Map";           }
+				if (grep /\bfilter\b/i, $_ )            { $filter               = "TRUE"; push @steps2execute, "Filter";        }
+				if (grep /\bpeakcalling\b/i, $_ )	{ $peakcalling          = "TRUE"; push @steps2execute, "Peakcalling";   }
+				if (grep /\bcleanbigwig\b/i, $_ )	{ $cleanbigwig          = "TRUE"; push @steps2execute, "Cleanbigwig";   }
+	}
 
 } # end of Targets.txt
 
@@ -220,6 +223,7 @@ print "\n Paired end sequencing:\t $PE";
 print "\n Aligner algorithm:\t $aligner";
 print "\n Remove pcr dupl:\t $removepcr";
 print "\n Make unique reads:\t $makeunique";
+print "\n Peak caller algo:\t $peakcaller";
 print "\n";
 #print "\n Current working dir:\t $path2expFolder";
 #print "\n";
@@ -784,8 +788,8 @@ if( $peakcalling =~ "TRUE" ){
 	my @myJobsInputs;
 	my @myJobsSamples;
 
-	# Copy script and rreate folder
-	`cp $path2ChIPseqScripts/PeakCalling.R $tmpscr`;
+	# Copy script and create folder
+	`cp $path2ChIPseqScripts/$peakcaller $tmpscr`;
 
 	foreach my $i (0 .. $#samples) {
 
@@ -804,7 +808,7 @@ if( $peakcalling =~ "TRUE" ){
                 # Parameters
 		my $path2currentSample	= "$path2currentSampleDir/$samples[$i]\.bam";
 		my $path2currentInput	= "$path2currentInputDir/$allinputs[$i]\.bam";
-		my $code		= "$tmpscr/PeakCalling.R";
+		my $code		= "$tmpscr/$peakcaller";
 
 		#-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+		
 		#-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+          IMPORTANT CODE HERE         -+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -966,7 +970,7 @@ if( $cleanbigwig =~ "TRUE" ){
 	# Add the next job line to the $filterQSUB
 	foreach( @myJobs ){ $_ = "\$".$_ ; }
 	my $myJobsVec   = join(":", @myJobs);
-	my $finalcmd    = "FINAL=\`qsub -N $iterateJobName -o $path2qsub -e $path2qsub -W depend=afterok\:$myJobsVec $IterateSH`";
+	my $finalcmd    = "FINAL=\`qsub -N $iterateJobName -o $path2qsub -e $path2qsub -W depend=afterany\:$myJobsVec $IterateSH`";
 	open $QSUB, ">>", "$QSUB" or die "Can't open '$QSUB'";
 	print $QSUB "$finalcmd\n";
 	close $QSUB;

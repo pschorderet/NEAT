@@ -78,6 +78,10 @@ while(<INPUT>) {
                         push(@lines2remove, $line);
                 }
         }
+	if (/# PeakCaller_R_script/) {
+                $_ =~ m/"(.+?)"/;
+                $peakcaller = "$1";
+        }
 	if (/# Steps_to_execute_pipe/) {
                 $_ =~ m/"(.+?)"/;
                 @steps2execute = ();
@@ -206,6 +210,7 @@ print "\n Paired end sequencing:\t $PE";
 print "\n Aligner algorithm:\t $aligner";
 print "\n Remove pcr dupl:\t $removepcr";
 print "\n Make unique reads:\t $makeunique";
+print "\n Peak caller algo:\t $peakcaller";
 print "\n";
 #print "\n Current working dir:\t $path2expFolder";
 #print "\n";
@@ -277,8 +282,8 @@ close $ChIPseqMainIterative;
 # Prepar file containing the jobs to run
 
 # Add the first iteration of the script to $SubmitJobsToCluster
-my $firstcmd    = "FIRST=`qsub -N Iterate\_$expFolder -o $path2qsub -e $path2qsub $ChIPseqMainIterative`";
-my $IterateSH	= "$path2iterate/Iterate\_$expFolder.sh";
+my $firstcmd    = "FIRST=`qsub -N Iterate_$expFolder -o $path2qsub -e $path2qsub $ChIPseqMainIterative`";
+my $IterateSH	= "$path2iterate/Iterate_$expFolder.sh";
 open $IterateSH, ">", "$IterateSH" or die "Can't open '$IterateSH'";
 print $IterateSH "#!/bin/bash\n";
 print $IterateSH "$firstcmd\n";
@@ -298,4 +303,7 @@ close $IterateSH;
 
 print "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n";
 print "\n Exiting INITIAL section with no known error \n";
-print "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n\n\n
+print "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n\n\n";
+
+exit 1;
+
