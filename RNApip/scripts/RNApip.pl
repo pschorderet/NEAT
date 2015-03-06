@@ -220,7 +220,7 @@ my $path2Tophat			= "$path2expFolder/Tophat";
 my $scrhead 			= "$path2RNAseqScripts/QSUB_header.sh";
 my $path2iterate		= "$tmpscr/iterate";
 my $RNAseqMainIterative		= "$path2iterate/RNAseq.sh";
-my $IterateSH			= "$path2iterate/Iterate_$expFolder.sh";
+my $IterateSH			= "$path2iterate/Iterate\_$expFolder.sh";
 
 
 #************************************************************************

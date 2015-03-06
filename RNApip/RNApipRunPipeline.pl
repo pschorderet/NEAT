@@ -219,17 +219,18 @@ unless (-d "$path2expFolder/Tophat")		{ `mkdir $path2expFolder/Tophat`;	}
 `cp $scrhead $tmpscr`;
 my $nameOfRNAseqFile	= "RNApip";
 
-# ------ ChIPseqMainCopy.pl to iterate later
+# ------ RNAseqMainCopy.pl to iterate later
 `cp $path2RNAseqScripts/$nameOfRNAseqFile\.pl $path2iterate/`;
+`mv $path2iterate/$nameOfRNAseqFile\.pl $path2iterate/$nameOfRNAseqFile\_$expFolder\.pl`;
 
 # ------ Copy chr_lens.dat file to $path2DataStructure
 `cp $chrlens $path2DataStructure`;
 
-# ------ ChIPseqMainIterative.sh to iterate later
-my $RNAseqMainIterative = "$path2iterate/$nameOfRNAseqFile\.sh";
+# ------ RNAseqMainIterative.sh to iterate later
+my $RNAseqMainIterative = "$path2iterate/$nameOfRNAseqFile\_$expFolder\.sh";
 `cp $scrhead $RNAseqMainIterative`;
 open $RNAseqMainIterative, ">>", "$RNAseqMainIterative" or die "Can't open '$RNAseqMainIterative'\n";
-print $RNAseqMainIterative "`echo \"perl $path2iterate\/$nameOfRNAseqFile\.pl $path2expFolder\"`";
+print $RNAseqMainIterative "`echo \"perl $path2iterate\/$nameOfRNAseqFile\_$expFolder\.pl $path2expFolder\"`";
 close $RNAseqMainIterative;
 # Change permissions of file so that it can be executed later on
 `chmod 777 $RNAseqMainIterative`;
@@ -239,9 +240,8 @@ close $RNAseqMainIterative;
 # Prepar file containing the jobs to run
 
 # Add the first iteration of the script to $SubmitJobsToCluster
-my $firstcmd    = "FIRST=`qsub -N Iterate -o $path2qsub -e $path2qsub $RNAseqMainIterative`";
-
-my $IterateSH	= "$path2iterate/IterateSH.sh";
+my $firstcmd    = "FIRST=`qsub -N Iterate\_$expFolder -o $path2qsub -e $path2qsub $RNAseqMainIterative`";
+my $IterateSH	= "$path2iterate/Iterate\_$expFolder\.sh";
 open $IterateSH, ">", "$IterateSH" or die "Can't open '$IterateSH'";
 print $IterateSH "#!/bin/bash\n";
 print $IterateSH "$firstcmd\n";
