@@ -35,7 +35,7 @@ version <- "1.0.1 Jan 2015"
 #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 #--------------------------------------------------
 # Load R and different packages
-library(Rsamtools); library(GenomicRanges); library(GenomicAlignments); library(caTools);  library(VennDiagram);
+library(Rsamtools); library(GenomicRanges); library(GenomicAlignments); library(caTools);  library(VennDiagram);library(rtracklayer)
 
 # Define paths to subfolders stored in RScripts
 path2bam <- paste(path2MainFolder, "bam/", sep="")
@@ -222,14 +222,13 @@ OutputNumberOfReadsFromGRanges(GRangesSamples)
 # Create GRanges objects contaninig bins around all feature
 #     Use the Features2Mart script to create this object !!
 
-# Load Mart object into GRanges
-path2MartObject <- paste(path2Mart, nameOfBed, sep="")
 # Load Mart object & store gene names
 cat(" \n\n\n ======================================================================================", sep="")
 cat(" \n || * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * ", sep="")
 cat(" \n ||\t Create / load Mart file as GRanges object", sep="")
 cat(" \n || .-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.\n", sep="")
-
+# Load Mart object into GRanges
+path2MartObject <- paste(path2Mart, nameOfBed, sep="")
 GRfeat <- LoadMartGRanges(path2MartObject=path2MartObject, binNumber=binNumber, strand=strand)
 geneNames <- GRfeat$GeneNames[seq(from=1, to=length(GRfeat), by=binNumber)]
 
@@ -251,7 +250,9 @@ pdf(paste(path2Plots, sub(".bed", "", nameOfBed), "_", strand,"_", runmeank, ".p
 
 # Compute and store countTables, pdf, etc
 cols <- c("Black", "Blue", "Red", "Green", "Yellow", "Purple", "Cyan", "Grey")
+
 for(i in levels(Targets$Factor)){
+  # i=levels(Targets$Factor)[1]
   cat(" \n\n **********************************************************", sep="")  
   cat(" \n *", sep="")
   cat(" \n *\tFactor: \t", i, sep="")
@@ -263,8 +264,10 @@ for(i in levels(Targets$Factor)){
   # For each sample with the same Factor, compute overlap and plot
   activeCTNames <- activeCTNamesRep <- NULL
   for(j in sameFactorSamples){
+    # Find which regions of HA are enriched
     # j =  sameFactorSamples[1]
-    cat(" \n\n Sample: \t", j, "\n", sep="")    
+    
+    cat(" \n\n Sample: \t", as.character(j), "\n", sep="")    
     
     #--------------------------------------------------------
     #----------------   Replicates   ------------------------
@@ -325,17 +328,39 @@ for(i in levels(Targets$Factor)){
       nameCountTable <- paste("CountTable_", k, "_", nameOfBed, sep="")
       currentGR <- get(paste(k, ".bam.GRanges.RData", sep=""))
       countTable <- CountOverlaps2matrix(GRanges1=GRfeat, GRanges2=currentGR, binNumber=binNumber, geneNamesSingle=geneNames)
+      head(countTable)
+      unique(as.vector(seqnames(currentGR)))
+      enrichments <- slice(currentGR)
       
-      # Normalize to input here
-      if(normInp=="TRUE"){
-        cat(" \n\n Inp sample: \t", as.character(Targets$InpName[which(Targets$FileName==k)]), "\n", sep="")
-        nameCountTable <- paste("CountTable_Norm2Inp_", k, "_", nameOfBed, sep="")
-        # Find corresponding input
-        currentGRInp <- get(paste(Targets$InpName[which(Targets$FileName==k)], ".bam.GRanges.RData", sep=""))
-        countTableInp <- CountOverlaps2matrix(GRanges1=GRfeat, GRanges2=currentGRInp, binNumber=binNumber, geneNamesSingle=geneNames) 
-        cat(" \n\n Normalizing to input sample", sep="")
-        countTable <- countTable-countTableInp
-      }
+      
+      peaksHA <- import.bed(con="~/Documents/Sciences/Kingston/DIPG/DIPG_2014-07-07_ChIPseq/narrowPeak/PSa29-7_K27M1_Dox4d_HA_peaks.bed", asRangedData=F)
+      cov <- coverage(peaksHA)      
+      
+      length(which(peaksHA$score>0))
+      length(which(peaksHA$score>50))
+      length(which(peaksHA$score>100))
+      length(which(peaksHA$score>200))
+      
+      peaksHATop <- peaksHA[which(peaksHA$score>100)]
+      countTable <- CountOverlaps2matrix(GRanges1=GRfeat, GRanges2=peaksHATop, binNumber=binNumber, geneNamesSingle=geneNames)
+      
+      mean(rowSums(countTable))
+      TSSwHA <- countTable[which(rowSums(countTable)!=0),]
+      head(TSSwHA)
+      nrow(TSSwHA)
+      nrow(countTable)
+      nrow(TSSwHA)/nrow(countTable)
+      
+      # Assign countTable to the nameCountTable
+      write.table(TSSwHA, paste(path2CountTables, "TSSwHAtop8pcPeaks_", Sys.Date(), ".bed", sep=""), sep = "\t", row.names = TRUE, col.names=TRUE, quote=FALSE, na="")
+      
+      # Create a Mart Object of these genes
+      path2MartObject <- paste(path2Mart, nameOfBed, sep="")
+      test <- LoadMartGRanges(path2MartObject=path2MartObject, binNumber=1, strand="-")
+      geneNames <- GRfeat$GeneNames[seq(from=1, to=length(GRfeat), by=binNumber)]
+      
+      
+      
       
       # Assign countTable to the nameCountTable
       assign(nameCountTable, countTable)
