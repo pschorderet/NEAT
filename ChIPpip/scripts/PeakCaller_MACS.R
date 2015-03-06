@@ -80,7 +80,7 @@ cat("\n Peak calling for sample: \t", mySample, "\t over \t", myInput, "\n", sep
 
 #*----------------------------------------------------------------*
 # select informative tags based on the binding characteristics
-cmd <- paste("`macs14 callpeak -t ", path2sample," -c ", path2input," -f BAM -g ", genomeMACS, " -n ", path2currSampleFolder, mySample, " -p ", fdr, "`", sep="")
+cmd <- paste("`macs14 callpeak -t ", path2sample," -c ", path2input," -f BAM -g ", genomeMACS, " -n ", path2peakcalling, "/narrowPeak/", mySample," -p ", fdr, "`", sep="")
 cat("\n cmd line: \t ", cmd, "\n\n", sep="")
 system(cmd)
 

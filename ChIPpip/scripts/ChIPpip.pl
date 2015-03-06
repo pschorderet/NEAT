@@ -791,6 +791,19 @@ if( $peakcalling =~ "TRUE" ){
 	# Copy script and create folder
 	`cp $path2ChIPseqScripts/$peakcaller $tmpscr`;
 
+
+	# Create bigwig folder
+        print "\n Create folders\n";
+        print "\n\t bigwig folder: \t $path2expFolder/bigwig/";
+        unless( -d "$path2peakcalling/bigwig" )         { `mkdir $path2peakcalling/bigwig`; }
+
+        # Create narrowPeak folder
+        print "\n\t narrowPeak folder: \t $path2peakcalling/narrowPeak/";
+        unless( -d "$path2peakcalling/narrowPeak" )     { `mkdir $path2peakcalling/narrowPeak`; }
+
+        # Create broadPeak folder
+        print "\n\t broadPeak folder: \t $path2peakcalling/broadPeak/ \n";
+        unless( -d "$path2peakcalling/broadPeak" )	{ `mkdir $path2peakcalling/broadPeak`; }
 	foreach my $i (0 .. $#samples) {
 
 		my $path2currentSampleDir	= "$path2aligned/$samples[$i]";
@@ -898,19 +911,6 @@ if( $cleanbigwig =~ "TRUE" ){
 	
 	print "\n These chromosomes will be deleted: @sc \n";
 	
-	# Create bigwig folder
-	print "\n Create folders\n";
-	print "\n\t bigwig folder: \t $path2expFolder/bigwig/";    
-	unless( -d "$path2peakcalling/bigwig" )		{ `mkdir $path2peakcalling/bigwig`; }
-
-	# Create narrowPeak folder
-	print "\n\t narrowPeak folder: \t $path2peakcalling/narrowPeak/";    
-	unless( -d "$path2peakcalling/narrowPeak" )	{ `mkdir $path2peakcalling/narrowPeak`; }
-
-	# Create broadPeak folder
-	print "\n\t broadPeak folder: \t $path2peakcalling/broadPeak/ \n";    
-	unless( -d "$path2peakcalling/broadPeak" )	{ `mkdir $path2peakcalling/broadPeak`; }
-    
 	foreach my $i (0 .. $#samples) {
 
 		# Prepare a personal qsub script
