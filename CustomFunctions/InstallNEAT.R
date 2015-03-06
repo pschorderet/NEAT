@@ -15,11 +15,18 @@ InstallNEAT <- function(LocalPath2NEAT, sshPath){
 #
 # Modify the Targets.xt file from the ChIP 
 #
+
+cat("\n************************************************************", sep='')
+cat("\n------------------------------------------------------------", sep='')
+cat("\n\n Installing NEAT \n\n", sep='')
+cat("\n\n------------------------------------------------------------", sep='')
+cat("\n Modifying the Targets.txt file for ChIPpip \n\n", sep='')
+
   path2Targets <- paste(LocalPath2NEAT, "/ChIPpip/scripts/NewChIPpipProject/DataStructure/Targets.txt", sep="")
   path2TargetsTmp <- paste(LocalPath2NEAT, "/ChIPpip/scripts/NewChIPpipProject/DataStructure/Targets_tmp.txt", sep="")
   
   #--------------------------------------------------
-  RemotePath2NEAT <- strsplit (sshPath, ":")[[1]][2]
+  RemotePath2NEAT <- paste(strsplit (sshPath, ":")[[1]][2], "NEAT/", sep="")
 
   #--------------------------------------------------
   # Parse and modify the Targets.txt file
@@ -58,6 +65,7 @@ InstallNEAT <- function(LocalPath2NEAT, sshPath){
   #
   # Modify the Targets.xt file from the ChIP 
   #
+  cat("\n Modifying the Targets.txt file for ChIPpip \n\n", sep='')
   path2Targets <- paste(LocalPath2NEAT, "/RNApip/scripts/NewRNApipProject/DataStructure/Targets.txt", sep="")
   path2TargetsTmp <- paste(LocalPath2NEAT, "/RNApip/scripts/NewRNApipProject/DataStructure/Targets_tmp.txt", sep="")
   

@@ -34,7 +34,7 @@
 # Remote_path_to_proj	=	"<REMOTE_PATH_TO_NEAT>RNApip"
 # Remote_path_to_NEAT	=	"<REMOTE_PATH_TO_NEAT>"
 #
-# Remote_path_to_orifastq.gz	=	"<REMOTE_PATH_TO_NEAT>RNApip/scripts/testdata"
+# Remote_path_to_orifastq.gz	=	"<REMOTE_PATH_TO_NEAT>/RNApip/scripts/testdata"
 # Remote_path_to_chrLens.dat	=	"/data/schorderet/reference_files/mm9/chr_lens.dat"
 # Remote_path_to_RefGen.fasta	=	"/data/ergun/ref/mm9/bowtie/"
 # Remote_path_to_ann_gtf_file	=	"/data/ergun/ref/mm9/mm9_gtf/Mus_musculus.NCBIM37.67.allchr.gtf";
