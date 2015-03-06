@@ -31,10 +31,10 @@
 #------------------------------------------------
 #---------------- REMOTE INFO -------------------
 #
-# Remote_path_to_proj	=	"/home/schorderet/NEAT/ChIPpip"
-# Remote_path_to_NEAT	=	"/home/schorderet/NEAT"
+# Remote_path_to_proj	=	"<REMOTE_PATH_TO_NEAT>ChIPpip"
+# Remote_path_to_NEAT	=	"<REMOTE_PATH_TO_NEAT>"
 #
-# Remote_path_to_orifastq.gz	=	"/home/schorderet/NEAT/ChIPpip/scripts/testdata"
+# Remote_path_to_orifastq.gz	=	"<REMOTE_PATH_TO_NEAT>ChIPpip/scripts/testdata"
 # Remote_path_to_chrLens.dat	=	"/data/schorderet/reference_files/mm9/chr_lens.dat"
 # Remote_path_to_RefGen.fasta	=	"/data/ref/mm9/bwa/mm9.fa"
 #
