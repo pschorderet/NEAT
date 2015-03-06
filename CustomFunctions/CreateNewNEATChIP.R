@@ -45,6 +45,8 @@ for(i in 2:length(res)){
   if(length(grep("<LOCAL_PATH_TO_PROJECT>", newLine))==1) { newLine <- gsub("<LOCAL_PATH_TO_PROJECT>", LocalBasePath2Project, newLine) }
   if(length(grep("<LOCAL_PATH_TO_NEAT>", newLine))==1) { newLine <- gsub("<LOCAL_PATH_TO_NEAT>", LocalPath2NEAT, newLine) }
   
+  if(length(grep("<REMOTE_PATH_TO_NEAT>", newLine))==1) { newLine <- gsub("<LOCAL_PATH_TO_NEAT>", LocalPath2NEAT, newLine) }
+  
   # Store some variables
   if(length(grep("My_personal_ssh", newLine))==1) { 
     currentline <- gsub("# ", "", newLine); currentline <- gsub("\t", "", currentline); currentline <- gsub("\"", "", currentline);
@@ -63,3 +65,6 @@ system(mycode)
 cat("\n\n Please fill in the Targets.txt file before going to the next step. \n\n", sep="")
 
 }
+
+
+

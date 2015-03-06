@@ -71,6 +71,7 @@ for(i in 1:length(res)){
     currentline <- gsub("# ", "", newLine); currentline <- gsub("\t", "", currentline); currentline <- gsub("\"", "", currentline);
     RemotePath2MainFolderName <- unlist(strsplit(currentline, split = "\\="))[2]
   }   
+  
 }
 
 #------------------------------------------------------------

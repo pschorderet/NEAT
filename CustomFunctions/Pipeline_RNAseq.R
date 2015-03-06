@@ -3,6 +3,7 @@
 # TEST LINES (DISREGARD)
 # path2NEAT='/Users/patrick/Desktop/NEAT/'; path2MainFolder ='/Users/patrick/Desktop/EXAMPLE/'; topNgenes = 100; toHighlight = 10; 
 # path2NEAT='/Users/patrick/NEAT/'; path2MainFolder ='~/Documents/Sciences/Kingston/DIPG/DIPG_2014-07-07_RNAseq/'; topNgenes = 100; toHighlight = 10; 
+# path2NEAT='/Users/patrick/NEAT/'; path2MainFolder ='~/Documents/Sciences/Kingston/DIPG/DIPG_consolidated_RNAseq/'; topNgenes = 500; toHighlight = 10; 
 
 #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 #******************************************************************
@@ -288,7 +289,7 @@ if(length(CTallsamples)>1){
 # Save countTable containaing all samples
 cat(" \n\n *\t\tStore countTable in : \t\t", paste(path2CountTables, "CountTable_OverExons_AllSamples.bed", sep=""), sep="")    
 cat(" \n\n - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - \n", sep="")
-write.table(CTall, paste(path2CountTables, prenameForCT, "_AllSamples.bed", sep=""), sep = "\t", row.names = FALSE, col.names=TRUE, quote=FALSE, na="")    
+write.table(CTall, paste(path2CountTables, prenameForCT, "AllSamples.bed", sep=""), sep = "\t", row.names = FALSE, col.names=TRUE, quote=FALSE, na="")    
 
 # Format into matrix form
 CTall <- as.matrix(CTall[2:(length(CTallsamples)+1)])
