@@ -15,61 +15,73 @@
 
 if( $ARGV[0] ) { $path2expFolder = $ARGV[0]; }
 else{ die "\n\n----------------------------------------\n\n Provide the path where to your project: </PATH/TO/PROJECT> \n\n--------------------------------------------------------------------------------\n\n"; }
-
+        
 #*----------------------------------------------------------------------*
 # Read Targets.txt file
 
 my $Targets = "$path2expFolder/DataStructure/Targets.txt";
 open(INPUT, $Targets) || die "Error opening $Targets : $!\n\n\n";
 
-my ($expFolder, $genome, $userFolder, $path2ChIPseqScripts, $path2ChIPseq, $path2fastqgz)	= ("NA", "NA", "NA", "NA", "NA", "NA");
-my ($unzip, $qc, $map, $filter, $peakcalling, $cleanbigwig, $cleanfolders)                      = ("FALSE", "FALSE", "FALSE", "FALSE", "FALSE", "FALSE", "FALSE");
-my (@sc, @lines2remove)                                                                         = ();
+my ($expFolder, $genome, $genomeRX, $userFolder, $path2ChIPseqScripts, $path2ChIPseq, $path2fastqgz)	= ("NA", "NA", "NA", "NA", "NA", "NA");
+my ($unzip, $qc, $chiprx, $map, $filter, $peakcalling, $cleanbigwig, $cleanfolders)          	        = ("FALSE", "FALSE", "FALSE", "FALSE", "FALSE", "FALSE", "FALSE");
+my (@sc, @lines2remove) 										= ();
 # Find paths to different folders in the Targets.txt file
 
 while(<INPUT>) {
-        if (/# My_personal_email/) {
+        if (/# My_personal_email\b/) {
                 $_ =~ m/"(.+?)"/;
                 $email = "$1";
         }
-	if (/# My_project_title/) {
+	elsif (/# My_project_title\b/) {
                 $_ =~ m/"(.+?)"/;
                 $expFolder = "$1";
         }
-	if (/# Reference_genome/) {
+	elsif (/# Reference_genome\b/) {
                 $_ =~ m/"(.+?)"/;
                 $genome = "$1";
         }
-	if (/# Remote_path_to_proj/) {
+	elsif (/# Reference_genome_rx\b/) {
+                $_ =~ m/"(.+?)"/;
+                $genomeRX = "$1";
+        }
+	elsif (/# Remote_path_to_proj\b/) {
                 $_ =~ m/"(.+?)"/;
                 $userFolder = "$1";
         }
-	if (/# Remote_path_to_NEAT/) {
+	elsif (/# Remote_path_to_NEAT\b/) {
                 $_ =~ m/"(.+?)"/;
                 $path2ChIPseq = "$1\/ChIPpip";
                 $path2ChIPseqScripts = join("", $path2ChIPseq, "/scripts");
         }
-	if (/# Remote_path_to_orifastq.gz/) {
+	elsif (/# Remote_path_to_orifastq_gz\b/) {
                 $_ =~ m/"(.+?)"/;
                 $path2fastqgz = "$1";
         }
-	if (/# Remote_path_to_chrLens.dat/) {
+	elsif (/# Remote_path_to_chrLens_dat\b/) {
                 $_ =~ m/"(.+?)"/;
                 $chrlens = "$1";
         }
-	if (/# Remote_path_to_RefGen.fasta/) {
+	elsif (/# Remote_path_to_RefGen_fasta\b/) {
                 $_ =~ m/"(.+?)"/;
                 $refGenome = "$1";
         }
-	if (/# Aligner_algo_short/) {
+	elsif (/# Remote_path_to_chrLens_dat_ChIP_rx\b/) {
+                $_ =~ m/"(.+?)"/;
+                $chrlensRX = "$1";
+	}
+	elsif (/# Remote_path_to_RefGen_fasta_ChIP_rx\b/) {
+                $_ =~ m/"(.+?)"/;
+                $refGenomeRX = "$1";
+	}
+	elsif (/# Aligner_algo_short\b/) {
                 $_ =~ m/"(.+?)"/;
                 $aligner = "$1";
         }
-	if (/# Paired_end_seq_run/) {
+	elsif (/# Paired_end_seq_run\b/) {
                 $_ =~ m/"(.+?)"/;
                 $PE = "$1";
         }
-	if (/# Remove_from_bigwig/) {
+	elsif (/# Remove_from_bigwig\b/) {
                 $_ =~ m/"(.+?)"/;
                 my $text = "$1";
                 my @var = split(",", $text);
@@ -78,15 +90,17 @@ while(<INPUT>) {
                         push(@lines2remove, $line);
                 }
         }
-	if (/# PeakCaller_R_script/) {
+	elsif (/# PeakCaller_R_script\b/) {
                 $_ =~ m/"(.+?)"/;
                 $peakcaller = "$1";
         }
-	if (/# Steps_to_execute_pipe/) {
+
+	elsif (/# Steps_to_execute_pipe\b/) {
                 $_ =~ m/"(.+?)"/;
                 @steps2execute = ();
                 if (grep /\bunzip\b/i, $_ )             { $unzip                = "TRUE"; push @steps2execute, "Unzip";         }
                 if (grep /\bqc\b/i, $_ )                { $qc                   = "TRUE"; push @steps2execute, "QC";            }
+                if (grep /\bchiprx\b/i, $_ )            { $chiprx               = "TRUE"; push @steps2execute, "ChIPRX";        }
                 if (grep /\bmap\b/i, $_ )               { $map                  = "TRUE"; push @steps2execute, "Map";           }
                 if (grep /\bfilter\b/i, $_ )            { $filter               = "TRUE"; push @steps2execute, "Filter";        }
                 if (grep /\bpeakcalling\b/i, $_ )	{ $peakcalling          = "TRUE"; push @steps2execute, "Peakcalling";   }
@@ -205,6 +219,10 @@ print "\n path2fastq.gz:\t\t $path2fastqgz";
 print "\n Targets:\t\t $path2expFolder/DataStructure/Targets.txt";
 print "\n chrlens:\t\t $chrlens";
 print "\n refGenome:\t\t $refGenome";
+if($chiprx =~ "TRUE"){
+	print "\n\t - chrlensRX:\t $chrlensRX";
+	print "\n\t - refGenomeRX:\t $refGenomeRX";
+}
 print "\n";
 print "\n Paired end sequencing:\t $PE";
 print "\n Aligner algorithm:\t $aligner";
@@ -219,6 +237,7 @@ print "\n Performing following modules:";
 print "\n .........................................";
 print "\n unzip:\t\t\t $unzip";
 print "\n qc:\t\t\t $qc";
+print "\n chiprx:\t\t $chiprx";
 print "\n map:\t\t\t $map";
 print "\n filter:\t\t $filter";
 print "\n peakcalling:\t\t $peakcalling";
@@ -244,6 +263,7 @@ my $path2qsub		= "$path2iterate/qsub";
 my $path2DataStructure	= "$path2expFolder/DataStructure";
 my $path2aligned	= "$path2expFolder/aligned";
 my $path2fastq		= "$path2expFolder/fastq";
+my $path2chrlens	= "$path2DataStructure/$genome";
 
 unless( -d "$path2fastq" )			{ `mkdir $path2fastq`;			}
 unless( -d "$path2aligned" )			{ `mkdir $path2aligned`;		}
@@ -251,7 +271,7 @@ unless( -d "$path2expFolder/peakcalling" )	{ `mkdir $path2expFolder/peakcalling`
 unless( -d "$tmpscr" )				{ `mkdir $tmpscr`;			}
 unless( -d "$path2iterate" )			{ `mkdir $path2iterate`;		}
 unless( -d "$path2qsub" )			{ `mkdir $path2qsub`;			}
-
+unless( -d "$path2chrlens" )                    { `mkdir $path2chrlens`;                }
 
 #------------------------------------------------------------------------
 # Copy and create various files with execution permissions
@@ -266,7 +286,12 @@ my $nameOfChIPseqFile	= "ChIPpip";
 `mv $path2iterate/$nameOfChIPseqFile\.pl $path2iterate/$nameOfChIPseqFile\_$expFolder\.pl`;
 
 # ------ Copy chr_lens.dat file to $path2DataStructure
-`cp $chrlens $path2DataStructure`;
+`cp $chrlens $path2chrlens`;
+if($chiprx =~ "TRUE"){
+	my $path2chrlensRX		= "$path2DataStructure/$genomeRX";
+	unless( -d "$path2chrlensRX" )	{ `mkdir $path2chrlensRX`; }
+	`cp $chrlensRX $path2chrlensRX`;
+}
 
 # ------ ChIPseqMainIterative.sh to iterate later
 my $ChIPseqMainIterative = "$path2iterate/$nameOfChIPseqFile\_$expFolder\.sh";

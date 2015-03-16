@@ -22,77 +22,95 @@ else{ die "\n\n----------------------------------------\n\n Provide the path whe
 my $Targets = "$path2expFolder/DataStructure/Targets.txt";
 open(INPUT, $Targets) || die "Error opening $Targets : $!\n\n\n";
 
-my ($expFolder, $genome, $userFolder, $path2ChIPseqScripts, $path2ChIPseq, $path2fastqgz) 	= ("NA", "NA", "NA", "NA", "NA", "NA");
-my ($unzip, $qc, $map, $filter, $peakcalling, $cleanbigwig, $cleanfolders)			= ("FALSE", "FALSE", "FALSE", "FALSE", "FALSE", "FALSE", "FALSE");
-my (@sc, @lines2remove)										= ();
+my ($expFolder, $genome, $genomeRX, $userFolder, $path2ChIPseqScripts, $path2ChIPseq, $path2fastqgz)    = ("NA", "NA", "NA", "NA", "NA", "NA");
+my ($unzip, $qc, $chiprx, $map, $filter, $peakcalling, $cleanbigwig, $cleanfolders)                     = ("FALSE", "FALSE", "FALSE", "FALSE", "FALSE", "FALSE", "FALSE");
+my (@sc, @lines2remove)                                                                                 = ();
 # Find paths to different folders in the Targets.txt file
+
 while(<INPUT>) {
-        if (/# My_personal_email/) {
+        if (/# My_personal_email\b/) {
                 $_ =~ m/"(.+?)"/;
                 $email = "$1";
         }
-	if (/# My_project_title/) {
+	elsif (/# My_project_title\b/) {
                 $_ =~ m/"(.+?)"/;
                 $expFolder = "$1";
         }
-	if (/# Reference_genome/) {
+	elsif (/# Reference_genome\b/) {
                 $_ =~ m/"(.+?)"/;
                 $genome = "$1";
         }
-	if (/# Remote_path_to_proj/) {
+	elsif (/# Reference_genome_rx\b/) {
+                $_ =~ m/"(.+?)"/;
+                $genomeRX = "$1";
+        }
+	elsif (/# Remote_path_to_proj\b/) {
                 $_ =~ m/"(.+?)"/;
                 $userFolder = "$1";
         }
-	if (/# Remote_path_to_NEAT/) {
+	elsif (/# Remote_path_to_NEAT\b/) {
                 $_ =~ m/"(.+?)"/;
                 $path2ChIPseq = "$1\/ChIPpip";
                 $path2ChIPseqScripts = join("", $path2ChIPseq, "/scripts");
         }
-	if (/# Remote_path_to_orifastq.gz/) {
+	elsif (/# Remote_path_to_orifastq_gz\b/) {
                 $_ =~ m/"(.+?)"/;
                 $path2fastqgz = "$1";
         }
-	if (/# Remote_path_to_chrLens.dat/) {
+	elsif (/# Remote_path_to_chrLens_dat\b/) {
                 $_ =~ m/"(.+?)"/;
                 $chrlens = "$1";
         }
-	if (/# Remote_path_to_RefGen.fasta/) {
+	elsif (/# Remote_path_to_RefGen_fasta\b/) {
                 $_ =~ m/"(.+?)"/;
                 $refGenome = "$1";
         }
-	if (/# Aligner_algo_short/) {
+	elsif (/# Remote_path_to_chrLens_dat_ChIP_rx\b/) {
+                $_ =~ m/"(.+?)"/;
+                $chrlensRX = "$1";
+        }
+	elsif (/# Remote_path_to_RefGen_fasta_ChIP_rx\b/) {
+                $_ =~ m/"(.+?)"/;
+                $refGenomeRX = "$1";
+        }
+	elsif (/# Aligner_algo_short\b/) {
                 $_ =~ m/"(.+?)"/;
                 $aligner = "$1";
         }
-	if (/# Paired_end_seq_run/) {
+	elsif (/# Paired_end_seq_run\b/) {
                 $_ =~ m/"(.+?)"/;
                 $PE = "$1";
         }
-	if (/# Remove_from_bigwig/) {
+	elsif (/# Remove_from_bigwig\b/) {
                 $_ =~ m/"(.+?)"/;
                 my $text = "$1";
                 my @var = split(",", $text);
                 foreach my $line (@var) {
                         $line =~ s/\s+//g;
                         push(@lines2remove, $line);
-				}
-	}
-	if (/# PeakCaller_R_script/) {
+                }
+        }
+	elsif (/# PeakCaller_R_script\b/) {
                 $_ =~ m/"(.+?)"/;
                 $peakcaller = "$1";
-	}
-	if (/# Steps_to_execute_pipe/) {
-				$_ =~ m/"(.+?)"/;
-				@steps2execute = ();
-				if (grep /\bunzip\b/i, $_ )             { $unzip                = "TRUE"; push @steps2execute, "Unzip";         }
-				if (grep /\bqc\b/i, $_ )                { $qc                   = "TRUE"; push @steps2execute, "QC";            }
-				if (grep /\bmap\b/i, $_ )               { $map                  = "TRUE"; push @steps2execute, "Map";           }
-				if (grep /\bfilter\b/i, $_ )            { $filter               = "TRUE"; push @steps2execute, "Filter";        }
-				if (grep /\bpeakcalling\b/i, $_ )	{ $peakcalling          = "TRUE"; push @steps2execute, "Peakcalling";   }
-				if (grep /\bcleanbigwig\b/i, $_ )	{ $cleanbigwig          = "TRUE"; push @steps2execute, "Cleanbigwig";   }
-	}
+        }
+
+	elsif (/# Steps_to_execute_pipe\b/) {
+                $_ =~ m/"(.+?)"/;
+                @steps2execute = ();
+                if (grep /\bunzip\b/i, $_ )             { $unzip                = "TRUE"; push @steps2execute, "Unzip";         }
+                if (grep /\bqc\b/i, $_ )                { $qc                   = "TRUE"; push @steps2execute, "QC";            }
+                if (grep /\bchiprx\b/i, $_ )            { $chiprx               = "TRUE"; push @steps2execute, "ChIPRX";        }
+		if (grep /\bchiprx_TMP\b/i, $_ )	{ $chiprxNorm		= "TRUE";					}
+                if (grep /\bmap\b/i, $_ )               { $map                  = "TRUE"; push @steps2execute, "Map";           }
+                if (grep /\bfilter\b/i, $_ )            { $filter               = "TRUE"; push @steps2execute, "Filter";        }
+                if (grep /\bpeakcalling\b/i, $_ )	{ $peakcalling          = "TRUE"; push @steps2execute, "Peakcalling";   }
+                if (grep /\bcleanbigwig\b/i, $_ )	{ $cleanbigwig          = "TRUE"; push @steps2execute, "Cleanbigwig";   }
+        }
 
 } # end of Targets.txt
+
+
 
 my $AdvSettings = "$path2expFolder/DataStructure/AdvancedSettings.txt";
 open(INPUT, $AdvSettings) || die "Error opening $AdvSettings : $!\n\n\n";
@@ -218,6 +236,10 @@ print "\n path2fastq.gz:\t\t $path2fastqgz";
 print "\n Targets:\t\t $path2expFolder/DataStructure/Targets.txt";
 print "\n chrlens:\t\t $chrlens";
 print "\n refGenome:\t\t $refGenome";
+if($chiprx =~ "TRUE"){
+        print "\n\t - chrlensRX:\t $chrlensRX";
+        print "\n\t - refGenomeRX:\t $refGenomeRX";
+}
 print "\n";
 print "\n Paired end sequencing:\t $PE";
 print "\n Aligner algorithm:\t $aligner";
@@ -232,6 +254,7 @@ print "\n Performing following modules:";
 print "\n .........................................";
 print "\n unzip:\t\t\t $unzip";
 print "\n qc:\t\t\t $qc";
+print "\n chiprx:\t\t $chiprx";
 print "\n map:\t\t\t $map";
 print "\n filter:\t\t $filter";
 print "\n peakcalling:\t\t $peakcalling";
@@ -240,7 +263,7 @@ print "\n .........................................";
 print "\n";
 print "\n Samples: ";
 foreach my $i (0 .. $#samples) {
-        print "\n\t $samples[$i]";
+        print "\n\t $samples[$i] \t - \t $inputs[$i]";
 }
 print "\n";
 #print "\n----------------------------------------\n";
@@ -250,6 +273,7 @@ print "\n";
 #*----------------------------------------------------------------------*
 # Set different paths
 
+my $path2DataStructure		= "$path2expFolder/DataStructure";
 my $tmpscr 			= "$path2expFolder/scripts";
 my $path2fastq			= "$path2expFolder/fastq";
 my $path2QC			= "$path2expFolder/QC";
@@ -435,6 +459,117 @@ if( $qc =~ "TRUE" ) {
 }
 
 
+#*----------------------------------------------------------------------*
+# Mapping sequences with bwa onto chiprx genome
+
+if( $chiprx =~ "TRUE" ){
+
+	print "\n\n*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-\n";
+        print "\n Mapping fastq files to the ChIP-RX genome\n";
+
+        my $iterateJobName	= "Iterate_map_RX_$expFolder";
+        my $myJobName           = "chiprx";
+	my $myJobName2		= "chiprx_clean";
+        my $path2qsub           = "$tmpscr/$myJobName/qsub";
+
+        # Create file to store jobs in
+        unless( -d "$tmpscr/$myJobName" )	{ `mkdir $tmpscr/$myJobName`; }
+        unless( -d "$path2qsub" )               { `mkdir $path2qsub`; }
+        my $QSUB        = "$tmpscr/$myJobName/$myJobName\.sh";
+        open $QSUB, ">", "$QSUB" or die "Can't open '$QSUB'";
+        print $QSUB "#!/bin/bash\n";
+        close $QSUB;
+        `chmod 777 $QSUB`;
+        print "\n Store all of the following '$myJobName' jobs in $QSUB \n";
+        my @myJobs;
+
+        foreach my $i (0 .. $#samplesInputs) {
+
+                # Prepare a personal qsub script
+                my $QSUBint     = "$tmpscr/$myJobName/$samplesInputs[$i]\_$myJobName\.sh";
+                `cp $scrhead $QSUBint`;
+
+                # Create a directory
+                my $path2currentSampleDir	= "$path2aligned/$samplesInputs[$i]\_RX";
+                unless( -d "$path2currentSampleDir" )   { `mkdir $path2currentSampleDir`; }
+
+
+                if( $PE ) {
+
+                        #-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+                        #-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+          IMPORTANT CODE HERE         -+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+                        my $cmd         = "$aligncommand1 -n $ndiff $refGenomeRX $path2fastq/$samplesInputs[$i]\_1.fastq > $path2currentSampleDir/$samplesInputs[$i]\_1.sai";
+                        `echo "$cmd" >> $QSUBint`;
+                        $cmd            = "$aligncommand1 -n $ndiff $refGenomeRX $path2fastq/$samplesInputs[$i]\_2.fastq > $path2currentSampleDir/$samplesInputs[$i]\_2.sai";
+                        `echo "$cmd" >> $QSUBint`;
+                        $cmd            = "bwa sampe $refGenomeRX $path2currentSampleDir/$samplesInputs[$i]\_1.sai $path2currentSampleDir/$samplesInputs[$i]\_2.sai $path2fastq/$samplesInputs\_1.fastq $path2fastq/$samplesInputs[$i]\_2.fastq > $path2currentSampleDir/$samplesInputs[$i]\.sam";
+                        `echo "$cmd" >> $QSUBint`;
+                        #--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--
+
+                } else {
+
+                        #-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+                        #-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+          IMPORTANT CODE HERE         -+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+                        my $cmd         = "$aligncommand1 -n $ndiff $refGenomeRX $path2fastq/$samplesInputs[$i]\.fastq > $path2currentSampleDir/$samplesInputs[$i]\.sai";
+                        `echo "$cmd" >> $QSUBint`;
+                        my $cmd2        = "bwa samse $refGenomeRX $path2currentSampleDir/$samplesInputs[$i]\.sai $path2fastq/$samplesInputs[$i]\.fastq > $path2currentSampleDir/$samplesInputs[$i]\.sam";
+                        `echo "$cmd2" >> $QSUBint`;
+			# Uniquely mapped reads
+			$cmd         = "grep -E '\\sX0:i:1\\s' $path2currentSampleDir/$samplesInputs[$i]\.sam > $path2currentSampleDir/$samplesInputs[$i]\.u.sam";
+                        `echo "$cmd" >> $QSUBint`;
+			# sam to bam
+                	$cmd		= "samtools view -b $path2currentSampleDir/$samplesInputs[$i]\.u.sam -T $refGenomeRX -o $path2currentSampleDir/$samplesInputs[$i]\.bam";
+                	`echo "$cmd" >> $QSUBint`;
+                        #--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--
+
+                }
+
+                #---------------------------------------------
+                # Keep track of the jobs in @myJobs
+                my $jobName     = "$myJobName$i";
+                push(@myJobs, $jobName);
+                $cmd            = "$jobName=`qsub -o $path2qsub -e $path2qsub $QSUBint`";
+                open $QSUB, ">>", "$QSUB" or die "Can't open '$QSUB'";
+                print $QSUB "$cmd\n";
+                close $QSUB;
+
+        }
+
+	#*----------------------------------------------------------------------*
+        # Change Targets.txt file for next iteration
+        print "\n--------------------------------------------------------------------------------------------------\n";
+        print "\n Changing '$myJobName' variable to FALSE and proceed";
+        `/usr/bin/perl -p -i -e "s/$myJobName/$myJobName\_TMP/gi" $Targets`;
+
+        #*----------------------------------------------------------------------*
+        # Prepar file containing the jobs to run
+
+        # Add the next job line to the $mapQSUB
+        foreach( @myJobs ){ $_ = "\$".$_ ; }
+        my $myJobsVec   = join(":", @myJobs);
+        my $finalcmd    = "FINAL=\`qsub -N $iterateJobName -o $path2qsub -e $path2qsub -W depend=afterok\:$myJobsVec $IterateSH`";
+        open $QSUB, ">>", "$QSUB" or die "Can't open '$QSUB'";
+        print $QSUB "$finalcmd\n";
+        close $QSUB;
+
+        #*----------------------------------------------------------------------*
+        # Submit jobs to run
+
+        print "\n\n--------------------------------------------------------------------------------------------------\n";
+        print "\n Submitting job to cluster: \t `sh $QSUB` \n";
+        `sh $QSUB`;
+
+        #*----------------------------------------------------------------------*
+        # Exit script
+
+        print "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n";
+        print "\n Exiting $myJobName section with no known error \n";
+        print "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n\n\n";
+
+        exit 0;
+
+}
+
 
 #*----------------------------------------------------------------------*
 # Mapping sequences with bwa
@@ -608,7 +743,7 @@ if( $filter =~ "TRUE" ){
 					my @a = split( /\t/,$line );
 					my $isize = abs($a[8]);
 			
-					if( $isize > $maxisize or $isize < $minisize ){ next; }
+		#			if( $isize > $maxisize or $isize < $minisize ){ next; }
 					if( ($a[8]>0 and $a[3]>$a[7]) or ($a[8]<0 and $a[3]<$a[7]) ){ next; } 
 					# I think I am trying to throw away non-paired reads. 
 					# Because I dumped non-uniquely mapping reads, there could be unpaired guys here...
@@ -699,21 +834,21 @@ if( $filter =~ "TRUE" ){
 
 		# -----------------------------------------
 		# Split indexed .bam by chr
-		if( $splitbychr ) {
-			unless( -d "$path2currentSampleDir/splitbychr" )	{ `mkdir $path2currentSampleDir/splitbychr`; }
-			foreach my $chr( keys %hChrs ) {
-				print "\n\n Entered split by chromosome \n\n";
-				#-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-				#-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+          IMPORTANT CODE HERE         -+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+	
-				# .bam to sorted .bam by chr
-				$cmd		= "samtools view -b $path2currentSampleDir/$samplesInputs[$i]\.bam $chr > $path2currentSampleDir/splitbychr/$samplesInputs[$i]\.$chr\.bam";
-				`echo "$cmd" >> $QSUBint`;
-				$cmd		= "samtools index $path2currentSampleDir/splitbychr/$samplesInputs[$i]\.$chr\.bam $path2currentSampleDir/splitbychr/$samplesInputs[$i]\.$chr\.bai";
-				`echo "$cmd" >> $QSUBint`;
-				#--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--
-
-			}
-		}
+		#if( $splitbychr ) {
+		#	unless( -d "$path2currentSampleDir/splitbychr" )	{ `mkdir $path2currentSampleDir/splitbychr`; }
+		#	foreach my $chr( keys %hChrs ) {
+		#		print "\n\n Entered split by chromosome \n\n";
+		#		#-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+		#		#-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+          IMPORTANT CODE HERE         -+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+	
+		#		# .bam to sorted .bam by chr
+		#		$cmd		= "samtools view -b $path2currentSampleDir/$samplesInputs[$i]\.bam $chr > $path2currentSampleDir/splitbychr/$samplesInputs[$i]\.$chr\.bam";
+		#		`echo "$cmd" >> $QSUBint`;
+		#		$cmd		= "samtools index $path2currentSampleDir/splitbychr/$samplesInputs[$i]\.$chr\.bam $path2currentSampleDir/splitbychr/$samplesInputs[$i]\.$chr\.bai";
+		#		`echo "$cmd" >> $QSUBint`;
+		#		#--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--
+		#
+		#	}
+		#}
 
 		print "\n\n Samtools processing for $samplesInputs[$i] done. \n\n";
 		
@@ -761,6 +896,119 @@ if( $filter =~ "TRUE" ){
 
 	exit 0;
 }
+
+
+#*----------------------------------------------------------------------*
+# Normalize bam files using the chiprx genome reads
+
+if( $chiprxNorm =~ "TRUE" ){
+
+        print "\n\n*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-\n";
+        print "\n Normalization bam files using chiprx reads\n";
+
+        my $iterateJobName	= "Iterate_map_RX_$expFolder";
+        my $myJobName           = "chiprxNorm";
+        my $path2qsub           = "$tmpscr/$myJobName/qsub";
+
+        # Create file to store jobs in
+        unless( -d "$tmpscr/$myJobName" )	{ `mkdir $tmpscr/$myJobName`; }
+        unless( -d "$path2qsub" )               { `mkdir $path2qsub`; }
+        my $QSUB        = "$tmpscr/$myJobName/$myJobName\.sh";
+        open $QSUB, ">", "$QSUB" or die "Can't open '$QSUB'";
+        print $QSUB "#!/bin/bash\n";
+        close $QSUB;
+        `chmod 777 $QSUB`;
+        print "\n Store all of the following '$myJobName' jobs in $QSUB \n";
+        my @myJobs;
+
+        foreach my $i (0 .. $#samplesInputs) {
+
+                # Prepare a personal qsub script
+                my $QSUBint     = "$tmpscr/$myJobName/$samplesInputs[$i]\_$myJobName\.sh";
+                `cp $scrhead $QSUBint`;
+
+                # Create a directory
+                my $path2currentSampleDir	= "$path2aligned/$samplesInputs[$i]\_RX";
+                unless( -d "$path2currentSampleDir" )   { `mkdir $path2currentSampleDir`; }
+
+
+                if( $PE ) {
+
+                        #-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+                        #-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+          IMPORTANT CODE HERE         -+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+                        my $cmd         = "$aligncommand1 -n $ndiff $refGenomeRX $path2fastq/$samplesInputs[$i]\_1.fastq > $path2currentSampleDir/$samplesInputs[$i]\_1.sai";
+                        `echo "$cmd" >> $QSUBint`;
+                        $cmd            = "$aligncommand1 -n $ndiff $refGenomeRX $path2fastq/$samplesInputs[$i]\_2.fastq > $path2currentSampleDir/$samplesInputs[$i]\_2.sai";
+                        `echo "$cmd" >> $QSUBint`;
+                        $cmd            = "bwa sampe $refGenomeRX $path2currentSampleDir/$samplesInputs[$i]\_1.sai $path2currentSampleDir/$samplesInputs[$i]\_2.sai $path2fastq/$samplesInputs\_1.fastq $path2fastq/$samplesInputs[$i]\_2.fastq > $path2currentSampleDir/$samplesInputs[$i]\.sam";
+                        `echo "$cmd" >> $QSUBint`;
+                        #--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--
+
+                } else {
+
+                        #-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+                        #-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+          IMPORTANT CODE HERE         -+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+                        my $cmd         = "$aligncommand1 -n $ndiff $refGenomeRX $path2fastq/$samplesInputs[$i]\.fastq > $path2currentSampleDir/$samplesInputs[$i]\.sai";
+                        `echo "$cmd" >> $QSUBint`;
+                        my $cmd2        = "bwa samse $refGenomeRX $path2currentSampleDir/$samplesInputs[$i]\.sai $path2fastq/$samplesInputs[$i]\.fastq > $path2currentSampleDir/$samplesInputs[$i]\.sam";
+                        `echo "$cmd2" >> $QSUBint`;
+                        # Uniquely mapped reads
+                        $cmd         = "grep -E '\\sX0:i:1\\s' $path2currentSampleDir/$samplesInputs[$i]\.sam > $path2currentSampleDir/$samplesInputs[$i]\.u.sam";
+                        `echo "$cmd" >> $QSUBint`;
+                        # sam to bam
+                        $cmd            = "samtools view -b $path2currentSampleDir/$samplesInputs[$i]\.u.sam -T $refGenomeRX -o $path2currentSampleDir/$samplesInputs[$i]\.bam";
+                        `echo "$cmd" >> $QSUBint`;
+                        #--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--
+
+                }
+
+                #---------------------------------------------
+                # Keep track of the jobs in @myJobs
+                my $jobName     = "$myJobName$i";
+                push(@myJobs, $jobName);
+                $cmd            = "$jobName=`qsub -o $path2qsub -e $path2qsub $QSUBint`";
+                open $QSUB, ">>", "$QSUB" or die "Can't open '$QSUB'";
+                print $QSUB "$cmd\n";
+                close $QSUB;
+
+        }
+
+	#*----------------------------------------------------------------------*
+        # Change Targets.txt file for next iteration
+        print "\n--------------------------------------------------------------------------------------------------\n";
+        print "\n Changing '$myJobName' variable to FALSE and proceed";
+        `/usr/bin/perl -p -i -e "s/$myJobName/$myJobName\_DONE/gi" $Targets`;
+
+        #*----------------------------------------------------------------------*
+        # Prepar file containing the jobs to run
+
+        # Add the next job line to the $mapQSUB
+        foreach( @myJobs ){ $_ = "\$".$_ ; }
+        my $myJobsVec   = join(":", @myJobs);
+        my $finalcmd    = "FINAL=\`qsub -N $iterateJobName -o $path2qsub -e $path2qsub -W depend=afterok\:$myJobsVec $IterateSH`";
+        open $QSUB, ">>", "$QSUB" or die "Can't open '$QSUB'";
+        print $QSUB "$finalcmd\n";
+        close $QSUB;
+
+        #*----------------------------------------------------------------------*
+        # Submit jobs to run
+
+        print "\n\n--------------------------------------------------------------------------------------------------\n";
+        print "\n Submitting job to cluster: \t `sh $QSUB` \n";
+        `sh $QSUB`;
+
+        #*----------------------------------------------------------------------*
+        # Exit script
+
+        print "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n";
+        print "\n Exiting $myJobName section with no known error \n";
+        print "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n\n\n";
+
+        exit 0;
+
+}
+
+
 
 
 #*----------------------------------------------------------------------*
@@ -899,7 +1147,6 @@ if( $cleanbigwig =~ "TRUE" ){
 	print "\n Store all of the following '$myJobName' jobs in $QSUB \n";
 	my @myJobs;
 
-
 	my $QSUBintWig  = "$tmpscr/$myJobName/$myJobName2\.sh";
 	open $QSUBintWig, ">", "$QSUBintWig" or die "Can't open '$QSUBintWig'";
 	print $QSUBintWig "#!/bin/bash\n";
@@ -995,8 +1242,22 @@ if( $cleanbigwig =~ "TRUE" ){
 
 
 
-if($unzip =~ "FALSE"  &&  $qc =~ "FALSE"  &&  $map =~ "FALSE"  &&  $filter =~ "FALSE"  &&  $peakcalling =~ "FALSE"  &&  $cleanbigwig =~ "FALSE"){
+if($unzip =~ "FALSE"  &&  $qc =~ "FALSE" && $chiprx =~ "FALSE"  &&  $map =~ "FALSE"  &&  $filter =~ "FALSE"  &&  $peakcalling =~ "FALSE"  &&  $cleanbigwig =~ "FALSE"){
 
+	my $iterateJobName	= "Iterate_exit_$expFolder";
+        my $myJobName           = "exit";
+        my $path2qsub           = "$tmpscr/$myJobName/qsub";
+
+        # Create file to store jobs in
+        unless( -d "$tmpscr/$myJobName" )	{ `mkdir $tmpscr/$myJobName`; }
+        unless( -d "$path2qsub" )               { `mkdir $path2qsub`; }
+        my $QSUB        = "$tmpscr/$myJobName/$myJobName\.sh";
+        open $QSUB, ">", "$QSUB" or die "Can't open '$QSUB'";
+        print $QSUB "#!/bin/bash\n";
+        close $QSUB;
+        `chmod 777 $QSUB`;
+        print "\n Store all of the following '$myJobName' jobs in $QSUB \n";
+        my @myJobs;
 
 	print "\n\n*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-\n";
         print "\n Moving .bam and .bai files from the Tophat to the aligned folder \n";
@@ -1006,35 +1267,47 @@ if($unzip =~ "FALSE"  &&  $qc =~ "FALSE"  &&  $map =~ "FALSE"  &&  $filter =~ "F
 	my $path2bam			= "$path2aligned/bam";
         unless( -d "$path2bam" )	{ `mkdir $path2bam`;		}	
 
-        foreach my $i (0 .. $#samplesInputs) {
+	#-----------------------------------------------------
+	# Copy .bam and .bai files to bam folder and fill in LibrarySize.txt
+	my $tmp 	= "$path2DataStructure/LibrarySize.txt";
+	open $tmp, ">", "$tmp" or die "Can't open '$tmp'";
+        close $tmp;
+
+	foreach my $i (0 .. $#samplesInputs) {
+
+		# Count reads in .bam and store in LibrarySize.txt
+		my $path2currentSampleDir	= "$path2aligned/$samplesInputs[$i]";
+		my $mapped			= `samtools view -c -F 4 $path2currentSampleDir/$samplesInputs[$i]\.bam`;
+		my $mappedRX			= `samtools view -c -F 4 $path2currentSampleDir\_RX/$samplesInputs[$i]\.bam`;
+
+		$mapped =~ s/\R//;
+		$mappedRX =~ s/\R//;	
+		my $cmd				= "$samplesInputs[$i]\.bam\t$mappedRX\t$mapped";
+		
+		open $tmp, ">>", "$tmp" or die "Can't open '$tmp'";
+        	print $tmp "$cmd\n";
+        	close $tmp;
+
                 `cp $path2aligned/$samplesInputs[$i]/$samplesInputs[$i].bam $path2bam/`;
                 `cp $path2aligned/$samplesInputs[$i]/$samplesInputs[$i].bai $path2bam/`;
-        }
+        
+	}
+	
+	#-----------------------------------------------------
+	# Copy .bam and .bai files to bam folder
+	
 
+	# Sort LibrarySize file
+	`sort $path2DataStructure/LibrarySizetmp.txt > $path2DataStructure/LibrarySize.txt`;
+	`sort $path2DataStructure/LibrarySizeRXtmp.txt > $path2DataStructure/LibrarySizeRX.txt`;
 
-	print "\n\n*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-\n";
-	print "\n Exiting \n";
+	# Add header
+	`echo '#FileName ReadsRX Reads' | cat - $tmp > temp && mv temp $tmp`;
 
-	my $iterateJobName	= "Iterate_exit_$expFolder";
-	my $myJobName           = "exit";
-	my $path2qsub           = "$tmpscr/$myJobName/qsub";
-
-	# Create file to store jobs in
- 	unless( -d "$tmpscr/$myJobName" )	{ `mkdir $tmpscr/$myJobName`; }
- 	unless( -d "$path2qsub" )		{ `mkdir $path2qsub`; }
-
-	my $QSUBfinal	= "$tmpscr/$myJobName/$myJobName\_final.sh";
-	`cp $scrhead $QSUBfinal`;
-	my $cmd		= "An email has been sent to $email";
-	`echo "$cmd" >> $QSUBfinal`;
-	`chmod 777 $QSUBfinal`;	
-
-	my $QSUB	= "$tmpscr/$myJobName/$myJobName\.sh";
-	$cmd		= "#!/bin/bash";
-	`echo "$cmd" >> $QSUB`;
-	$cmd		= "FINAL=\`qsub -m e -M $email -N $iterateJobName -o $path2qsub -e $path2qsub $QSUBfinal`";
-	`echo "$cmd" >> $QSUB`;
-	`chmod 777 $QSUB`;
+	my $finalcmd    = "FINAL=\`qsub -m e -M $email -N $iterateJobName -o $path2qsub -e $path2qsub $QSUBfinal`";
+        open $QSUB, ">>", "$QSUB" or die "Can't open '$QSUB'";
+        print $QSUB "$finalcmd\n";
+        close $QSUB;
 
         #*----------------------------------------------------------------------*
         # Submit jobs to run

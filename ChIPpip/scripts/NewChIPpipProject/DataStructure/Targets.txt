@@ -6,7 +6,7 @@
 #
 #
 # My project Title	=	"<PROJECT_NAME>"
-# Date of creation	=	"<DATE>"
+# Date of creation	=	"2015-03-06"
 #
 #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-|
 #
@@ -18,12 +18,13 @@
 # 
 # My_project_title	=	"<PROJECT_NAME>"
 # Reference_genome	=	"mm9"
+# Reference_genome_rx	=	"dm9"
 #
 #------------------------------------------------
 #----------------- LOCAL INFO -------------------
 #
 # Local_path_to_proj	=	"<LOCAL_PATH_TO_PROJECT>"
-# Local_path_to_NEAT	=	"<LOCAL_PATH_TO_NEAT>"
+# Local_path_to_NEAT	=	"/Users/patrick/Desktop/NEAT"
 # Proj_TaxonDatabase	=	"TxDb.Mmusculus.UCSC.mm9.knownGene"
 # Proj_TaxonDatabaseDic	=	"org.Mm.eg.db"
 #
@@ -31,12 +32,15 @@
 #------------------------------------------------
 #---------------- REMOTE INFO -------------------
 #
-# Remote_path_to_proj	=	"<REMOTE_PATH_TO_NEAT>ChIPpip"
-# Remote_path_to_NEAT	=	"<REMOTE_PATH_TO_NEAT>"
+# Remote_path_to_proj	=	"/data/schorderet/NEAT/ChIPpip"
+# Remote_path_to_NEAT	=	"/data/schorderet/NEAT/"
 #
-# Remote_path_to_orifastq.gz	=	"<REMOTE_PATH_TO_NEAT>ChIPpip/scripts/testdata"
-# Remote_path_to_chrLens.dat	=	"/data/schorderet/reference_files/mm9/chr_lens.dat"
-# Remote_path_to_RefGen.fasta	=	"/data/ref/mm9/bwa/mm9.fa"
+# Remote_path_to_orifastq_gz	=	"/data/schorderet/NEAT/ChIPpip/scripts/testdata"
+# Remote_path_to_chrLens_dat	=	"/data/schorderet/reference_files/mm9/chr_lens.dat"
+# Remote_path_to_RefGen_fasta	=	"/data/ref/mm9/bwa/mm9.fa"
+#
+# Remote_path_to_chrLens_dat_ChIP_rx	=	"/data/schorderet/reference_files/dm3/chr_lens.dat"
+# Remote_path_to_RefGen_fasta_ChIP_rx	=	"/data/ref/dm3/bwa/dm3.fa"
 #
 #------------------------------------------------
 #----------------- PARAMETERS -------------------
@@ -46,7 +50,7 @@
 # Remove_from_bigwig	=	"random, chrM"
 # PeakCaller_R_script	=	"PeakCaller_SPP.R"
 #
-# Steps_to_execute_pipe	=	"unzip + qc + map + filter + peakcalling + cleanbigwig"
+# Steps_to_execute_pipe	=	"unzip + qc + chiprx + map + filter + peakcalling + cleanbigwig"
 #
 #
 #
