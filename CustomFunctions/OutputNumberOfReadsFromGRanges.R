@@ -13,8 +13,7 @@
 OutputNumberOfReadsFromGRanges <- function(myGRsamples){
   cat(" \n **********************************************************", sep="")
   for(i in 1:length(myGRsamples)){
-    # Text        
-    # i=1
+    # Text
     cat(" \n Reads in ", myGRsamples[i], " :\t", length(get(myGRsamples[i])), sep="")
   }
   cat(" \n **********************************************************\n", sep="")

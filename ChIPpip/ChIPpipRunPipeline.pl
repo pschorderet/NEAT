@@ -22,9 +22,9 @@ else{ die "\n\n----------------------------------------\n\n Provide the path whe
 my $Targets = "$path2expFolder/DataStructure/Targets.txt";
 open(INPUT, $Targets) || die "Error opening $Targets : $!\n\n\n";
 
-my ($expFolder, $genome, $genomeRX, $userFolder, $path2ChIPseqScripts, $path2ChIPseq, $path2fastqgz)	= ("NA", "NA", "NA", "NA", "NA", "NA");
-my ($unzip, $qc, $chiprx, $map, $filter, $peakcalling, $cleanbigwig, $cleanfolders)          	        = ("FALSE", "FALSE", "FALSE", "FALSE", "FALSE", "FALSE", "FALSE");
-my (@sc, @lines2remove) 										= ();
+my ($expFolder, $genome, $genomeRX, $userFolder, $path2ChIPseqScripts, $path2ChIPseq, $path2fastqgz)    = ("NA", "NA", "NA", "NA", "NA", "NA", "NA");
+my ($unzip, $qc, $chiprx, $map, $filter, $peakcalling, $cleanbigwig, $cleanfiles, $granges)		= ("FALSE", "FALSE", "FALSE", "FALSE", "FALSE", "FALSE", "FALSE", "FALSE", "FALSE");
+my (@sc, @lines2remove)                                                                                 = ();
 # Find paths to different folders in the Targets.txt file
 
 while(<INPUT>) {
@@ -50,6 +50,7 @@ while(<INPUT>) {
         }
 	elsif (/# Remote_path_to_NEAT\b/) {
                 $_ =~ m/"(.+?)"/;
+#               $path2NEAT = "$1";
                 $path2ChIPseq = "$1\/ChIPpip";
                 $path2ChIPseqScripts = join("", $path2ChIPseq, "/scripts");
         }
@@ -68,11 +69,11 @@ while(<INPUT>) {
 	elsif (/# Remote_path_to_chrLens_dat_ChIP_rx\b/) {
                 $_ =~ m/"(.+?)"/;
                 $chrlensRX = "$1";
-	}
+        }
 	elsif (/# Remote_path_to_RefGen_fasta_ChIP_rx\b/) {
                 $_ =~ m/"(.+?)"/;
                 $refGenomeRX = "$1";
-	}
+        }
 	elsif (/# Aligner_algo_short\b/) {
                 $_ =~ m/"(.+?)"/;
                 $aligner = "$1";
@@ -105,6 +106,8 @@ while(<INPUT>) {
                 if (grep /\bfilter\b/i, $_ )            { $filter               = "TRUE"; push @steps2execute, "Filter";        }
                 if (grep /\bpeakcalling\b/i, $_ )	{ $peakcalling          = "TRUE"; push @steps2execute, "Peakcalling";   }
                 if (grep /\bcleanbigwig\b/i, $_ )	{ $cleanbigwig          = "TRUE"; push @steps2execute, "Cleanbigwig";   }
+                if (grep /\bcleanfiles\b/i, $_ )        { $cleanfiles           = "TRUE"; push @steps2execute, "Cleanfiles";    }
+                if (grep /\bgranges\b/i, $_ )           { $granges              = "TRUE"; push @steps2execute, "GRanges";	}
         }
 
 } # end of Targets.txt
@@ -114,7 +117,7 @@ while(<INPUT>) {
 my $AdvSettings = "$path2expFolder/DataStructure/AdvancedSettings.txt";
 open(INPUT, $AdvSettings) || die "Error opening $AdvSettings : $!\n\n\n";
 
-my ($removepcrdup, $makeunique, $ndiff, $aligncommand1, $fdr, $posopt, $densityopt, $enforceisize)		= ("NA", "NA", "NA", "NA", "NA", "NA", "NA", "NA");
+my ($removepcr, $makeunique, $ndiff, $aligncommand1, $fdr, $posopt, $densityopt, $enforceisize)		= ("NA", "NA", "NA", "NA", "NA", "NA", "NA", "NA");
 
 while(<INPUT>) {
 
@@ -242,6 +245,8 @@ print "\n map:\t\t\t $map";
 print "\n filter:\t\t $filter";
 print "\n peakcalling:\t\t $peakcalling";
 print "\n cleanbigwig:\t\t $cleanbigwig \t (remove: @lines2remove)";
+print "\n cleanfiles:\t\t $cleanfiles";
+print "\n granges:\t\t $granges";
 print "\n .........................................";
 print "\n";
 print "\n Samples: ";
@@ -320,15 +325,4 @@ close $IterateSH;
 # Submit jobs to run 
 
 #print "\n\n--------------------------------------------------------------------------------------------------\n";
-#print "\n  Submitting job to cluster: \t `sh $IterateSH` \n";
-`sh $IterateSH`;
-
-#*----------------------------------------------------------------------*
-# Exit script
-
-print "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n";
-print "\n Exiting INITIAL section with no known error \n";
-print "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n\n\n";
-
-exit 1;
-
+#prin

@@ -46,7 +46,6 @@ path2Logs <- paste(path2MainFolder, "Logs/", sep="")
 path2ReferenceFiles <- paste(path2NEAT,"ReferenceFiles/", sep="")
 path2CustFct <- paste(path2NEAT,"CustomFunctions/", sep="")
 path2Targets <- paste(path2MainFolder, "DataStructure/Targets.txt", sep="")
-path2chrlens <- paste(path2MainFolder, "DataStructure/chr_lens.dat", sep="")
 path2Tophat <- paste(path2MainFolder, "Tophat/", sep="")
 
 # Source pepsfunctions
@@ -118,12 +117,6 @@ cat(" \n || .-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-
 source(paste(path2CustFct, "RNAseqCreateArborescence.R", sep=""))
 RNAseqCreateArborescence(path2MainFolder=path2MainFolder)
 
-#------------------------------------------------------------
-# Read the chr_lens.dat
-#chromosomesFile <- read.delim(path2chrlens, comment.char="#")
-chromosomesFile <- read.table(path2chrlens, comment.char="#")
-chromosomes <- chromosomesFile$V1
-#chromosomes = c(paste("chr", seq(1,19),  sep = ""), "chrX", "chrY")
 
 #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 #                                                                 #
@@ -141,6 +134,26 @@ if(file.exists(path2Targets)==FALSE){ErrorOutput(paste("No Targets.txt file in\t
 cat(" \n\n Targets file provided: \n\n", sep="")
 Targets <- read.delim(path2Targets, comment.char="#")
 print(Targets)
+
+res <- readLines(LocalPath2Targets)
+for(i in 1:length(res)){
+  #i=21
+  newLine <- res[i]
+  # Store some variables
+  if(length(grep("Reference_genome\t", newLine))==1) { 
+    currentline <- gsub("# ", "", newLine); currentline <- gsub("\t", "", currentline); currentline <- gsub("\"", "", currentline);
+    refGenome <- unlist(strsplit(currentline, split = "\\="))[2]
+  }    
+}
+
+#------------------------------------------------------------
+# Read the chr_lens.dat
+#chromosomesFile <- read.delim(path2chrlens, comment.char="#")
+path2chrlens <- paste(path2MainFolder, "DataStructure/", refGenome, "/chr_lens.dat", sep="")
+chromosomesFile <- read.table(path2chrlens, comment.char="#")
+chromosomes <- chromosomesFile$V1
+#chromosomes = c(paste("chr", seq(1,19),  sep = ""), "chrX", "chrY")
+
 
 #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 #                                                                 #

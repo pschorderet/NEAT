@@ -17,7 +17,7 @@
 # parameters first:                                               #
 #                                                                 #
 #     path2NEAT <- "~/NEAT/"                                      #
-#     MainFolder <- "EXAMPLE/"; path2MainFolder <- paste("~/Desktop/", MainFolder, sep="")
+#     MainFolder <- "MY_NEW_CHIP_PROJECT/"; path2MainFolder <- paste("~/Desktop/", MainFolder, sep="")
 #     path2NEAT='/Users/patrick/NEAT/'; path2MainFolder ='~/Documents/Sciences/Kingston/DIPG/DIPG_consolidated_ChIPseq/';
 #     nameOfBed <- "mm9_TSS_10kb.bed" ; binNumber = 100 ; strand <- "+" ; Venn <- FALSE ; normInp <- FALSE
 #     nameOfBed <- "mm9_Transcripts.bed" ;
@@ -47,15 +47,15 @@ path2Mart <- paste(path2NEAT, "MartObjects/", sep="")
 path2ReferenceFiles <- paste(path2NEAT,"ReferenceFiles/", sep="")
 path2CustFct <- paste(path2NEAT,"CustomFunctions/", sep="")
 path2Targets <- paste(path2MainFolder, "DataStructure/Targets.txt", sep="")
-path2chrlens <- paste(path2MainFolder, "DataStructure/chr_lens.dat", sep="")
+path2bedwig <- paste(path2MainFolder, "/bedwig", sep="")
 
 # Source CustomFunctions
-source(paste(path2CustFct, "Tags2GRanges.R", sep=""))
-source(paste(path2CustFct, "DoesTheFileExist.R", sep=""))
 source(paste(path2CustFct, "Bam2GRangesRData.R", sep=""))
 source(paste(path2CustFct, "Bed2GRanges.R", sep=""))
 source(paste(path2CustFct, "CountOverlaps2matrix.R", sep=""))
+source(paste(path2CustFct, "DoesTheFileExist.R", sep=""))
 source(paste(path2CustFct, "ErrorOutput.R", sep=""))
+source(paste(path2CustFct, "GRanges2Bed.R", sep=""))
 source(paste(path2CustFct, "LoadMartGRanges.R", sep=""))
 source(paste(path2CustFct, "Mart2GRanges.R", sep=""))
 source(paste(path2CustFct, "OutputNumberOfReadsFromGRanges.R", sep=""))
@@ -145,9 +145,20 @@ cat(" \n\n Targets file provided: \n\n", sep="")
 Targets <- read.delim(path2Targets, comment.char="#")
 print(Targets)
 
+res <- readLines(LocalPath2Targets)
+for(i in 1:length(res)){
+  newLine <- res[i]
+  # Store some variables
+  if(length(grep("Reference_genome\t", newLine))==1) { 
+    currentline <- gsub("# ", "", newLine); currentline <- gsub("\t", "", currentline); currentline <- gsub("\"", "", currentline);
+    refGenome <- unlist(strsplit(currentline, split = "\\="))[2]
+  }    
+}
+
 #------------------------------------------------------------
 # Read the chr_lens.dat
 #chromosomesFile <- read.delim(path2chrlens, comment.char="#")
+path2chrlens <- paste(path2MainFolder, "DataStructure/", refGenome, "/chr_lens.dat", sep="")
 chromosomesFile <- read.table(path2chrlens, comment.char="#")
 chromosomes <- chromosomesFile$V1
 #chromosomes = c(paste("chr", seq(1,19),  sep = ""), "chrX", "chrY")
@@ -191,9 +202,12 @@ if(DoesTheFileExist(path2file=bamGRangesRDataPath)!=TRUE){
       cat(" \n\n\n * * * * * * * * * * * * * * * * * * * * * * * * * * * * ", sep="")
       cat(" \n ", k, " / ", length(bamPath) ," :\t", bamPath[k], sep="")
       Bam2GRangesRData(path2bam=bamPath[k], chromosomes=chromosomes)
+      #Bam2GRangesRData(path2bam=bamPath[1], chromosomes=0)
     }  
   }
 }
+
+#dirname(bamGRangesRDataPath[1])
 
 # Check if .bam.GRanges.RData files exists, load them
 GRangesSamples <- list.files(path2GRangesRData, pattern = "*.bam.GRanges.RData$")  
@@ -210,6 +224,13 @@ if(DoesTheFileExist(path2file=paste(paste(path2GRangesRData, allsamples, sep="")
 #------------------------------------------------------------
 # Quality Control 
 OutputNumberOfReadsFromGRanges(GRangesSamples)
+
+
+
+path2bed <- paste(path2bedwig, "/", samples[1], ".bam.bedwig", sep="")
+GRanges2bed(GRangesSample=get(GRangesSamples[1]), path2bed=path2bed)
+
+
 
 
 #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
