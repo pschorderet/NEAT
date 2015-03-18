@@ -121,35 +121,35 @@ my ($removepcr, $makeunique, $ndiff, $aligncommand1, $fdr, $posopt, $densityopt,
 
 while(<INPUT>) {
 
-        if (/# Bwa.maxEditDist/) {
+        if (/# Bwa_maxEditDist/) {
                 $_ =~ m/"(.+?)"/;
                 $ndiff = "$1";
 	}
-        elsif (/# Align.command.line.1/) {
+        elsif (/# Align_command_line_1/) {
                 $_ =~ m/"(.+?)"/;
                 $aligncommand1 = "$1";
 	}
-        elsif (/# Filter.removePCRdup/) {
+        elsif (/# Filter_removePCRdup/) {
                 $_ =~ m/"(.+?)"/;
                 $removepcr = "$1";
 	}
-        elsif (/# Filter.makeUniqueRead/) {
+        elsif (/# Filter_makeUniqueRead/) {
                 $_ =~ m/"(.+?)"/;
                 $makeunique = "$1";
         }
-        elsif (/# PeakCaller.fdr/) {
+        elsif (/# PeakCaller_fdr/) {
                 $_ =~ m/"(.+?)"/;
                 $fdr = "$1";
         }
-        elsif (/# PeakCaller.posopt/) {
+        elsif (/# PeakCaller_posopt/) {
                 $_ =~ m/"(.+?)"/;
                 $posopt = "$1";
         }
-        elsif (/# PeakCaller.densityopt/) {
+        elsif (/# PeakCaller_densityopt/) {
                 $_ =~ m/"(.+?)"/;
                 $densityopt = "$1";
         }
-        elsif (/# PeakCaller.enfSize/) {
+        elsif (/# PeakCaller_enfSize/) {
                 $_ =~ m/"(.+?)"/;
                 $enforceisize = "$1";
         }
@@ -544,7 +544,7 @@ if( $chiprx =~ "TRUE" ){
         # Change Targets.txt file for next iteration
         print "\n--------------------------------------------------------------------------------------------------\n";
         print "\n Changing '$myJobName' variable to FALSE and proceed";
-        `/usr/bin/perl -p -i -e "s/$myJobName/$myJobName\_TMP/gi" $Targets`;
+        `/usr/bin/perl -p -i -e "s/$myJobName/$myJobName\_DONE/gi" $Targets`;
 
         #*----------------------------------------------------------------------*
         # Prepar file containing the jobs to run
@@ -1162,23 +1162,37 @@ if($cleanfiles =~ "TRUE"){
 	my $path2bamRX			= "$path2aligned/bam_RX";
         unless( -d "$path2bamRX" )	{ `mkdir $path2bamRX`;		}
 
-
-	#-----------------------------------------------------
-	# Copy .bam and .bai files to bam folder and fill in LibrarySize.txt
-	my $tmp 	= "$path2DataStructure/LibrarySize.txt";
-	open $tmp, ">", "$tmp" or die "Can't open '$tmp'";
-        close $tmp;
-
 	foreach my $i (0 .. $#samplesInputs) {
 
+		print "\n\t $samples[$i] ";
+
+                # Prepare a personal qsub script
+                my $QSUBint     = "$tmpscr/$myJobName/$samples[$i]\_$myJobName\.sh";
+                `cp $scrhead $QSUBint`;
+
 		# Count reads in .bam and store in LibrarySize.txt
-		my $path2currentSampleDir	= "$path2aligned/$samplesInputs[$i]";
+                my $path2currentSampleDir	= "$path2aligned/$samplesInputs[$i]";
 
-                `cp $path2aligned/$samplesInputs[$i]/$samplesInputs[$i].bam $path2bam/`;
-                `cp $path2aligned/$samplesInputs[$i]/$samplesInputs[$i].bai $path2bam/`;
+                #-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+                #-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+          IMPORTANT CODE HERE         -+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
-		`cp $path2aligned/$samplesInputs[$i]\_RX/$samplesInputs[$i].bam $path2bamRX/`;
-                `cp $path2aligned/$samplesInputs[$i]\_RX/$samplesInputs[$i].bai $path2bamRX/`;        
+                my $cmd		= "`cp $path2aligned/$samplesInputs[$i]/$samplesInputs[$i].bam $path2bam/`";
+		`echo "$cmd" >> $QSUBint`;
+                $cmd		= "`cp $path2aligned/$samplesInputs[$i]/$samplesInputs[$i].bai $path2bam/`";
+		`echo "$cmd" >> $QSUBint`;
+		"`cp $path2aligned/$samplesInputs[$i]\_RX/$samplesInputs[$i].bam $path2bamRX/`";
+                $cmd            = `echo "$cmd" >> $QSUBint`;
+		"`cp $path2aligned/$samplesInputs[$i]\_RX/$samplesInputs[$i].bai $path2bamRX/`";        
+		$cmd            = `echo "$cmd" >> $QSUBint`;
+
+		#---------------------------------------------
+                # Keep track of the jobs in @myJobs
+                my $jobName     = "$myJobName$i";
+                push(@myJobs, "$jobName");
+                $cmd            = "$jobName=`qsub -o $path2qsub -e $path2qsub $QSUBint`";
+                open $QSUB, ">>", "$QSUB" or die "Can't open '$QSUB'";
+                print $QSUB "$cmd\n";
+                close $QSUB;
 
 	}
 	
@@ -1191,7 +1205,13 @@ if($cleanfiles =~ "TRUE"){
         print "\n Changing '$myJobName' variable to FALSE and proceed";
         `/usr/bin/perl -p -i -e "s/$myJobName/$myJobName\_DONE/gi" $Targets`;
 
-	my $finalcmd    = "FINAL=\`qsub -N $iterateJobName -o $path2qsub -e $path2qsub -W depend=afterok\:$myJobsVec $IterateSH`";
+	#*----------------------------------------------------------------------*
+        # Prepar file containing the jobs to run
+
+        # Add the next job line to the $QSUB
+        foreach( @myJobs ){ $_ = "\$".$_ ; }
+        my $myJobsVec   = join(":", @myJobs);
+        my $finalcmd    = "FINAL=\`qsub -N $iterateJobName -o $path2qsub -e $path2qsub -W depend=afterany\:$myJobsVec $IterateSH`";
         open $QSUB, ">>", "$QSUB" or die "Can't open '$QSUB'";
         print $QSUB "$finalcmd\n";
         close $QSUB;
@@ -1203,11 +1223,14 @@ if($cleanfiles =~ "TRUE"){
         print "\n Submitting job to cluster: \t `sh $QSUB` \n";
         `sh $QSUB`;
 
-	print "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n";
-	print "\n Exiting $myJobName section with no known error \n";
-	print "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n\n\n";
+        #*----------------------------------------------------------------------*
+        # Exit script
 
-	exit 0;
+        print "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n";
+        print "\n Exiting $myJobName section with no known error \n";
+        print "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n\n\n";
+
+        exit 0;
 
 }
 

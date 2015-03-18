@@ -28,9 +28,11 @@ path2CustFct	<- paste(args[3], "/", sep="")		# path to CustomFunctions
 path2MainFolder	<- path2expFolder
 path2GRangesRData <- paste(path2MainFolder, "aligned/GRangesRData/", sep="")
 path2GRangesRDataRX <- paste(path2MainFolder, "aligned/GRangesRData_RX/", sep="") 
+path2statTable <- paste(path2MainFolder, "DataStructure/statTable.bed", sep="")
 
 path2Targets	<- paste(path2MainFolder, "DataStructure/Targets.txt", sep="")
 normConstant	<- 1e6
+
 
 #-----------------------------------------------------------
 # LOAD LIBRARY
@@ -42,13 +44,20 @@ library(caTools)
 library(rtracklayer)
 
 source(paste(path2CustFct, "Bam2GRangesRData.R", sep=""))
+source(paste(path2CustFct, "CountOverlaps2GRanges.R", sep=""))
 source(paste(path2CustFct, "DoesTheFileExist.R", sep=""))
 source(paste(path2CustFct, "ErrorOutput.R", sep=""))
-#source(paste(path2CustFct, "GRanges2Bed.R", sep=""))
 source(paste(path2CustFct, "LoadMartGRanges.R", sep=""))
 source(paste(path2CustFct, "Mart2GRanges.R", sep=""))
 source(paste(path2CustFct, "Tags2GRanges.R", sep=""))
 source(paste(path2CustFct, "OutputNumberOfReadsFromGRanges.R", sep=""))
+
+
+#-----------------------------------------------------------
+# Create folder
+# wig
+path2wig <- paste(path2MainFolder, "wig/", sep="")
+checkExistenceOfFolder(path2CheckFolder=path2wig)
 
 #------------------------------------------------------------
 # Read Targets files
@@ -104,6 +113,7 @@ allsamples <- c(levels(Targets$FileName), levels(Targets$InpName))
 if(length(which(allsamples=="-")) != 0){
   allsamples <- allsamples[-which(allsamples=="-")]    
 }
+cat("\n Samples provided: ", allsamples, sep="\n")
 
 #------------------------------------------------------------
 # Check existence of .bam.GRanges.RData or .bam files
@@ -112,26 +122,36 @@ cat(" \n || * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
 cat(" \n ||\t Create / load GRanges object from bam files", sep="")
 cat(" \n || .-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.\n", sep="")
 
+
+
+
 #------------------------------------------------------------
 # Create ChIPrx GRanges objects
 
 # If .bam.GRanges.RData files DO NOT exists, create them
 cat(" \n\n #########################################################", sep="")
-cat(" \n #                                                       #", sep="")
-cat(" \n #                Creating GRanges for RX                #", sep="")
-cat(" \n #                                                       #", sep="")
-cat(" \n ---------------------------------------------------------", sep="")
+cat("   \n #                                                       #", sep="")
+cat("   \n #                Creating GRanges for RX                #", sep="")
+cat("   \n #                                                       #", sep="")
+cat("   \n ---------------------------------------------------------", sep="")
 
 #------------------------------------------------------------
 # Create GRanges objects
 #
+myChIPrx <- "TRUE"
+countsRX <- NULL
 bamGRangesRDataRXPath <- paste(paste(path2GRangesRDataRX, allsamples, sep=""), ".bam.GRanges.RData", sep="")
 if(DoesTheFileExist(path2file=bamGRangesRDataRXPath)!=TRUE){
-	
-	# If .bam files cannot be found, abort
-	bamPathRX <- paste(path2file=path2bamRX, allsamples, ".bam", sep="")
-	# If .bam files are present, create .bam.GRanges.RData files
-	if(DoesTheFileExist(path2file=bamPathRX)==TRUE){
+	# If .bam files cannot be found, assume RX is not used and set everything to 1
+        bamPathRX <- paste(path2file=path2bamRX, allsamples, ".bam", sep="")
+        if(DoesTheFileExist(path2file=bamPathRX)!=TRUE){
+                # do nothing
+		cat(" \n\n +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-", sep="")
+                cat("   \n +-+-+-+-+-+-+-+-+-        NOTE       -+-+-+-+-+-+-+-+-+-+-\n", sep="")
+		cat("   \n Some RX.bam files do not exists. \n Assume no ChIPrx normalization.\n", sep="")
+		cat("   \n +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-\n\n\n", sep="")	
+		myChIPrx <- "FALSE"		
+        } else {
 		# Create GRangesRData files
 		cat(" \n\n **********************************************************\n", sep="")       
 		cat(" \n Generating .bam.GRanges.RData files for RX", sep="")
@@ -146,31 +166,35 @@ if(DoesTheFileExist(path2file=bamGRangesRDataRXPath)!=TRUE){
 #------------------------------------------------------------
 # Load GRanges objects
 #
-countsRX <- NULL
-GRangesSamplesRX <- list.files(path2GRangesRDataRX, pattern = "*.bam.GRanges.RData$")  
-if(DoesTheFileExist(path2file=paste(paste(path2GRangesRDataRX, allsamples, sep=""), ".bam.GRanges.RData", sep=""))==TRUE){
-	 # If .bam files cannot be found, assume RX is not used and set everything to 1
-	bamPathRX <- paste(path2file=path2bamRX, allsamples, ".bam", sep="")
-	if(DoesTheFileExist(path2file=bamPathRX)!=TRUE){
-		countsRX <- c(countsRX, normConstant)
+if(myChIPrx == "TRUE"){
+
+	GRangesSamplesRX <- list.files(path2GRangesRDataRX, pattern = "*.bam.GRanges.RData$")  
+	if(DoesTheFileExist(path2file=paste(paste(path2GRangesRDataRX, allsamples, sep=""), ".bam.GRanges.RData", sep=""))==TRUE){
+		# If .bam files cannot be found, assume RX is not used and set everything to 1
+		bamPathRX <- paste(path2file=path2bamRX, allsamples, ".bam", sep="")
+		if(DoesTheFileExist(path2file=bamPathRX)!=TRUE){
+			countsRX <- c(countsRX, normConstant)
+		}
+		# Load each sample into its .GRanges named object
+		for(i in 1:length(GRangesSamplesRX)){
+			path2load <- paste(path2GRangesRDataRX, GRangesSamplesRX[i], sep="")
+			load(path2load)
+			assign(GRangesSamplesRX[i], GRangesObj)
+			countsRX <- c(countsRX, length(get(GRangesSamplesRX[i])))
+#			cat("\n", GRangesSamplesRX[i], "\t", length(get(GRangesSamplesRX[i])), sep="")
+		}
 	}
-	# Load each sample into its .GRanges named object
-	for(i in 1:length(GRangesSamplesRX)){
-		path2load <- paste(path2GRangesRDataRX, GRangesSamplesRX[i], sep="")
-		load(path2load)
-		assign(GRangesSamplesRX[i], GRangesObj)
-		countsRX <- c(countsRX, length(get(GRangesSamplesRX[i])))
-#		cat("\n", GRangesSamplesRX[i], "\t", length(get(GRangesSamplesRX[i])), sep="")
-	}
+
+	OutputNumberOfReadsFromGRanges(GRangesSamplesRX)
+
 }
-OutputNumberOfReadsFromGRanges(GRangesSamplesRX)
 
 
 cat(" \n\n #########################################################", sep="")
-cat(" \n #                                                       #", sep="")
-cat(" \n #                    Creating GRanges                   #", sep="")
-cat(" \n #                                                       #", sep="")
-cat(" \n ---------------------------------------------------------", sep="")
+cat("   \n #                                                       #", sep="")
+cat("   \n #                    Creating GRanges                   #", sep="")
+cat("   \n #                                                       #", sep="")
+cat("   \n ---------------------------------------------------------", sep="")
 
 #------------------------------------------------------------
 # Load GRanges objects
@@ -182,9 +206,7 @@ if(DoesTheFileExist(path2file=bamGRangesRDataPath)!=TRUE){
 	bamPath <- paste(path2file=path2bam, allsamples, ".bam", sep="")
 	if(DoesTheFileExist(path2file=bamPath)!=TRUE){
 		ErrorOutput("Some .bam files could not be found")
-	}
-	# If .bam files are present, create .bam.GRanges.RData files
-	if(DoesTheFileExist(path2file=bamPath)==TRUE){
+	} else {
 		# Create GRangesRData files
 		cat(" \n\n **********************************************************\n", sep="")
 		cat(" \n Generating .bam.GRanges.RData files", sep="")
@@ -214,29 +236,18 @@ if(DoesTheFileExist(path2file=paste(paste(path2GRangesRData, allsamples, sep="")
 OutputNumberOfReadsFromGRanges(GRangesSamples)
 
 
+
 cat(" \n\n #########################################################", sep="")
-cat(" \n #                                                       #", sep="")
-cat(" \n #                 Creating Summary table                #", sep="")
-cat(" \n #                                                       #", sep="")
-cat(" \n ---------------------------------------------------------\n", sep="")
+cat("   \n #                                                       #", sep="")
+cat("   \n #                 Creating Summary table                #", sep="")
+cat("   \n #                                                       #", sep="")
+cat("   \n ---------------------------------------------------------\n", sep="")
 
 #------------------------------------------------------------
 # Create summary table with number of reads and scaling factor
 #
 cat("\n statTable: \n\n", sep="")
 
-# Compute normalization factor. This corresponds to alpha in the Orlando et al. Cell Reports 2014.
-# Multiplying counts by alpha results in RRPM (reference-adjusted RPM)
-NormFact <- round(normConstant/countsRX, 2)
-statTable <- NULL
-statTable <- data.frame(allsamples, counts, countsRX, NormFact)
-print(statTable)
-write.table(statTable, paste(path2MainFolder, "DataStructure/statTable_", Sys.Date(), ".bed", sep=""), sep = "\t", row.names = FALSE, col.names=TRUE, quote=FALSE, na="")
-
-cat(" \n\n #########################################################", sep="")
-cat(" \n #                                                       #", sep="")
-cat(" \n #                     Create bedwig                     #", sep="")
-cat(" \n #                                                       #", sep="")
-cat(" \n ---------------------------------------------------------\n", sep="")
-
-
+if(myChIPrx == "TRUE"){
+	# Compute normalization factor. This corresponds to alpha in the Orlando et al. Cell Reports 2014.
+	# Multiplyin

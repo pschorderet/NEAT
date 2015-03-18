@@ -6,22 +6,18 @@
 #
 # Remote Server
 #
-# Bwa.maxEditDist	=	"1"
-# Align.command.line.1	=	"bwa aln"
-# Align.command.line.2  =	"bwa samse"
-# 	single-end	:	"samse"
-# 	paired-end	:	"sampe"
+# Bwa_maxEditDist	=	"1"
+# Align_command_line_1	=	"bwa aln"
 #
+# Filter_removePCRdup	=	"1"
+# Filter_makeUniqueRead	=	"1"
+# Filter_splitbychr	=	"1"
+# Filter_enforceinssize	=	"0"
+# Filter_minisize	=	"100"
+# Filter_maxisize	=	"800"
 #
-# Filter.removePCRdup	=	"1"
-# Filter.makeUniqueRead	=	"1"
-# Filter.splitbychr	=	"1"
-# Filter.enforceinssize	=	"0"
-# Filter.minisize	=	"100"
-# Filter.maxisize	=	"800"
-#
-# PeakCaller.fdr	=	"0.01"
-# PeakCaller.posopt	=	"1"
-# PeakCaller.densityopt	=	"1"
+# PeakCaller_fdr	=	"0.01"
+# PeakCaller_posopt	=	"1"
+# PeakCaller_densityopt	=	"1"
 #
 #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-|

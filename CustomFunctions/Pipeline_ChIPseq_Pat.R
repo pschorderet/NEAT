@@ -17,9 +17,10 @@
 # parameters first:                                               #
 #                                                                 #
 #     path2NEAT <- "~/NEAT/"                                      #
+#     
 #     MainFolder <- "MY_NEW_CHIP_PROJECT/"; path2MainFolder <- paste("~/Desktop/", MainFolder, sep="")
 #     path2NEAT='/Users/patrick/NEAT/'; path2MainFolder ='~/Documents/Sciences/Kingston/DIPG/DIPG_consolidated_ChIPseq/';
-#     nameOfBed <- "mm9_TSS_10kb.bed" ; binNumber = 100 ; strand <- "+" ; Venn <- FALSE ; normInp <- FALSE
+#     nameOfBed <- "mm9_TSS_10kb.bed" ; binNumber = 100 ; strand <- "+" ; Venn <- FALSE ; normInp <- FALSE; runmean=10
 #     nameOfBed <- "mm9_Transcripts.bed" ;
 #     nameOfBed <- "mm9_Enhancers" ;
 #     runmeank <- 5
@@ -53,9 +54,10 @@ path2bedwig <- paste(path2MainFolder, "/bedwig", sep="")
 source(paste(path2CustFct, "Bam2GRangesRData.R", sep=""))
 source(paste(path2CustFct, "Bed2GRanges.R", sep=""))
 source(paste(path2CustFct, "CountOverlaps2matrix.R", sep=""))
+source(paste(path2CustFct, "CountOverlaps2GRanges.R", sep=""))
 source(paste(path2CustFct, "DoesTheFileExist.R", sep=""))
 source(paste(path2CustFct, "ErrorOutput.R", sep=""))
-source(paste(path2CustFct, "GRanges2Bed.R", sep=""))
+source(paste(path2CustFct, "GRanges2Bedwig.R", sep=""))
 source(paste(path2CustFct, "LoadMartGRanges.R", sep=""))
 source(paste(path2CustFct, "Mart2GRanges.R", sep=""))
 source(paste(path2CustFct, "OutputNumberOfReadsFromGRanges.R", sep=""))
@@ -145,7 +147,7 @@ cat(" \n\n Targets file provided: \n\n", sep="")
 Targets <- read.delim(path2Targets, comment.char="#")
 print(Targets)
 
-res <- readLines(LocalPath2Targets)
+res <- readLines(path2Targets)
 for(i in 1:length(res)){
   newLine <- res[i]
   # Store some variables
@@ -228,7 +230,88 @@ OutputNumberOfReadsFromGRanges(GRangesSamples)
 
 
 path2bed <- paste(path2bedwig, "/", samples[1], ".bam.bedwig", sep="")
-GRanges2bed(GRangesSample=get(GRangesSamples[1]), path2bed=path2bed)
+
+# Find Taxon Db name and dictionary
+res <- readLines(path2Targets)
+tDb <- res[grep("Proj_TaxonDatabase", res)]; tDb <- gsub("# ","",tDb); tDb <- gsub("\t","",tDb); tDb <- gsub("\"","",tDb)
+TaxonDatabaseKG <- unlist(strsplit(tDb, split = "\\="))[2]
+tDbDict <- res[grep("Proj_TaxonDatabaseDic", res)]; tDbDict <- gsub("# ","",tDbDict); tDbDict <- gsub("\t","",tDbDict); tDbDict <- gsub("\"","",tDbDict)
+TaxonDatabaseDict <- unlist(strsplit(tDbDict, split = "\\="))[2]
+
+TaxonDatabase = "BSgenome.Mmusculus.UCSC.mm9"
+library(TaxonDatabase, character.only = TRUE)
+
+#source(paste(path2CustFct, "GRanges2Bedwig.R", sep=""))
+
+
+
+
+source(paste(path2CustFct, "CountOverlaps2GRanges.R", sep=""))
+
+
+# Set variables and paths
+path2chrlens <- paste(path2MainFolder, "DataStructure/", refGenome, "/chr_lens.dat", sep="")
+chromosomesFile <- read.table(path2chrlens, comment.char="#")
+seqlengths <- c(chromosomesFile[,2])
+names(seqlengths) <- chromosomesFile[,1]
+seqlengths
+
+# Slice the genome into bins
+bins <- tileGenome(seqlengths, tilewidth=500, cut.last.tile.in.chrom=TRUE)
+bins
+currentGR <- get(GRangesSamples[1])
+
+# Read in the statTable file countaining the ChIPrx normaization factors
+path2statTable <- paste(path2MainFolder, "DataStructure/statTable.bed", sep="")
+statTable <- read.table(path2statTable, header=TRUE, comment.char="#")
+
+# Disable scientific notation to ensure no 'e' are found in the wig files
+options(scipen=999)
+# Set paths to tmp files
+path2wigfilename_tmp <- paste(path2bedwig, "/tmp.wig", sep="")
+path2wigfile_header <- paste(path2bedwig, "/header.wig", sep="")
+
+for(h in 1:length(GRangesSamples)){
+  # h=1
+  gr <- CountOverlaps2GRanges(GRanges1=bins, GRanges2=get(GRangesSamples[h]), normFactRX=statTable$NormFact[h], normToLibrarySize=FALSE)
+  df <- data.frame(seqnames=seqnames(gr), starts=start(gr)-1, ends=end(gr), value=elementMetadata(gr)$ValueRX)
+  # Delete line that have no value
+  dfnon0 <- df[which(df$value!=0),]
+  # Set path to current wig file
+  path2wigfilename <- paste(path2bedwig, "/", GRangesSamples[h], ".wig", sep="")
+  # Copy dfnon0 to tmp file
+  write.table(dfnon0, file=path2wigfilename_tmp, quote=F, sep="\t", row.names=F, col.names=F)
+  # Add header to the file
+  header = paste("track type=wiggle_0 name='", allsamples[h], "' description='coverata' visibility=dense color=0,100,200 priority=20", sep="")
+  # Copy header to tmp file
+  write.table(header, file=path2wigfile_header, quote=F, sep="\t", row.names=F, col.names=F)
+  # Consolidate files
+  mycode <- paste("`echo '", header, "' > ", path2wigfilename, "`", sep="")
+  system(mycode)
+  mycode <- paste("`cat ", path2wigfile_header, " ", path2wigfilename_tmp, " > ", path2wigfilename, "`", sep="")
+  system(mycode)
+
+}
+
+# Delete temporary files
+mycode <- paste("`rm ", path2wigfilename_tmp, "`", sep="")
+system(mycode)
+mycode <- paste("`rm ", path2wigfile_header, "`", sep="")
+system(mycode)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -379,8 +462,6 @@ for(i in levels(Targets$Factor)){
       path2MartObject <- paste(path2Mart, nameOfBed, sep="")
       test <- LoadMartGRanges(path2MartObject=path2MartObject, binNumber=1, strand="-")
       geneNames <- GRfeat$GeneNames[seq(from=1, to=length(GRfeat), by=binNumber)]
-      
-      
       
       
       # Assign countTable to the nameCountTable

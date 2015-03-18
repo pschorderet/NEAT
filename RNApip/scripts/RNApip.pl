@@ -24,9 +24,10 @@ else{ die "\n\n----------------------------------------\n\n Provide the path whe
 my $Targets = "$path2expFolder/DataStructure/Targets.txt";
 open(INPUT, $Targets) || die "Error opening $Targets : $!\n\n\n";
 
-my ($expFolder, $genome, $userFolder, $path2RNAseqScripts, $path2RNAseq, $path2fastqgz, $chrlens, $path2gtfFile)	 			= ("NA", "NA", "NA", "NA", "NA", "NA", "NA", "NA");
-my ($unzip, $qc, $map, $filter)															= ("FALSE", "FALSE", "FALSE", "FALSE", "FALSE");
-my (@sc, @lines2remove)																= ();
+my ($expFolder, $genome, $userFolder, $path2RNAseqScripts, $path2RNAseq, $path2fastqgz, $chrlens, $path2gtfFile)                                = ("NA", "NA", "NA", "NA", "NA", "NA", "NA", "NA");
+my ($unzip, $qc, $map, $filter, $cleanfiles, $granges)                                                                                          = ("FALSE", "FALSE", "FALSE", "FALSE", "FALSE", "FALSE");
+
+my (@sc, @lines2remove)                                                                                                                         = ();
 # Find paths to different folders in the Targets.txt file
 while(<INPUT>) {
         if (/# My_personal_email/) {
@@ -47,18 +48,19 @@ while(<INPUT>) {
         }
 	if (/# Remote_path_to_NEAT/) {
                 $_ =~ m/"(.+?)"/;
-                $path2RNAseq = "$1\/RNApip";
+            	$path2NEAT = "$1";
+		$path2RNAseq = "$1\/RNApip";
                 $path2RNAseqScripts = join("", $path2RNAseq, "/scripts");
         }
-	if (/# Remote_path_to_orifastq.gz/) {
+	if (/# Remote_path_to_orifastq_gz/) {
                 $_ =~ m/"(.+?)"/;
                 $path2fastqgz = "$1";
         }
-	if (/# Remote_path_to_chrLens.dat/) {
+	if (/# Remote_path_to_chrLens_dat/) {
                 $_ =~ m/"(.+?)"/;
                 $chrlens = "$1";
         }
-	if (/# Remote_path_to_RefGen.fasta/) {
+	if (/# Remote_path_to_RefGen_fasta/) {
                 $_ =~ m/"(.+?)"/;
                 $refGenome = "$1";
         }
@@ -81,38 +83,42 @@ while(<INPUT>) {
                 if (grep /\bqc\b/i, $_ )                { $qc                   = "TRUE"; push @steps2execute, "QC";            }
                 if (grep /\bmap\b/i, $_ )               { $map                  = "TRUE"; push @steps2execute, "Map";           }
                 if (grep /\bfilter\b/i, $_ )            { $filter               = "TRUE"; push @steps2execute, "Filter";        }
+                if (grep /\bcleanfiles\b/i, $_ )        { $cleanfiles           = "TRUE"; push @steps2execute, "Cleanfiles";    }
+                if (grep /\bgranges\b/i, $_ )           { $granges              = "TRUE"; push @steps2execute, "GRanges";	}
+
         }
 
 } # end of Targets.txt
 
 
 
-
 my $AdvSettings = "$path2expFolder/DataStructure/AdvancedSettings.txt";
 open(INPUT, $AdvSettings) || die "Error opening $AdvSettings : $!\n\n\n";
 
-my ($removepcrdup, $makeunique, $ndiff, $aligncommand)				= ("NA", "NA", "NA", "NA", "NA", "NA", "NA");
+my ($removepcr, $makeunique, $ndiff, $aligncommand)                             = ("NA", "NA", "NA", "NA");
 
 while(<INPUT>) {
 
-	if (/# Filter.removePCRdup/) {
-		$_ =~ m/"(.+?)"/;
-		$removepcr = "$1";
-	}
-	if (/# Filter.makeUniqueRead/) {
-		$_ =~ m/"(.+?)"/;
-		$makeunique = "$1";
-	}
-	if (/# Filter.maxEditDist/) {
-		$_ =~ m/"(.+?)"/;
-		$ndiff = "$1";
-	}
-	if (/# Align.command.opt/) {
+        if (/# Filter_removePCRdup/) {
+                $_ =~ m/"(.+?)"/;
+                $removepcr = "$1";
+        }
+	if (/# Filter_makeUniqueRead/) {
+                $_ =~ m/"(.+?)"/;
+                $makeunique = "$1";
+        }
+	if (/# Filter_maxEditDist/) {
+                $_ =~ m/"(.+?)"/;
+                $ndiff = "$1";
+        }
+        if (/# Align_command.opt/) {
                 $_ =~ m/"(.+?)"/;
                 $aligncommand = "$1";
         }
 
 } # end of AdvancedSettings.txt
+
+
 
 
 
@@ -141,7 +147,7 @@ print "\n genome:\t\t $genome";
 print "\n userFolder:\t\t $userFolder";
 print "\n path2RNApip:\t\t $path2RNAseq";
 print "\n path2expFolder:\t $path2expFolder";
-print "\n path2fastq.gz:\t\t $path2fastqgz";
+print "\n path2fastq_gz:\t\t $path2fastqgz";
 print "\n Targets:\t\t $path2expFolder/DataStructure/Targets.txt";
 print "\n chrlens:\t\t $chrlens";
 print "\n refGenome:\t\t $refGenome";
@@ -162,6 +168,8 @@ print "\n unzip:\t\t\t $unzip";
 print "\n qc:\t\t\t $qc";
 print "\n map:\t\t\t $map";
 print "\n filter:\t\t $filter";
+print "\n cleanfiles:\t\t $cleanfiles";
+print "\n granges:\t\t $granges";
 print "\n .........................................";
 print "\n";
 print "\n Samples: ";
@@ -221,7 +229,8 @@ my $scrhead 			= "$path2RNAseqScripts/QSUB_header.sh";
 my $path2iterate		= "$tmpscr/iterate";
 my $RNAseqMainIterative		= "$path2iterate/RNAseq.sh";
 my $IterateSH			= "$path2iterate/Iterate\_$expFolder.sh";
-
+my $path2CustFct                = "$path2NEAT/CustomFunctions";
+my $path2aligned  	        = "$path2expFolder/aligned";
 
 #************************************************************************
 #									*
@@ -611,46 +620,78 @@ if( $filter =~ "TRUE" ){
 }
 
 
-if($unzip =~ "FALSE"  &&  $qc =~ "FALSE"  &&  $map =~ "FALSE"  &&  $filter =~ "FALSE" ){
+if($cleanfiles =~ "TRUE"){
 
-	print "\n\n*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-\n";
+
+	my $iterateJobName	= "Iterate_cleanfiles_$expFolder";
+        my $myJobName           = "cleanfiles";
+        my $path2qsub           = "$tmpscr/$myJobName/qsub";
+
+        # Create file to store jobs in
+        unless( -d "$tmpscr/$myJobName" )	{ `mkdir $tmpscr/$myJobName`; }
+        unless( -d "$path2qsub" )               { `mkdir $path2qsub`; }
+        my $QSUB        = "$tmpscr/$myJobName/$myJobName\.sh";
+        open $QSUB, ">", "$QSUB" or die "Can't open '$QSUB'";
+        print $QSUB "#!/bin/bash\n";
+        close $QSUB;
+        `chmod 777 $QSUB`;
+        print "\n Store all of the following '$myJobName' jobs in $QSUB \n";
+        my @myJobs;
+
+        print "\n\n*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-\n";
         print "\n Moving .bam and .bai files from the Tophat to the aligned folder \n";
 
-
-	my $path2aligned                = "$path2expFolder/aligned";
+        my $path2aligned                = "$path2expFolder/aligned";
         unless( -d "$path2aligned" )    { `mkdir $path2aligned`;        }
         my $path2bam                    = "$path2aligned/bam";
         unless( -d "$path2bam" )        { `mkdir $path2bam`;            }
 
-	foreach my $i (0 .. $#samples) {
-		`cp $path2Tophat/$samples[$i]/$samples[$i].bam $path2bam/`;
-		`cp $path2Tophat/$samples[$i]/$samples[$i].bai $path2bam/`;
+        foreach my $i (0 .. $#samples) {
+
+		print "\n\t $samples[$i] ";
+
+                # Prepare a personal qsub script
+                my $QSUBint     = "$tmpscr/$myJobName/$samples[$i]\_$myJobName\.sh";
+                `cp $scrhead $QSUBint`;
+
+		#-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+                #-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+          IMPORTANT CODE HERE         -+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+              #  # Count reads in .bam and store in LibrarySize.txt
+              #  my $path2currentSampleDir	= "$path2aligned/$samplesInputs[$i]";
+		my $cmd = "`cp $path2Tophat/$samples[$i]/$samples[$i].bam $path2bam/`";
+		`echo "$cmd" >> $QSUBint`;
+                $cmd = "`cp $path2Tophat/$samples[$i]/$samples[$i].bai $path2bam/`";
+		`echo "$cmd" >> $QSUBint`;
+                #--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--
+
+                #---------------------------------------------
+                # Keep track of the jobs in @myJobs
+                my $jobName     = "$myJobName$i";
+                push(@myJobs, "$jobName");
+                $cmd            = "$jobName=`qsub -o $path2qsub -e $path2qsub $QSUBint`";
+                open $QSUB, ">>", "$QSUB" or die "Can't open '$QSUB'";
+                print $QSUB "$cmd\n";
+                close $QSUB;
+
 	}
 
-	print "\n\n*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-\n";
-	print "\n Exiting \n";
+        #*----------------------------------------------------------------------*
+        # Change Targets.txt file for next iteration
+        print "\n--------------------------------------------------------------------------------------------------\n";
+        print "\n Changing '$myJobName' variable to FALSE and proceed";
+        `/usr/bin/perl -p -i -e "s/$myJobName/$myJobName\_DONE/gi" $Targets`;
 
-	my $iterateJobName	= "Iterate_exit_$expFolder";
-	my $myJobName           = "exit";
-	my $path2qsub           = "$tmpscr/$myJobName/qsub";
 
-	# Create file to store jobs in
- 	unless( -d "$tmpscr/$myJobName" )	{ `mkdir $tmpscr/$myJobName`; }
- 	unless( -d "$path2qsub" )		{ `mkdir $path2qsub`; }
+	#*----------------------------------------------------------------------*
+        # Prepar file containing the jobs to run
 
-	my $QSUBfinal	= "$tmpscr/$myJobName/$myJobName\_final.sh";
-	`cp $scrhead $QSUBfinal`;
-	my $cmd		= "echo `An email has been sent to $email`";
-	`echo "$cmd" >> $QSUBfinal`;
-	`chmod 777 $QSUBfinal`;	
-
-	my $QSUB	= "$tmpscr/$myJobName/$myJobName\.sh";
-	$cmd		= "#!/bin/bash";
-	`echo "$cmd" >> $QSUB`;
-	$cmd		= "FINAL=\`qsub -m e -M $email -N $iterateJobName -o $path2qsub -e $path2qsub $QSUBfinal`";
-	`echo "$cmd" >> $QSUB`;
-	`chmod 777 $QSUB`;
-
+        # Add the next job line to the $QSUB
+        foreach( @myJobs ){ $_ = "\$".$_ ; }
+        my $myJobsVec   = join(":", @myJobs);
+        my $finalcmd    = "FINAL=\`qsub -N $iterateJobName -o $path2qsub -e $path2qsub -W depend=afterany\:$myJobsVec $IterateSH`";
+        open $QSUB, ">>", "$QSUB" or die "Can't open '$QSUB'";
+        print $QSUB "$finalcmd\n";
+        close $QSUB;
 
         #*----------------------------------------------------------------------*
         # Submit jobs to run
@@ -659,16 +700,108 @@ if($unzip =~ "FALSE"  &&  $qc =~ "FALSE"  &&  $map =~ "FALSE"  &&  $filter =~ "F
         print "\n Submitting job to cluster: \t `sh $QSUB` \n";
         `sh $QSUB`;
 
-	print "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n";
-	print "\n Exiting $myJobName section with no known error \n";
-	print "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n\n\n";
+        #*----------------------------------------------------------------------*
+        # Exit script
 
-	exit 0;
+        print "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n";
+        print "\n Exiting $myJobName section with no known error \n";
+        print "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n\n\n";
+
+        exit 0;
 
 }
 
 
+#*----------------------------------------------------------------------*
+# Normalize bam files using the chiprx genome reads
+
+if( $granges =~ "TRUE" ){
+
+        print "\n\n*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-\n";
+        print "\n Creating GRanges\n";
+
+        my $iterateJobName	= "Iterate_GRanges_$expFolder";
+        my $myJobName           = "granges";
+        my $path2qsub           = "$tmpscr/$myJobName/qsub";
+
+        # Create file to store jobs in
+        unless( -d "$tmpscr/$myJobName" )	{ `mkdir $tmpscr/$myJobName`; }
+        unless( -d "$path2qsub" )               { `mkdir $path2qsub`; }
+        my $QSUB        = "$tmpscr/$myJobName/$myJobName\.sh";
+        open $QSUB, ">", "$QSUB" or die "Can't open '$QSUB'";
+        print $QSUB "#!/bin/bash\n";
+        close $QSUB;
+        `chmod 777 $QSUB`;
+        print "\n Store all of the following '$myJobName' jobs in $QSUB \n";
+        my @myJobs;
+
+        # Create a GRangesRData folder
+        unless( -d "$path2aligned/GRangesRData" )	{ `mkdir $path2aligned/GRangesRData`; }
+
+                #-----------------------------------------------------------
+                # Prepare a personal qsub script
+                my $QSUBint  = "$tmpscr/$myJobName/$myJobName\_qsub.sh";
+                `cp $scrhead $QSUBint`;
+
+                #-----------------------------------------------------------
+                # Parameters
+                my $path2bam            = "$path2expFolder/aligned/bam";
+                my $code                = "$path2CustFct/Bam2GRangesRemote.R";
+
+                #-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+                #-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+          IMPORTANT CODE HERE         -+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+                my $cmd         = "Rscript $code $path2expFolder $path2bam $path2CustFct"; # &>> $path2qsub/GRanges.log";
+                `echo "$cmd" >> $QSUBint`;
+
+                #--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--
+
+		#---------------------------------------------
+                # Keep track of the jobs in @myJobs
+                my $jobName     = "$myJobName$i";
+                push(@myJobs, "$jobName");
+                $cmd            = "$jobName=`qsub -o $path2qsub -e $path2qsub $QSUBint`";
+                open $QSUB, ">>", "$QSUB" or die "Can't open '$QSUB'";
+                print $QSUB "$cmd\n";
+                close $QSUB;
+
+        #*----------------------------------------------------------------------*
+        # Change Targets.txt file for next iteration
+        print "\n--------------------------------------------------------------------------------------------------\n";
+        print "\n Changing '$myJobName' variable to FALSE and proceed";
+        `/usr/bin/perl -p -i -e "s/$myJobName/$myJobName\_DONE/gi" $Targets`;
+
+        #*----------------------------------------------------------------------*
+        # Prepar file containing the jobs to run
+
+        # Add the next job line to the $QSUB
+        foreach( @myJobs ){ $_ = "\$".$_ ; }
+        my $myJobsVec   = join(":", @myJobs);
+        my $finalcmd    = "FINAL=\`qsub -N $iterateJobName -o $path2qsub -e $path2qsub -W depend=afterok\:$myJobsVec $IterateSH`";
+        open $QSUB, ">>", "$QSUB" or die "Can't open '$QSUB'";
+        print $QSUB "$finalcmd\n";
+        close $QSUB;
+
+        #*----------------------------------------------------------------------*
+        # Submit jobs to run
+
+        print "\n\n--------------------------------------------------------------------------------------------------\n";
+        print "\n Submitting job to cluster: \t `sh $QSUB` \n";
+        `sh $QSUB`;
+
+        #*----------------------------------------------------------------------*
+        # Exit script
+
+        print "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n";
+        print "\n Exiting $myJobName section with no known error \n";
+        print "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n\n\n";
+
+        exit 0;
+
+}
+
 exit 0;
+
 
 print "\n*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-\n\n";
 

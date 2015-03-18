@@ -54,13 +54,17 @@ source(paste(path2CustFct, "Tags2GRanges.R", sep=""))
 source(paste(path2CustFct, "DoesTheFileExist.R", sep=""))
 source(paste(path2CustFct, "Bam2GRangesRData.R", sep=""))
 source(paste(path2CustFct, "Bed2GRanges.R", sep=""))
+source(paste(path2CustFct, "CheckExistenceOfFolder", sep=""))
 source(paste(path2CustFct, "CountOverlaps2matrix.R", sep=""))
+source(paste(path2CustFct, "ChIPseqCreateArborescence.R", sep=""))
 source(paste(path2CustFct, "ErrorOutput.R", sep=""))
 source(paste(path2CustFct, "LoadMartGRanges.R", sep=""))
 source(paste(path2CustFct, "Mart2GRanges.R", sep=""))
 source(paste(path2CustFct, "OutputNumberOfReadsFromGRanges.R", sep=""))
 source(paste(path2CustFct, "RawMart2FormattedMart.R", sep=""))
 source(paste(path2CustFct, "Tags2GRanges.R", sep=""))
+
+
 
 #------------------------------------------------------------
 # Redirect output to log file
@@ -101,7 +105,6 @@ cat(" \n\n\n ===================================================================
 cat(" \n || * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * ", sep="")
 cat(" \n ||\t Create / check arborescence of ", paste(path2MainFolder, sep=""), sep="")
 cat(" \n || .-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.\n", sep="")
-source(paste(path2CustFct, "ChIPseqCreateArborescence.R", sep=""))
 ChIPseqCreateArborescence(path2MainFolder=path2MainFolder)
 
 #--------------------------------------------------

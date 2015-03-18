@@ -126,9 +126,9 @@ cat(" \n Downloading QC folder from remote server", sep="")
 mycode <- paste("`scp -r ", sshpath, ":", RemotePath2MainFolderName, "/", ProjectName, "/QC/ " , LocalPath2NewProject, "`", sep="")
 system(mycode)
 # Download bam folder
-cat(" \n Downloading bam folder from remote server", sep="")
-mycode <- paste("`scp -r ", sshpath, ":", RemotePath2MainFolderName, "/", ProjectName, "/aligned/bam/ ", LocalPath2NewProject, "`", sep="")
-system(mycode)
+#cat(" \n Downloading bam folder from remote server", sep="")
+#mycode <- paste("`scp -r ", sshpath, ":", RemotePath2MainFolderName, "/", ProjectName, "/aligned/bam/ ", LocalPath2NewProject, "`", sep="")
+#system(mycode)
 
 
 #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@

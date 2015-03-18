@@ -25,7 +25,8 @@ my $Targets = "$path2expFolder/DataStructure/Targets.txt";
 open(INPUT, $Targets) || die "Error opening $Targets : $!\n\n\n";
 
 my ($expFolder, $genome, $userFolder, $path2RNAseqScripts, $path2RNAseq, $path2fastqgz, $chrlens, $path2gtfFile)				= ("NA", "NA", "NA", "NA", "NA", "NA", "NA", "NA");
-my ($unzip, $qc, $map, $filter)                                                                                                                 = ("FALSE", "FALSE", "FALSE", "FALSE", "FALSE");
+my ($unzip, $qc, $map, $filter, $cleanfiles, $granges)												= ("FALSE", "FALSE", "FALSE", "FALSE", "FALSE", "FALSE");
+
 my (@sc, @lines2remove)                                                                                                                         = ();
 # Find paths to different folders in the Targets.txt file
 while(<INPUT>) {
@@ -50,15 +51,15 @@ while(<INPUT>) {
                 $path2RNAseq = "$1\/RNApip";
                 $path2RNAseqScripts = join("", $path2RNAseq, "/scripts");
         }
-	if (/# Remote_path_to_orifastq.gz/) {
+	if (/# Remote_path_to_orifastq_gz/) {
                 $_ =~ m/"(.+?)"/;
                 $path2fastqgz = "$1";
         }
-	if (/# Remote_path_to_chrLens.dat/) {
+	if (/# Remote_path_to_chrLens_dat/) {
                 $_ =~ m/"(.+?)"/;
                 $chrlens = "$1";
         }
-	if (/# Remote_path_to_RefGen.fasta/) {
+	if (/# Remote_path_to_RefGen_fasta/) {
                 $_ =~ m/"(.+?)"/;
                 $refGenome = "$1";
         }
@@ -81,6 +82,9 @@ while(<INPUT>) {
                 if (grep /\bqc\b/i, $_ )                { $qc                   = "TRUE"; push @steps2execute, "QC";            }
                 if (grep /\bmap\b/i, $_ )               { $map                  = "TRUE"; push @steps2execute, "Map";           }
                 if (grep /\bfilter\b/i, $_ )            { $filter               = "TRUE"; push @steps2execute, "Filter";        }
+		if (grep /\bcleanfiles\b/i, $_ )        { $cleanfiles		= "TRUE"; push @steps2execute, "Cleanfiles";    }
+                if (grep /\bgranges\b/i, $_ )           { $granges		= "TRUE"; push @steps2execute, "GRanges";	}
+
         }
 
 } # end of Targets.txt
@@ -90,7 +94,7 @@ while(<INPUT>) {
 my $AdvSettings = "$path2expFolder/DataStructure/AdvancedSettings.txt";
 open(INPUT, $AdvSettings) || die "Error opening $AdvSettings : $!\n\n\n";
 
-my ($removepcrdup, $makeunique, $ndiff, $aligncommand)				= ("NA", "NA", "NA", "NA");
+my ($removepcr, $makeunique, $ndiff, $aligncommand)				= ("NA", "NA", "NA", "NA");
 
 while(<INPUT>) {
 
@@ -161,7 +165,7 @@ print "\n genome:\t\t $genome";
 print "\n userFolder:\t\t $userFolder";
 print "\n path2RNApip:\t\t $path2RNAseq";
 print "\n path2expFolder:\t $path2expFolder";
-print "\n path2fastq.gz:\t\t $path2fastqgz";
+print "\n path2fastq_gz:\t\t $path2fastqgz";
 print "\n Targets:\t\t $path2expFolder/DataStructure/Targets.txt";
 print "\n chrlens:\t\t $chrlens";
 print "\n refGenome:\t\t $refGenome";
@@ -182,6 +186,8 @@ print "\n unzip:\t\t\t $unzip";
 print "\n qc:\t\t\t $qc";
 print "\n map:\t\t\t $map";
 print "\n filter:\t\t $filter";
+print "\n cleanfiles:\t\t $cleanfiles";
+print "\n granges:\t\t $granges";
 print "\n .........................................";
 print "\n";
 print "\n Samples: ";
@@ -202,7 +208,7 @@ my $scrhead		= "$path2RNAseqScripts/QSUB_header.sh";
 my $path2iterate	= "$tmpscr/iterate";
 my $path2qsub		= "$path2iterate/qsub";
 my $path2DataStructure	= "$path2expFolder/DataStructure";
-
+my $path2chrlens        = "$path2DataStructure/$genome";
 
 unless( -d "$tmpscr" )				{ `mkdir $tmpscr`;			}
 unless( -d "$path2expFolder/fastq" )		{ `mkdir $path2expFolder/fastq`;	}
@@ -210,6 +216,7 @@ unless( -d "$path2iterate" )			{ `mkdir $path2iterate`;		}
 unless( -d "$path2qsub" )			{ `mkdir $path2qsub`;			}
 unless (-d "$path2expFolder/HTSeq")		{ `mkdir $path2expFolder/HTSeq`;	}
 unless (-d "$path2expFolder/Tophat")		{ `mkdir $path2expFolder/Tophat`;	}
+unless( -d "$path2chrlens" )                    { `mkdir $path2chrlens`;                }
 
 #------------------------------------------------------------------------
 # Copy and create various files with execution permissions
@@ -224,7 +231,7 @@ my $nameOfRNAseqFile	= "RNApip";
 `mv $path2iterate/$nameOfRNAseqFile\.pl $path2iterate/$nameOfRNAseqFile\_$expFolder\.pl`;
 
 # ------ Copy chr_lens.dat file to $path2DataStructure
-`cp $chrlens $path2DataStructure`;
+`cp $chrlens $path2chrlens`;
 
 # ------ RNAseqMainIterative.sh to iterate later
 my $RNAseqMainIterative = "$path2iterate/$nameOfRNAseqFile\_$expFolder\.sh";

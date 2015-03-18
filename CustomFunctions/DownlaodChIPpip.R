@@ -156,9 +156,9 @@ cat(" \n Downloading narrowPeaks foler from remote server", sep="")
 mycode <- paste("`scp -r ", sshpath, ":", RemotePath2MainFolderName, "/", ProjectName, "/peakcalling/narrowPeak " , LocalPath2NewProject, "`", sep="")
 system(mycode)
 # Download bam folder
-cat(" \n Downloading bam folder from remote server", sep="")
-mycode <- paste("`scp -r ", sshpath, ":", RemotePath2MainFolderName, "/", ProjectName, "/aligned/bam/ ", LocalPath2NewProject, "`", sep="")
-system(mycode)
+#cat(" \n Downloading bam folder from remote server", sep="")
+#mycode <- paste("`scp -r ", sshpath, ":", RemotePath2MainFolderName, "/", ProjectName, "/aligned/bam/ ", LocalPath2NewProject, "`", sep="")
+#system(mycode)
 # Download GRanges folder
 cat(" \n Downloading GRanges folder from remote server", sep="")
 mycode <- paste("`scp -r ", sshpath, ":", RemotePath2MainFolderName, "/", ProjectName, "/aligned/GRangesRData/ ", LocalPath2NewProject, "`", sep="")

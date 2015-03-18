@@ -121,23 +121,23 @@ my ($removepcr, $makeunique, $ndiff, $aligncommand1, $fdr, $posopt, $densityopt,
 
 while(<INPUT>) {
 
-	if (/# Bwa.maxEditDist/) {
+	if (/# Bwa_maxEditDist/) {
                 $_ =~ m/"(.+?)"/;
                 $ndiff = "$1";
         }
-	if (/# Align.command.line.1/) {
+	if (/# Align_command_line_1/) {
                 $_ =~ m/"(.+?)"/;
                 $aligncommand1 = "$1";
 	}
-	if (/# Filter.removePCRdup/) {
+	if (/# Filter_removePCRdup/) {
                 $_ =~ m/"(.+?)"/;
                 $removepcr = "$1";
         }
-	if (/# Filter.makeUniqueRead/) {
+	if (/# Filter_makeUniqueRead/) {
                 $_ =~ m/"(.+?)"/;
                 $makeunique = "$1";
         }
-	if (/# PeakCaller.fdr/) {
+	if (/# PeakCaller_fdr/) {
                 $_ =~ m/"(.+?)"/;
                 $fdr = "$1";
         }
@@ -145,11 +145,11 @@ while(<INPUT>) {
                 $_ =~ m/"(.+?)"/;
                 $posopt = "$1";
         }
-	if (/# PeakCaller.densityopt/) {
+	if (/# PeakCaller_densityopt/) {
                 $_ =~ m/"(.+?)"/;
                 $densityopt = "$1";
         }
-	if (/# PeakCaller.enfSize/) {
+	if (/# PeakCaller_enfSize/) {
                 $_ =~ m/"(.+?)"/;
                 $enforceisize = "$1";
         }
@@ -218,7 +218,7 @@ print "\n genome:\t\t $genome";
 print "\n userFolder:\t\t $userFolder";
 print "\n path2ChIPpip:\t\t $path2ChIPseq";
 print "\n path2expFolder:\t $path2expFolder";
-print "\n path2fastq.gz:\t\t $path2fastqgz";
+print "\n path2fastq_gz:\t\t $path2fastqgz";
 print "\n Targets:\t\t $path2expFolder/DataStructure/Targets.txt";
 print "\n chrlens:\t\t $chrlens";
 print "\n refGenome:\t\t $refGenome";
