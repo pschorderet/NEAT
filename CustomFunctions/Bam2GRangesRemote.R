@@ -29,6 +29,7 @@ path2MainFolder	<- path2expFolder
 path2GRangesRData <- paste(path2MainFolder, "aligned/GRangesRData/", sep="")
 path2GRangesRDataRX <- paste(path2MainFolder, "aligned/GRangesRData_RX/", sep="") 
 path2statTable <- paste(path2MainFolder, "DataStructure/statTable.bed", sep="")
+path2wig <- paste(path2MainFolder, "/wig", sep="")
 
 path2Targets	<- paste(path2MainFolder, "DataStructure/Targets.txt", sep="")
 normConstant	<- 1e6
@@ -44,6 +45,7 @@ library(caTools)
 library(rtracklayer)
 
 source(paste(path2CustFct, "Bam2GRangesRData.R", sep=""))
+source(paste(path2CustFct, "CheckExistenceOfFolder.R", sep=""))
 source(paste(path2CustFct, "CountOverlaps2GRanges.R", sep=""))
 source(paste(path2CustFct, "DoesTheFileExist.R", sep=""))
 source(paste(path2CustFct, "ErrorOutput.R", sep=""))
@@ -52,12 +54,6 @@ source(paste(path2CustFct, "Mart2GRanges.R", sep=""))
 source(paste(path2CustFct, "Tags2GRanges.R", sep=""))
 source(paste(path2CustFct, "OutputNumberOfReadsFromGRanges.R", sep=""))
 
-
-#-----------------------------------------------------------
-# Create folder
-# wig
-path2wig <- paste(path2MainFolder, "wig/", sep="")
-checkExistenceOfFolder(path2CheckFolder=path2wig)
 
 #------------------------------------------------------------
 # Read Targets files
@@ -69,16 +65,21 @@ print(Targets)
 
 res <- readLines(path2Targets)
 for(i in 1:length(res)){
-  newLine <- res[i]
-  # Store some variables
-  if(length(grep("Reference_genome\t", newLine))==1) { 
-    currentline <- gsub("# ", "", newLine); currentline <- gsub("\t", "", currentline); currentline <- gsub("\"", "", currentline);
-    refGenome <- unlist(strsplit(currentline, split = "\\="))[2]
-  }    
-  if(length(grep("Reference_genome_rx\t", newLine))==1) {
-    currentline <- gsub("# ", "", newLine); currentline <- gsub("\t", "", currentline); currentline <- gsub("\"", "", currentline);
-    refGenomeRX <- unlist(strsplit(currentline, split = "\\="))[2]
-  }
+	newLine <- res[i]
+	# Store some variables
+	if(length(grep("Reference_genome\t", newLine))==1) { 
+		currentline <- gsub("# ", "", newLine); currentline <- gsub("\t", "", currentline); currentline <- gsub("\"", "", currentline);
+		refGenome <- unlist(strsplit(currentline, split = "\\="))[2]
+	}
+	if(length(grep("Reference_genome_rx\t", newLine))==1) {
+		currentline <- gsub("# ", "", newLine); currentline <- gsub("\t", "", currentline); currentline <- gsub("\"", "", currentline);
+		refGenomeRX <- unlist(strsplit(currentline, split = "\\="))[2]
+	}
+	if(length(grep("Proj_TaxonBSgenome\t", newLine))==1) {
+                currentline <- gsub("# ", "", newLine); currentline <- gsub("\t", "", currentline); currentline <- gsub("\"", "", currentline);
+                BSgenome <- unlist(strsplit(currentline, split = "\\="))[2]
+        }
+
 
 }
 
@@ -124,7 +125,6 @@ cat(" \n || .-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-
 
 
 
-
 #------------------------------------------------------------
 # Create ChIPrx GRanges objects
 
@@ -138,8 +138,10 @@ cat("   \n ---------------------------------------------------------", sep="")
 #------------------------------------------------------------
 # Create GRanges objects
 #
+
 myChIPrx <- "TRUE"
 countsRX <- NULL
+
 bamGRangesRDataRXPath <- paste(paste(path2GRangesRDataRX, allsamples, sep=""), ".bam.GRanges.RData", sep="")
 if(DoesTheFileExist(path2file=bamGRangesRDataRXPath)!=TRUE){
 	# If .bam files cannot be found, assume RX is not used and set everything to 1
@@ -170,6 +172,7 @@ if(myChIPrx == "TRUE"){
 
 	GRangesSamplesRX <- list.files(path2GRangesRDataRX, pattern = "*.bam.GRanges.RData$")  
 	if(DoesTheFileExist(path2file=paste(paste(path2GRangesRDataRX, allsamples, sep=""), ".bam.GRanges.RData", sep=""))==TRUE){
+	
 		# If .bam files cannot be found, assume RX is not used and set everything to 1
 		bamPathRX <- paste(path2file=path2bamRX, allsamples, ".bam", sep="")
 		if(DoesTheFileExist(path2file=bamPathRX)!=TRUE){
@@ -181,7 +184,6 @@ if(myChIPrx == "TRUE"){
 			load(path2load)
 			assign(GRangesSamplesRX[i], GRangesObj)
 			countsRX <- c(countsRX, length(get(GRangesSamplesRX[i])))
-#			cat("\n", GRangesSamplesRX[i], "\t", length(get(GRangesSamplesRX[i])), sep="")
 		}
 	}
 
@@ -230,7 +232,6 @@ if(DoesTheFileExist(path2file=paste(paste(path2GRangesRData, allsamples, sep="")
 		load(path2load)
 		assign(GRangesSamples[i], GRangesObj)
 		counts <- c(counts, length(get(GRangesSamples[i])))
-#		cat("\n", GRangesSamples[i], "\t", length(get(GRangesSamples[i])), sep="")
 	}
 }
 OutputNumberOfReadsFromGRanges(GRangesSamples)
@@ -246,8 +247,83 @@ cat("   \n ---------------------------------------------------------\n", sep="")
 #------------------------------------------------------------
 # Create summary table with number of reads and scaling factor
 #
-cat("\n statTable: \n\n", sep="")
+NormFactRX <- round(normConstant/countsRX, 2)
 
-if(myChIPrx == "TRUE"){
-	# Compute normalization factor. This corresponds to alpha in the Orlando et al. Cell Reports 2014.
-	# Multiplyin
+
+statTable <- cbind(allsamples, counts, countsRX, NormFactRX)
+colnames(statTable) <- c("FileName", "Counts", "CountsRX", "NormFactRX")
+
+write.table(statTable, file=path2statTable, quote=F, sep="\t", row.names=F, col.names=T)
+
+cat("\n statTable: \n\n", sep="")
+print(statTable)
+
+
+
+cat(" \n\n #########################################################", sep="")
+cat("   \n #                                                       #", sep="")
+cat("   \n #                   Creating wig files                  #", sep="")
+cat("   \n #                                                       #", sep="")
+cat("   \n ---------------------------------------------------------\n", sep="")
+
+
+# Set variables and paths
+seqlengths <- c(chromosomesFile[,2])
+names(seqlengths) <- chromosomesFile[,1]
+#seqlengths
+
+# Slice the genome into bins
+#bins <- tileGenome(seqlengths, tilewidth=500, cut.last.tile.in.chrom=TRUE)
+
+# Read in the statTable file countaining the ChIPrx normaization factors
+path2statTable <- paste(path2MainFolder, "DataStructure/statTable.bed", sep="")
+statTable <- read.table(path2statTable, header=TRUE, comment.char="#")
+
+# Disable scientific notation to ensure no 'e' are found in the wig files
+options(scipen=999)
+# Set paths to tmp files
+
+path2wigfilename_tmp <- paste(path2wig, "/tmp.wig", sep="")
+path2wigfile_header <- paste(path2wig, "/header.wig", sep="")
+
+for(h in 1:length(GRangesSamples)){
+
+	cat("\n - - - - - - - - - - - - - - - - - - - - - - - - - - - - -", sep="")
+	cat("\n Creating wig file:\t", GRangesSamples[h], "\n", sep="")
+
+	# h=1
+#	gr <- CountOverlaps2GRanges(GRanges1=bins, GRanges2=get(GRangesSamples[h]), normFactRX=statTable$NormFactRX[h], normToLibrarySize=FALSE)
+#	df <- data.frame(seqnames=seqnames(gr), starts=start(gr)-1, ends=end(gr), value=elementMetadata(gr)$ValueRX)
+  
+	# Delete line that have no value
+#	dfnon0 <- df[which(df$value!=0),]
+  
+	# Set path to current wig file
+#	path2wigfilename <- paste(path2wig, "/", GRangesSamples[h], ".wig", sep="")
+  
+	# Copy dfnon0 to tmp file
+#	write.table(dfnon0, file=path2wigfilename_tmp, quote=F, sep="\t", row.names=F, col.names=F)
+  
+	# Add header to the file
+#	header = paste("track type=wiggle_0 name='", allsamples[h], "' description='coverata' visibility=dense color=0,100,200 priority=20", sep="")
+  
+	# Copy header to tmp file
+#	write.table(header, file=path2wigfile_header, quote=F, sep="\t", row.names=F, col.names=F)
+  
+	# Consolidate files
+#	mycode <- paste("`echo '", header, "' > ", path2wigfilename, "`", sep="")
+#	system(mycode)
+#	mycode <- paste("`cat ", path2wigfile_header, " ", path2wigfilename_tmp, " > ", path2wigfilename, "`", sep="")
+#	system(mycode)
+
+}
+
+cat("\n\n", sep="")
+
+# Delete temporary files
+mycode <- paste("`rm ", path2wigfilename_tmp, "`", sep="")
+system(mycode)
+mycode <- paste("`rm ", path2wigfile_header, "`", sep="")
+system(mycode)
+
+
