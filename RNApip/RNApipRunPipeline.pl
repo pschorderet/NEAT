@@ -211,29 +211,33 @@ my $path2DataStructure	= "$path2expFolder/DataStructure";
 my $path2chrlens        = "$path2DataStructure/$genome";
 
 unless( -d "$tmpscr" )				{ `mkdir $tmpscr`;			}
-unless( -d "$path2expFolder/fastq" )		{ `mkdir $path2expFolder/fastq`;	}
 unless( -d "$path2iterate" )			{ `mkdir $path2iterate`;		}
 unless( -d "$path2qsub" )			{ `mkdir $path2qsub`;			}
-unless (-d "$path2expFolder/HTSeq")		{ `mkdir $path2expFolder/HTSeq`;	}
-unless (-d "$path2expFolder/Tophat")		{ `mkdir $path2expFolder/Tophat`;	}
 unless( -d "$path2chrlens" )                    { `mkdir $path2chrlens`;                }
+
 
 #------------------------------------------------------------------------
 # Copy and create various files with execution permissions
 
-
 # ------ Copy temp.sh file to $tmpscr
+
 `cp $scrhead $tmpscr`;
 my $nameOfRNAseqFile	= "RNApip";
 
+
 # ------ RNAseqMainCopy.pl to iterate later
+
 `cp $path2RNAseqScripts/$nameOfRNAseqFile\.pl $path2iterate/`;
 `mv $path2iterate/$nameOfRNAseqFile\.pl $path2iterate/$nameOfRNAseqFile\_$expFolder\.pl`;
 
+
 # ------ Copy chr_lens.dat file to $path2DataStructure
+
 `cp $chrlens $path2chrlens`;
 
+
 # ------ RNAseqMainIterative.sh to iterate later
+
 my $RNAseqMainIterative = "$path2iterate/$nameOfRNAseqFile\_$expFolder\.sh";
 `cp $scrhead $RNAseqMainIterative`;
 open $RNAseqMainIterative, ">>", "$RNAseqMainIterative" or die "Can't open '$RNAseqMainIterative'\n";
