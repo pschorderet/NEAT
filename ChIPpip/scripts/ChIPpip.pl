@@ -101,7 +101,7 @@ while(<INPUT>) {
                 @steps2execute = ();
                 if (grep /\bunzip\b/i, $_ )             { $unzip                = "TRUE"; push @steps2execute, "Unzip";         }
                 if (grep /\bqc\b/i, $_ )                { $qc                   = "TRUE"; push @steps2execute, "QC";            }
-                if (grep /\bchiprx\b/i, $_ )            { $chiprx               = "TRUE"; push @steps2execute, "ChIPRX";        }
+                if (grep /\bchiprx\b/i, $_ )            { $chiprx               = "TRUE"; push @steps2execute, "ChIPrx";        }
                 if (grep /\bmap\b/i, $_ )               { $map                  = "TRUE"; push @steps2execute, "Map";           }
                 if (grep /\bfilter\b/i, $_ )            { $filter               = "TRUE"; push @steps2execute, "Filter";        }
                 if (grep /\bpeakcalling\b/i, $_ )	{ $peakcalling          = "TRUE"; push @steps2execute, "Peakcalling";   }
@@ -215,7 +215,7 @@ chomp(@chrs);
 # Define paths
 my $path2expFolder 	= "$userFolder/$expFolder";
 $Targets 		= "$path2expFolder/DataStructure/Targets.txt";
-$AdvancedSettings	= "$path2expFolder/DataStructure/AdvancedSettings.txt";
+#$AdvancedSettings	= "$path2expFolder/DataStructure/AdvancedSettings.txt";
 
 #*----------------------------------------------------------------------*
 
@@ -304,10 +304,17 @@ if( $unzip =~ "TRUE" ){
 	print "\n\n*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*- \n";
 	print "\n Unzipping and renaming files using Targets.txt \n";
 
-	my $iterateJobName	= "Iterate_unzip_$expFolder";
+	#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 	my $myJobName		= "unzip";
+	my $iterateJobName	= "Iterate_$myJobName\_$expFolder";
 	my $path2qsub		= "$tmpscr/$myJobName/qsub";
 
+	#-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-
+        # Create folders
+	my $path2fastq          = "$path2expFolder/fastq";
+	unless( -d "$path2fastq" )	{ `mkdir $path2fastq`;                  }
+
+	#-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-
 	# Create file to store jobs in
 	unless( -d "$tmpscr/$myJobName" )	{ `mkdir $tmpscr/$myJobName`; }
 	unless( -d "$path2qsub" )		{ `mkdir $path2qsub`; }
@@ -319,6 +326,7 @@ if( $unzip =~ "TRUE" ){
         print "\n Store all of the following '$myJobName' jobs in $QSUB \n";
         my @myJobs;
 
+	#<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
 	foreach my $i (0 .. $#samples) {
 
 		# Prepare a personal qsub script
@@ -338,6 +346,7 @@ if( $unzip =~ "TRUE" ){
 		close $QSUB;     
 	}
 
+	#<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
 	foreach my $i (0 .. $#inputs) {
 
 		# Prepare a personal qsub script
@@ -404,10 +413,15 @@ if( $qc =~ "TRUE" ) {
 	print "\n\n*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*- \n";
 	print "\n QC fastq files \n";
 
-	my $iterateJobName	= "Iterate_QC_$expFolder";
+	#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 	my $myJobName		= "QC";
+	my $iterateJobName	= "Iterate_$myJobName\_$expFolder";
 	my $path2qsub		= "$tmpscr/$myJobName/qsub";
 
+	#-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-
+        # Create folders
+
+	#-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-
 	# Create file to store jobs in
 	unless( -d "$tmpscr/$myJobName" )	{ `mkdir $tmpscr/$myJobName`; }
 	unless( -d "$path2qsub" )		{ `mkdir $path2qsub`; }
@@ -422,13 +436,31 @@ if( $qc =~ "TRUE" ) {
 	unless( -d "$path2QC" ) { `mkdir $path2QC`; }
 	`cp $path2ChIPseqScripts/QC.R $tmpscr`;
 
-	#-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-	#-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+          IMPORTANT CODE HERE         -+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-	my $code 	= "$tmpscr/QC.R" ;
-	my $cmd		= "Rscript $code $path2expFolder &>> $path2qsub/QCReport.log";
-	`echo "$cmd" >> $QSUB`;
-	#--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--
+	#<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+	foreach my $i (0) {
 
+		# Prepare a personal qsub script
+                my $QSUBint     = "$tmpscr/$myJobName/$myJobName\_qsub.sh";
+                `cp $scrhead $QSUBint`;
+
+		#-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+		#-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+          IMPORTANT CODE HERE         -+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+		my $code 	= "$tmpscr/QC.R" ;
+		my $cmd		= "Rscript $code $path2expFolder &>> $path2qsub/QCReport.log";
+		#my $cmd         = "Rscript $code $path2expFolder";
+		`echo "$cmd" >> $QSUBint`;
+		#--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--
+
+		#---------------------------------------------
+                # Keep track of the jobs in @myJobs
+                my $jobName     = "$myJobName$i";
+                push(@myJobs, $jobName);
+                $cmd            = "$jobName=`qsub -o $path2qsub -e $path2qsub $QSUBint`";
+                open $QSUB, ">>", "$QSUB" or die "Can't open '$QSUB'";
+                print $QSUB "$cmd\n";
+                close $QSUB;
+
+	}
 
 	#*----------------------------------------------------------------------*
         # Change Targets.txt file for next iteration
@@ -472,11 +504,18 @@ if( $chiprx =~ "TRUE" ){
 	print "\n\n*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-\n";
         print "\n Mapping fastq files to the ChIP-RX genome\n";
 
-        my $iterateJobName	= "Iterate_map_RX_$expFolder";
+	#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
         my $myJobName           = "chiprx";
+	my $iterateJobName	= "Iterate_$myJobName\_$expFolder";
 	my $myJobName2		= "chiprx_clean";
         my $path2qsub           = "$tmpscr/$myJobName/qsub";
 
+	#-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-
+        # Create folders
+	my $path2aligned        = "$path2expFolder/aligned";
+	unless( -d "$path2aligned" )	{ `mkdir $path2aligned`; }
+
+	#-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-
         # Create file to store jobs in
         unless( -d "$tmpscr/$myJobName" )	{ `mkdir $tmpscr/$myJobName`; }
         unless( -d "$path2qsub" )               { `mkdir $path2qsub`; }
@@ -488,6 +527,7 @@ if( $chiprx =~ "TRUE" ){
         print "\n Store all of the following '$myJobName' jobs in $QSUB \n";
         my @myJobs;
 
+	#<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
         foreach my $i (0 .. $#samplesInputs) {
 
                 # Prepare a personal qsub script
@@ -552,7 +592,7 @@ if( $chiprx =~ "TRUE" ){
         # Add the next job line to the $mapQSUB
         foreach( @myJobs ){ $_ = "\$".$_ ; }
         my $myJobsVec   = join(":", @myJobs);
-        my $finalcmd    = "FINAL=\`qsub -N $iterateJobName -o $path2qsub -e $path2qsub -W depend=afterok\:$myJobsVec $IterateSH`";
+        my $finalcmd    = "FINAL=\`qsub -N $iterateJobName -o $path2qsub -e $path2qsub -W depend=afterany\:$myJobsVec $IterateSH`";
         open $QSUB, ">>", "$QSUB" or die "Can't open '$QSUB'";
         print $QSUB "$finalcmd\n";
         close $QSUB;
@@ -584,10 +624,17 @@ if( $map =~ "TRUE" ){
 	print "\n\n*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-\n";
 	print "\n Mapping fastq files\n";
 
-	my $iterateJobName	= "Iterate_map_$expFolder";
+	#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 	my $myJobName		= "map";
+	my $iterateJobName	= "Iterate_$myJobName\_$expFolder";
 	my $path2qsub		= "$tmpscr/$myJobName/qsub";
 
+	#-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-
+        # Create folders
+	my $path2aligned        = "$path2expFolder/aligned";
+        unless( -d "$path2aligned" )    { `mkdir $path2aligned`; }
+
+	#-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-
 	# Create file to store jobs in
 	unless( -d "$tmpscr/$myJobName" )	{ `mkdir $tmpscr/$myJobName`; }
 	unless( -d "$path2qsub" )		{ `mkdir $path2qsub`; }
@@ -599,7 +646,7 @@ if( $map =~ "TRUE" ){
 	print "\n Store all of the following '$myJobName' jobs in $QSUB \n";
 	my @myJobs;
 
-
+	#<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
 	foreach my $i (0 .. $#samplesInputs) {
 		
 		# Prepare a personal qsub script
@@ -693,10 +740,15 @@ if( $filter =~ "TRUE" ){
  	print "\n\n*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-\n";
         print "\n Filtering reads\n";
 
-	my $iterateJobName	= "Iterate_filter_$expFolder";
+	#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 	my $myJobName		= "filter";
+	my $iterateJobName	= "Iterate_$myJobName\_$expFolder";
 	my $path2qsub		= "$tmpscr/$myJobName/qsub";
 
+	#-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-
+        # Create folders
+
+	#-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-
 	# Create file to store jobs in
 	unless( -d "$tmpscr/$myJobName" )	{ `mkdir $tmpscr/$myJobName`; }
 	unless( -d "$path2qsub" )		{ `mkdir $path2qsub`; }
@@ -708,6 +760,7 @@ if( $filter =~ "TRUE" ){
 	print "\n Store all of the following '$myJobName' jobs in $QSUB \n";
 	my @myJobs;
 
+	#<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
 	foreach my $i (0 .. $#samplesInputs) {
 
 		# Prepare a personal qsub script
@@ -911,11 +964,22 @@ if( $peakcalling =~ "TRUE" ){
 
 	print "\n\n*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-\n";
 	print "\n Run PeakCaller (SPP)\n";
-
-	my $iterateJobName	= "Iterate_peakcalling_$expFolder";
+	
+	#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 	my $myJobName		= "peakcalling";
+	my $iterateJobName	= "Iterate_$myJobName\_$expFolder";
 	my $path2qsub		= "$tmpscr/$myJobName/qsub";
 
+	#-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-
+        # Create folders
+	my $path2peakcalling    = "$path2expFolder/peakcalling";
+        unless( -d "$path2peakcalling" )    { `mkdir $path2peakcalling`; }
+	
+        unless( -d "$path2peakcalling/bigwig" )         { `mkdir $path2peakcalling/bigwig`; }
+        unless( -d "$path2peakcalling/narrowPeak" )     { `mkdir $path2peakcalling/narrowPeak`; }
+        unless( -d "$path2peakcalling/broadPeak" )	{ `mkdir $path2peakcalling/broadPeak`; }
+
+	#-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-
 	# Create file to store jobs in
 	unless( -d "$tmpscr/$myJobName" )	{ `mkdir $tmpscr/$myJobName`; }
 	unless( -d "$path2qsub" )		{ `mkdir $path2qsub`; }
@@ -933,18 +997,7 @@ if( $peakcalling =~ "TRUE" ){
 	`cp $path2ChIPseqScripts/$peakcaller $tmpscr`;
 
 
-	# Create bigwig folder
-        print "\n Create folders\n";
-        print "\n\t bigwig folder: \t $path2expFolder/bigwig/";
-        unless( -d "$path2peakcalling/bigwig" )         { `mkdir $path2peakcalling/bigwig`; }
-
-        # Create narrowPeak folder
-        print "\n\t narrowPeak folder: \t $path2peakcalling/narrowPeak/";
-        unless( -d "$path2peakcalling/narrowPeak" )     { `mkdir $path2peakcalling/narrowPeak`; }
-
-        # Create broadPeak folder
-        print "\n\t broadPeak folder: \t $path2peakcalling/broadPeak/ \n";
-        unless( -d "$path2peakcalling/broadPeak" )	{ `mkdir $path2peakcalling/broadPeak`; }
+	#<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
 	foreach my $i (0 .. $#samples) {
 
 		my $path2currentSampleDir	= "$path2aligned/$samples[$i]";
@@ -1024,11 +1077,16 @@ if( $cleanbigwig =~ "TRUE" ){
 	print "\n\n*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-\n";
 	print "\n Bigwig file cleaning\n";
 
-	my $iterateJobName	= "Iterate_cleanbigwig_$expFolder";
+	#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 	my $myJobName		= "cleanbigwig";
+	my $iterateJobName	= "Iterate_$myJobName\_$expFolder";
 	my $myJobName2		= "wigToBigwig";
 	my $path2qsub		= "$tmpscr/$myJobName/qsub";
 
+	#-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-
+        # Create folders
+
+	#-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-
 	# Create file to store jobs in
 	unless( -d "$tmpscr/$myJobName" )	{ `mkdir $tmpscr/$myJobName`; }
 	unless( -d "$path2qsub" )		{ `mkdir $path2qsub`; }
@@ -1050,7 +1108,8 @@ if( $cleanbigwig =~ "TRUE" ){
         # Open special character file and store in @specialchar
 	
 	print "\n These chromosomes will be deleted: @sc \n";
-	
+
+	#<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>	
 	foreach my $i (0 .. $#samples) {
 
 		# Prepare a personal qsub script
@@ -1137,10 +1196,25 @@ if( $cleanbigwig =~ "TRUE" ){
 
 if($cleanfiles =~ "TRUE"){
 
-	my $iterateJobName	= "Iterate_cleanfiles_$expFolder";
+	print "\n\n*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-\n";
+        print "\n Cleaning files and folders\n";
+
+	#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
         my $myJobName           = "cleanfiles";
+	my $iterateJobName	= "Iterate_$myJobName\_$expFolder";
         my $path2qsub           = "$tmpscr/$myJobName/qsub";
 
+	#-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-
+        # Create folders
+	my $path2aligned                = "$path2expFolder/aligned";
+        unless( -d "$path2aligned" )    { `mkdir $path2aligned`;        }
+        my $path2bam                    = "$path2aligned/bam";
+        unless( -d "$path2bam" )        { `mkdir $path2bam`;            }
+        my $path2bamRX                  = "$path2aligned/bam_RX";
+        unless( -d "$path2bamRX" )	{ `mkdir $path2bamRX`;          }
+
+
+	#-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-
         # Create file to store jobs in
         unless( -d "$tmpscr/$myJobName" )	{ `mkdir $tmpscr/$myJobName`; }
         unless( -d "$path2qsub" )               { `mkdir $path2qsub`; }
@@ -1155,17 +1229,10 @@ if($cleanfiles =~ "TRUE"){
 	print "\n\n*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-\n";
         print "\n Moving .bam and .bai files from the Tophat to the aligned folder \n";
 
-	my $path2aligned		= "$path2expFolder/aligned";
-	unless( -d "$path2aligned" )	{ `mkdir $path2aligned`;	}
-	my $path2bam			= "$path2aligned/bam";
-        unless( -d "$path2bam" )	{ `mkdir $path2bam`;		}
-	my $path2bamRX			= "$path2aligned/bam_RX";
-        unless( -d "$path2bamRX" )	{ `mkdir $path2bamRX`;		}
-
+	#<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
 	foreach my $i (0 .. $#samplesInputs) {
 
 		print "\n\t $samples[$i] ";
-
                 # Prepare a personal qsub script
                 my $QSUBint     = "$tmpscr/$myJobName/$samples[$i]\_$myJobName\.sh";
                 `cp $scrhead $QSUBint`;
@@ -1180,10 +1247,10 @@ if($cleanfiles =~ "TRUE"){
 		`echo "$cmd" >> $QSUBint`;
                 $cmd		= "`cp $path2aligned/$samplesInputs[$i]/$samplesInputs[$i].bai $path2bam/`";
 		`echo "$cmd" >> $QSUBint`;
-		"`cp $path2aligned/$samplesInputs[$i]\_RX/$samplesInputs[$i].bam $path2bamRX/`";
-                $cmd            = `echo "$cmd" >> $QSUBint`;
-		"`cp $path2aligned/$samplesInputs[$i]\_RX/$samplesInputs[$i].bai $path2bamRX/`";        
-		$cmd            = `echo "$cmd" >> $QSUBint`;
+		$cmd		= "`cp $path2aligned/$samplesInputs[$i]\_RX/$samplesInputs[$i].bam $path2bamRX/`";
+                `echo "$cmd" >> $QSUBint`;
+		$cmd		= "`cp $path2aligned/$samplesInputs[$i]\_RX/$samplesInputs[$i].bai $path2bamRX/`";        
+		`echo "$cmd" >> $QSUBint`;
 
 		#---------------------------------------------
                 # Keep track of the jobs in @myJobs
@@ -1242,11 +1309,18 @@ if( $granges =~ "TRUE" ){
 
         print "\n\n*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-\n";
         print "\n Creating GRanges\n";
-
-        my $iterateJobName	= "Iterate_GRanges_$expFolder";
+	
+	#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
         my $myJobName           = "granges";
+	my $iterateJobName	= "Iterate_$myJobName\_$expFolder";
         my $path2qsub           = "$tmpscr/$myJobName/qsub";
 
+	#-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-
+	# Create folders
+        unless( -d "$path2aligned/GRangesRData" )	{ `mkdir $path2aligned/GRangesRData`; }
+        unless( -d "$path2aligned/GRangesRData_RX" )    { `mkdir $path2aligned/GRangesRData_RX`; }	
+
+	#-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-
         # Create file to store jobs in
         unless( -d "$tmpscr/$myJobName" )	{ `mkdir $tmpscr/$myJobName`; }
         unless( -d "$path2qsub" )               { `mkdir $path2qsub`; }
@@ -1258,10 +1332,9 @@ if( $granges =~ "TRUE" ){
         print "\n Store all of the following '$myJobName' jobs in $QSUB \n";
         my @myJobs;
 
-        # Create a GRangesRData folder
-        unless( -d "$path2aligned/GRangesRData" )	{ `mkdir $path2aligned/GRangesRData`; }
-	unless( -d "$path2aligned/GRangesRData_RX" )	{ `mkdir $path2aligned/GRangesRData_RX`; }
-                
+	#<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+	foreach my $i (0) {
+
 		#-----------------------------------------------------------
                 # Prepare a personal qsub script
                 my $QSUBint  = "$tmpscr/$myJobName/$myJobName\_qsub.sh";
@@ -1280,14 +1353,17 @@ if( $granges =~ "TRUE" ){
 
                 #--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--
 
-                #---------------------------------------------
+
+		#---------------------------------------------
                 # Keep track of the jobs in @myJobs
-                my $jobName     = "$myJobName";
-                push(@myJobsSamples, "$jobName");
+                my $jobName     = "$myJobName$i";
+                push(@myJobs, "$jobName");
                 $cmd            = "$jobName=`qsub -o $path2qsub -e $path2qsub $QSUBint`";
                 open $QSUB, ">>", "$QSUB" or die "Can't open '$QSUB'";
                 print $QSUB "$cmd\n";
                 close $QSUB;
+
+	}
 
         #*----------------------------------------------------------------------*
         # Change Targets.txt file for next iteration

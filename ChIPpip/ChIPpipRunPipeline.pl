@@ -101,7 +101,7 @@ while(<INPUT>) {
                 @steps2execute = ();
                 if (grep /\bunzip\b/i, $_ )             { $unzip                = "TRUE"; push @steps2execute, "Unzip";         }
                 if (grep /\bqc\b/i, $_ )                { $qc                   = "TRUE"; push @steps2execute, "QC";            }
-                if (grep /\bchiprx\b/i, $_ )            { $chiprx               = "TRUE"; push @steps2execute, "ChIPRX";        }
+                if (grep /\bchiprx\b/i, $_ )            { $chiprx               = "TRUE"; push @steps2execute, "ChIPrx";        }
                 if (grep /\bmap\b/i, $_ )               { $map                  = "TRUE"; push @steps2execute, "Map";           }
                 if (grep /\bfilter\b/i, $_ )            { $filter               = "TRUE"; push @steps2execute, "Filter";        }
                 if (grep /\bpeakcalling\b/i, $_ )	{ $peakcalling          = "TRUE"; push @steps2execute, "Peakcalling";   }
@@ -266,13 +266,8 @@ my $scrhead		= "$path2ChIPseqScripts/QSUB_header.sh";
 my $path2iterate	= "$tmpscr/iterate";
 my $path2qsub		= "$path2iterate/qsub";
 my $path2DataStructure	= "$path2expFolder/DataStructure";
-my $path2aligned	= "$path2expFolder/aligned";
-my $path2fastq		= "$path2expFolder/fastq";
-my $path2chrlens	= "$path2DataStructure/$genome";
+my $path2chrlens        = "$path2DataStructure/$genome";
 
-unless( -d "$path2fastq" )			{ `mkdir $path2fastq`;			}
-unless( -d "$path2aligned" )			{ `mkdir $path2aligned`;		}
-unless( -d "$path2expFolder/peakcalling" )	{ `mkdir $path2expFolder/peakcalling`;	}
 unless( -d "$tmpscr" )				{ `mkdir $tmpscr`;			}
 unless( -d "$path2iterate" )			{ `mkdir $path2iterate`;		}
 unless( -d "$path2qsub" )			{ `mkdir $path2qsub`;			}
@@ -283,14 +278,19 @@ unless( -d "$path2chrlens" )                    { `mkdir $path2chrlens`;        
 
 
 # ------ Copy temp.sh file to $tmpscr
+
 `cp $scrhead $tmpscr`;
 my $nameOfChIPseqFile	= "ChIPpip";
 
+
 # ------ ChIPseqMainCopy.pl to iterate later
+
 `cp $path2ChIPseqScripts/$nameOfChIPseqFile\.pl $path2iterate/`;
 `mv $path2iterate/$nameOfChIPseqFile\.pl $path2iterate/$nameOfChIPseqFile\_$expFolder\.pl`;
 
+
 # ------ Copy chr_lens.dat file to $path2DataStructure
+
 `cp $chrlens $path2chrlens`;
 if($chiprx =~ "TRUE"){
 	my $path2chrlensRX		= "$path2DataStructure/$genomeRX";
@@ -298,7 +298,9 @@ if($chiprx =~ "TRUE"){
 	`cp $chrlensRX $path2chrlensRX`;
 }
 
+
 # ------ ChIPseqMainIterative.sh to iterate later
+
 my $ChIPseqMainIterative = "$path2iterate/$nameOfChIPseqFile\_$expFolder\.sh";
 `cp $scrhead $ChIPseqMainIterative`;
 open $ChIPseqMainIterative, ">>", "$ChIPseqMainIterative" or die "Can't open '$ChIPseqMainIterative'\n";
@@ -325,4 +327,15 @@ close $IterateSH;
 # Submit jobs to run 
 
 #print "\n\n--------------------------------------------------------------------------------------------------\n";
-#prin
+#print "\n  Submitting job to cluster: \t `sh $IterateSH` \n";
+`sh $IterateSH`;
+
+#*----------------------------------------------------------------------*
+# Exit script
+
+print "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n";
+print "\n Exiting INITIAL section with no known error \n";
+print "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n\n\n";
+
+exit 1;
+

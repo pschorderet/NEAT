@@ -246,10 +246,16 @@ if( $unzip =~ "TRUE" ){
 	print "\n\n*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*- \n";
 	print "\n Unzipping and renaming files using Targets.txt \n";
 
-	my $iterateJobName	= "Iterate_unzip_$expFolder";
+
+	#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 	my $myJobName		= "unzip";
+	my $iterateJobName	= "Iterate_$myJobName\_$expFolder";
 	my $path2qsub		= "$tmpscr/$myJobName/qsub";
 
+	#-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-
+        # Create folders
+
+	#-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-
 	# Create file to store jobs in
 	unless( -d "$tmpscr/$myJobName" )	{ `mkdir $tmpscr/$myJobName`; }
 	unless( -d "$path2qsub" )		{ `mkdir $path2qsub`; }
@@ -261,6 +267,7 @@ if( $unzip =~ "TRUE" ){
         print "\n Store all of the following '$myJobName' jobs in $QSUB \n";
         my @myJobs;
 	
+	#<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
 	print "\n\n-------------------------------------\n\n Unzipping samples: ";
 	foreach my $i (0 .. $#samples) {
 		
@@ -327,10 +334,15 @@ if( $qc =~ "TRUE" ) {
 	print "\n\n*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*- \n";
 	print "\n QC fastq files \n";
 
-	my $iterateJobName	= "Iterate_QC_$expFolder";
+	#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 	my $myJobName		= "QC";
+	my $iterateJobName	= "Iterate_$myJobName\_$expFolder";
 	my $path2qsub		= "$tmpscr/$myJobName/qsub";
 
+	#-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-
+        # Create folders
+	
+	#-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-
 	# Create file to store jobs in
 	unless( -d "$tmpscr/$myJobName" )	{ `mkdir $tmpscr/$myJobName`; }
 	unless( -d "$path2qsub" )		{ `mkdir $path2qsub`; }
@@ -345,13 +357,31 @@ if( $qc =~ "TRUE" ) {
 	unless( -d "$path2QC" ) { `mkdir $path2QC`; }
 	`cp $path2RNAseqScripts/QC.R $tmpscr`;
 
-	#-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-	#-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+          IMPORTANT CODE HERE         -+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-	my $code 	= "$tmpscr/QC.R" ;
-	my $cmd		= "Rscript $code $path2expFolder &>> $path2qsub/QCReport.log";
-	`echo "$cmd" >> $QSUB`;
-	#--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--
+	#<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+	foreach my $i (0) {
+	
+		# Prepare a personal qsub script
+                my $QSUBint     = "$tmpscr/$myJobName/$myJobName\_qsub.sh";
+                `cp $scrhead $QSUBint`;
+	
+		#-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+		#-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+          IMPORTANT CODE HERE         -+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+		my $code 	= "$tmpscr/QC.R" ;
+		my $cmd		= "Rscript $code $path2expFolder &>> $path2qsub/QCReport.log";
+		#my $cmd         = "Rscript $code $path2expFolder";
+		`echo "$cmd" >> $QSUBint`;
+		#--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--
 
+		#---------------------------------------------
+                # Keep track of the jobs in @myJobs
+                my $jobName     = "$myJobName$i";
+                push(@myJobs, $jobName);
+                $cmd            = "$jobName=`qsub -o $path2qsub -e $path2qsub $QSUBint`";
+                open $QSUB, ">>", "$QSUB" or die "Can't open '$QSUB'";
+                print $QSUB "$cmd\n";
+                close $QSUB;
+
+	}
 
 	#*----------------------------------------------------------------------*
         # Change Targets.txt file for next iteration
@@ -396,11 +426,16 @@ if( $map =~ "TRUE" ){
 	print "\n\n*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-\n";
 	print "\n Mapping fastq files using Tophat\n";
 
-	my $iterateJobName	= "Iterate_map_$expFolder";
+	#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 	my $myJobName		= "map";
+	my $iterateJobName	= "Iterate_$myJobName\_$expFolder";
 	my $myJobName2		= "rename";
 	my $path2qsub		= "$tmpscr/$myJobName/qsub";
 
+	#-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-
+        # Create folders
+
+	#-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-
 	# Create file to store jobs in
 	unless( -d "$tmpscr/$myJobName" )	{ `mkdir $tmpscr/$myJobName`; }
 	unless( -d "$path2qsub" )		{ `mkdir $path2qsub`; }
@@ -414,9 +449,7 @@ if( $map =~ "TRUE" ){
 	my @myJobs2;
 
 
-	#*----------------------------------------------------------------------*
-	# Create a folder named * mysample *
-
+	#<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
 	print "\n\n-------------------------------------\n\n Mapping samples: ";
 	foreach my $i (0 .. $#samples) {
 		
@@ -523,10 +556,15 @@ if( $filter =~ "TRUE" ){
  	print "\n\n*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-\n";
         print "\n Filtering reads\n";
 
-	my $iterateJobName	= "Iterate_filter_$expFolder";
+	#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 	my $myJobName		= "filter";
+	my $iterateJobName	= "Iterate_$myJobName\_$expFolder";
 	my $path2qsub		= "$tmpscr/$myJobName/qsub";
 
+	#-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-
+        # Create folders
+
+	#-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-
 	# Create file to store jobs in
 	unless( -d "$tmpscr/$myJobName" )	{ `mkdir $tmpscr/$myJobName`; }
 	unless( -d "$path2qsub" )		{ `mkdir $path2qsub`; }
@@ -538,6 +576,7 @@ if( $filter =~ "TRUE" ){
 	print "\n Store all of the following '$myJobName' jobs in $QSUB \n";
 	my @myJobs;
 
+	#<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
 	print "\n\n-------------------------------------\n\n Filtering samples: ";
 	foreach my $i (0 .. $#samples) {
 
@@ -623,10 +662,16 @@ if( $filter =~ "TRUE" ){
 if($cleanfiles =~ "TRUE"){
 
 
-	my $iterateJobName	= "Iterate_cleanfiles_$expFolder";
+
+	#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
         my $myJobName           = "cleanfiles";
+	my $iterateJobName	= "Iterate_$myJobName\_$expFolder";
         my $path2qsub           = "$tmpscr/$myJobName/qsub";
 
+	#-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-
+        # Create folders
+
+	#-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-
         # Create file to store jobs in
         unless( -d "$tmpscr/$myJobName" )	{ `mkdir $tmpscr/$myJobName`; }
         unless( -d "$path2qsub" )               { `mkdir $path2qsub`; }
@@ -646,6 +691,7 @@ if($cleanfiles =~ "TRUE"){
         my $path2bam                    = "$path2aligned/bam";
         unless( -d "$path2bam" )        { `mkdir $path2bam`;            }
 
+	#<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
         foreach my $i (0 .. $#samples) {
 
 		print "\n\t $samples[$i] ";
@@ -720,10 +766,16 @@ if( $granges =~ "TRUE" ){
         print "\n\n*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-\n";
         print "\n Creating GRanges\n";
 
-        my $iterateJobName	= "Iterate_GRanges_$expFolder";
+	#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
         my $myJobName           = "granges";
+	my $iterateJobName	= "Iterate_$myJobName\_$expFolder";
         my $path2qsub           = "$tmpscr/$myJobName/qsub";
 
+	#-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-
+        # Create folders
+	unless( -d "$path2aligned/GRangesRData" )	{ `mkdir $path2aligned/GRangesRData`; }
+
+	#-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-
         # Create file to store jobs in
         unless( -d "$tmpscr/$myJobName" )	{ `mkdir $tmpscr/$myJobName`; }
         unless( -d "$path2qsub" )               { `mkdir $path2qsub`; }
@@ -735,9 +787,8 @@ if( $granges =~ "TRUE" ){
         print "\n Store all of the following '$myJobName' jobs in $QSUB \n";
         my @myJobs;
 
-        # Create a GRangesRData folder
-        unless( -d "$path2aligned/GRangesRData" )	{ `mkdir $path2aligned/GRangesRData`; }
-
+	#<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+	foreach my $i (0) {
                 #-----------------------------------------------------------
                 # Prepare a personal qsub script
                 my $QSUBint  = "$tmpscr/$myJobName/$myJobName\_qsub.sh";
@@ -759,52 +810,4 @@ if( $granges =~ "TRUE" ){
 		#---------------------------------------------
                 # Keep track of the jobs in @myJobs
                 my $jobName     = "$myJobName$i";
-                push(@myJobs, "$jobName");
-                $cmd            = "$jobName=`qsub -o $path2qsub -e $path2qsub $QSUBint`";
-                open $QSUB, ">>", "$QSUB" or die "Can't open '$QSUB'";
-                print $QSUB "$cmd\n";
-                close $QSUB;
-
-        #*----------------------------------------------------------------------*
-        # Change Targets.txt file for next iteration
-        print "\n--------------------------------------------------------------------------------------------------\n";
-        print "\n Changing '$myJobName' variable to FALSE and proceed";
-        `/usr/bin/perl -p -i -e "s/$myJobName/$myJobName\_DONE/gi" $Targets`;
-
-        #*----------------------------------------------------------------------*
-        # Prepar file containing the jobs to run
-
-        # Add the next job line to the $QSUB
-        foreach( @myJobs ){ $_ = "\$".$_ ; }
-        my $myJobsVec   = join(":", @myJobs);
-        my $finalcmd    = "FINAL=\`qsub -N $iterateJobName -o $path2qsub -e $path2qsub -W depend=afterok\:$myJobsVec $IterateSH`";
-        open $QSUB, ">>", "$QSUB" or die "Can't open '$QSUB'";
-        print $QSUB "$finalcmd\n";
-        close $QSUB;
-
-        #*----------------------------------------------------------------------*
-        # Submit jobs to run
-
-        print "\n\n--------------------------------------------------------------------------------------------------\n";
-        print "\n Submitting job to cluster: \t `sh $QSUB` \n";
-        `sh $QSUB`;
-
-        #*----------------------------------------------------------------------*
-        # Exit script
-
-        print "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n";
-        print "\n Exiting $myJobName section with no known error \n";
-        print "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n\n\n";
-
-        exit 0;
-
-}
-
-exit 0;
-
-
-print "\n*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-\n\n";
-
-#*----------------------------------------------------------------------*
-
-
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      
