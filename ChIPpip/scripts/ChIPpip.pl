@@ -13,8 +13,6 @@
 #*                                                                	*
 #*----------------------------------------------------------------------*
 
-`umask 0`;
-
 if( $ARGV[0] ) { $path2expFolder = $ARGV[0]; }
 else{ die "\n\n----------------------------------------\n\n Provide the path where to your project: </PATH/TO/PROJECT> \n\n--------------------------------------------------------------------------------\n\n"; }
 
@@ -1235,7 +1233,6 @@ if($cleanfiles =~ "TRUE"){
 	
 		# Count reads in .bam and store in LibrarySize.txt
 		my $path2currentSampleDir	= "$path2aligned/$samplesInputs[$i]";
-		print "\n\t $samples[$i] ";
 
 		# Prepare a personal qsub script
 		my $QSUBint	= "$tmpscr/$myJobName/$samplesInputs[$i]\_$myJobName\.sh";
