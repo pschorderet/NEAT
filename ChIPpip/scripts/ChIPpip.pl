@@ -13,6 +13,8 @@
 #*                                                                	*
 #*----------------------------------------------------------------------*
 
+`umask 0`;
+
 if( $ARGV[0] ) { $path2expFolder = $ARGV[0]; }
 else{ die "\n\n----------------------------------------\n\n Provide the path where to your project: </PATH/TO/PROJECT> \n\n--------------------------------------------------------------------------------\n\n"; }
 
@@ -278,17 +280,22 @@ print "\n";
 #*----------------------------------------------------------------------*
 # Set different paths
 
-my $path2DataStructure		= "$path2expFolder/DataStructure";
-my $tmpscr 			= "$path2expFolder/scripts";
+my $tmpscr			= "$path2expFolder/scripts";
 my $path2fastq			= "$path2expFolder/fastq";
 my $path2QC			= "$path2expFolder/QC";
 my $path2aligned		= "$path2expFolder/aligned";
-my $path2peakcalling            = "$path2expFolder/peakcalling";
-my $scrhead 			= "$path2ChIPseqScripts/QSUB_header.sh";
+my $scrhead			= "$path2ChIPseqScripts/QSUB_header.sh";
 my $path2iterate		= "$tmpscr/iterate";
-my $ChIPseqMainIterative	= "$path2iterate/ChIPseq.sh";
+my $ChIPseqMainIterative	= "$path2iterate/RNAseq.sh";
 my $IterateSH			= "$path2iterate/Iterate\_$expFolder.sh";
 my $path2CustFct		= "$path2NEAT/CustomFunctions";
+my $path2DataStructure		= "$path2expFolder/DataStructure";
+my $path2peakcalling		= "$path2expFolder/peakcalling";
+my $path2bam			= "$path2expFolder/bam";
+my $path2bamRX			= "$path2expFolder/bam_RX";
+my $path2GRanges		= "$path2expFolder/GRangesRData";
+my $path2GRangesRX		= "$path2expFolder/GRangesRData_RX";
+
 
 #************************************************************************
 #									*
@@ -311,8 +318,7 @@ if( $unzip =~ "TRUE" ){
 
 	#-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-
         # Create folders
-	my $path2fastq          = "$path2expFolder/fastq";
-	unless( -d "$path2fastq" )	{ `mkdir $path2fastq`;                  }
+	unless( -d "$path2fastq" )	{ `mkdir $path2fastq`; }
 
 	#-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-
 	# Create file to store jobs in
@@ -420,6 +426,8 @@ if( $qc =~ "TRUE" ) {
 
 	#-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-
         # Create folders
+	unless( -d "$path2QC" ) { `mkdir $path2QC`; }
+        `cp $path2ChIPseqScripts/QC.R $tmpscr`;
 
 	#-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-
 	# Create file to store jobs in
@@ -432,9 +440,6 @@ if( $qc =~ "TRUE" ) {
 	`chmod 777 $QSUB`;
 	print "\n Store all of the following '$myJobName' jobs in $QSUB \n";
 	my @myJobs;
-
-	unless( -d "$path2QC" ) { `mkdir $path2QC`; }
-	`cp $path2ChIPseqScripts/QC.R $tmpscr`;
 
 	#<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
 	foreach my $i (0) {
@@ -512,7 +517,6 @@ if( $chiprx =~ "TRUE" ){
 
 	#-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-
         # Create folders
-	my $path2aligned        = "$path2expFolder/aligned";
 	unless( -d "$path2aligned" )	{ `mkdir $path2aligned`; }
 
 	#-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-
@@ -631,7 +635,6 @@ if( $map =~ "TRUE" ){
 
 	#-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-
         # Create folders
-	my $path2aligned        = "$path2expFolder/aligned";
         unless( -d "$path2aligned" )    { `mkdir $path2aligned`; }
 
 	#-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-
@@ -972,7 +975,6 @@ if( $peakcalling =~ "TRUE" ){
 
 	#-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-
         # Create folders
-	my $path2peakcalling    = "$path2expFolder/peakcalling";
         unless( -d "$path2peakcalling" )    { `mkdir $path2peakcalling`; }
 	
         unless( -d "$path2peakcalling/bigwig" )         { `mkdir $path2peakcalling/bigwig`; }
@@ -1085,6 +1087,8 @@ if( $cleanbigwig =~ "TRUE" ){
 
 	#-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-
         # Create folders
+	
+
 
 	#-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-
 	# Create file to store jobs in
@@ -1203,14 +1207,11 @@ if($cleanfiles =~ "TRUE"){
         my $myJobName           = "cleanfiles";
 	my $iterateJobName	= "Iterate_$myJobName\_$expFolder";
         my $path2qsub           = "$tmpscr/$myJobName/qsub";
-
+	
 	#-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-
         # Create folders
-	my $path2aligned                = "$path2expFolder/aligned";
         unless( -d "$path2aligned" )    { `mkdir $path2aligned`;        }
-        my $path2bam                    = "$path2aligned/bam";
         unless( -d "$path2bam" )        { `mkdir $path2bam`;            }
-        my $path2bamRX                  = "$path2aligned/bam_RX";
         unless( -d "$path2bamRX" )	{ `mkdir $path2bamRX`;          }
 
 
@@ -1231,35 +1232,35 @@ if($cleanfiles =~ "TRUE"){
 
 	#<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
 	foreach my $i (0 .. $#samplesInputs) {
-
-		print "\n\t $samples[$i] ";
-                # Prepare a personal qsub script
-                my $QSUBint     = "$tmpscr/$myJobName/$samples[$i]\_$myJobName\.sh";
-                `cp $scrhead $QSUBint`;
-
+	
 		# Count reads in .bam and store in LibrarySize.txt
-                my $path2currentSampleDir	= "$path2aligned/$samplesInputs[$i]";
+		my $path2currentSampleDir	= "$path2aligned/$samplesInputs[$i]";
+		print "\n\t $samples[$i] ";
 
-                #-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-                #-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+          IMPORTANT CODE HERE         -+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+		# Prepare a personal qsub script
+		my $QSUBint	= "$tmpscr/$myJobName/$samplesInputs[$i]\_$myJobName\.sh";
+		`cp $scrhead $QSUBint`;
 
-                my $cmd		= "`cp $path2aligned/$samplesInputs[$i]/$samplesInputs[$i].bam $path2bam/`";
+		#-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+		#-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+          IMPORTANT CODE HERE         -+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+		my $cmd		= "cp $path2aligned/$samplesInputs[$i]/$samplesInputs[$i].bam $path2bam/";
 		`echo "$cmd" >> $QSUBint`;
-                $cmd		= "`cp $path2aligned/$samplesInputs[$i]/$samplesInputs[$i].bai $path2bam/`";
+		$cmd		= "cp $path2aligned/$samplesInputs[$i]/$samplesInputs[$i].bai $path2bam/";
 		`echo "$cmd" >> $QSUBint`;
-		$cmd		= "`cp $path2aligned/$samplesInputs[$i]\_RX/$samplesInputs[$i].bam $path2bamRX/`";
-                `echo "$cmd" >> $QSUBint`;
-		$cmd		= "`cp $path2aligned/$samplesInputs[$i]\_RX/$samplesInputs[$i].bai $path2bamRX/`";        
+		$cmd		= "cp $path2aligned/$samplesInputs[$i]\_RX/$samplesInputs[$i].bam $path2bamRX/";
+		`echo "$cmd" >> $QSUBint`;
+		$cmd		= "cp $path2aligned/$samplesInputs[$i]\_RX/$samplesInputs[$i].bai $path2bamRX/";        
 		`echo "$cmd" >> $QSUBint`;
 
 		#---------------------------------------------
-                # Keep track of the jobs in @myJobs
-                my $jobName     = "$myJobName$i";
-                push(@myJobs, "$jobName");
-                $cmd            = "$jobName=`qsub -o $path2qsub -e $path2qsub $QSUBint`";
-                open $QSUB, ">>", "$QSUB" or die "Can't open '$QSUB'";
-                print $QSUB "$cmd\n";
-                close $QSUB;
+		# Keep track of the jobs in @myJobs
+		my $jobName     = "$myJobName$i";
+		push(@myJobs, "$jobName");
+		$cmd            = "$jobName=`qsub -o $path2qsub -e $path2qsub $QSUBint`";
+		open $QSUB, ">>", "$QSUB" or die "Can't open '$QSUB'";
+		print $QSUB "$cmd\n";
+		close $QSUB;
 
 	}
 	
@@ -1317,8 +1318,8 @@ if( $granges =~ "TRUE" ){
 
 	#-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-
 	# Create folders
-        unless( -d "$path2aligned/GRangesRData" )	{ `mkdir $path2aligned/GRangesRData`; }
-        unless( -d "$path2aligned/GRangesRData_RX" )    { `mkdir $path2aligned/GRangesRData_RX`; }	
+        unless( -d "$path2GRanges" )	{ `mkdir $path2GRanges`; }
+        unless( -d "$path2GRangesRX" )	{ `mkdir $path2GRangesRX`; }	
 
 	#-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-
         # Create file to store jobs in
@@ -1337,19 +1338,18 @@ if( $granges =~ "TRUE" ){
 
 		#-----------------------------------------------------------
                 # Prepare a personal qsub script
-                my $QSUBint  = "$tmpscr/$myJobName/$myJobName\_qsub.sh";
+		my $QSUBint	= "$tmpscr/$myJobName/$myJobName\_qsub.sh";
                 `cp $scrhead $QSUBint`;
 
                 #-----------------------------------------------------------
                 # Parameters
-                my $path2bam            = "$path2expFolder/aligned/bam";
                 my $code                = "$path2CustFct/Bam2GRangesRemote.R";
 
                 #-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
                 #-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+          IMPORTANT CODE HERE         -+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
-                my $cmd         = "Rscript $code $path2expFolder $path2bam $path2CustFct &>> $path2qsub/GRanges.log";
-                `echo "$cmd" >> $QSUBint`;
+                my $cmd         = "Rscript $code $path2expFolder $path2bam $path2GRanges $path2CustFct &>> $path2qsub/GRanges.log";
+		`echo "$cmd" >> $QSUBint`;
 
                 #--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--
 
