@@ -47,16 +47,16 @@ path2Mart <- paste(path2NEAT, "MartObjects/", sep="")
 path2ReferenceFiles <- paste(path2NEAT,"ReferenceFiles/", sep="")
 path2CustFct <- paste(path2NEAT,"CustomFunctions/", sep="")
 path2Targets <- paste(path2MainFolder, "DataStructure/Targets.txt", sep="")
-path2chrlens <- paste(path2MainFolder, "DataStructure/chr_lens.dat", sep="")
+
 
 # Source CustomFunctions
-source(paste(path2CustFct, "Tags2GRanges.R", sep=""))
-source(paste(path2CustFct, "DoesTheFileExist.R", sep=""))
+
 source(paste(path2CustFct, "Bam2GRangesRData.R", sep=""))
 source(paste(path2CustFct, "Bed2GRanges.R", sep=""))
-source(paste(path2CustFct, "CheckExistenceOfFolder", sep=""))
+source(paste(path2CustFct, "CheckExistenceOfFolder.R", sep=""))
+source(paste(path2CustFct, "CreateArborescenceChIPseq.R", sep=""))
 source(paste(path2CustFct, "CountOverlaps2matrix.R", sep=""))
-source(paste(path2CustFct, "ChIPseqCreateArborescence.R", sep=""))
+source(paste(path2CustFct, "DoesTheFileExist.R", sep=""))
 source(paste(path2CustFct, "ErrorOutput.R", sep=""))
 source(paste(path2CustFct, "LoadMartGRanges.R", sep=""))
 source(paste(path2CustFct, "Mart2GRanges.R", sep=""))
@@ -105,7 +105,8 @@ cat(" \n\n\n ===================================================================
 cat(" \n || * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * ", sep="")
 cat(" \n ||\t Create / check arborescence of ", paste(path2MainFolder, sep=""), sep="")
 cat(" \n || .-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.\n", sep="")
-ChIPseqCreateArborescence(path2MainFolder=path2MainFolder)
+
+CreateArborescenceChIPseq(path2MainFolder=path2MainFolder)
 
 #--------------------------------------------------
 # Define function to plot axes
@@ -148,9 +149,21 @@ cat(" \n\n Targets file provided: \n\n", sep="")
 Targets <- read.delim(path2Targets, comment.char="#")
 print(Targets)
 
+res <- readLines(path2Targets)
+for(i in 1:length(res)){
+  newLine <- res[i]
+  # Store some variables
+  if(length(grep("Reference_genome\t", newLine))==1) { 
+    currentline <- gsub("# ", "", newLine); currentline <- gsub("\t", "", currentline); currentline <- gsub("\"", "", currentline);
+    refGenome <- unlist(strsplit(currentline, split = "\\="))[2]
+  }    
+}
+
 #------------------------------------------------------------
 # Read the chr_lens.dat
 #chromosomesFile <- read.delim(path2chrlens, comment.char="#")
+
+path2chrlens <- paste(path2MainFolder, "DataStructure/", refGenome, "/chr_lens.dat", sep="")
 chromosomesFile <- read.table(path2chrlens, comment.char="#")
 chromosomes <- chromosomesFile$V1
 #chromosomes = c(paste("chr", seq(1,19),  sep = ""), "chrX", "chrY")

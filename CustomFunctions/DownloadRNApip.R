@@ -50,7 +50,10 @@ LocalPath2CustomFunctions <- paste( LocalPath2NEAT, "CustomFunctions", "/", sep=
 LocalPath2Targets <- paste( LocalPath2NewProject, "DataStructure/Targets.txt", sep="")
 LocalPath2bam <- paste( LocalPath2NewProject, "bam/", sep="")
 LocalPath2aligned <- paste( LocalPath2NewProject, "Tophat/", sep="")
-source(paste( LocalPath2CustomFunctions, "ErrorOutput.R", sep=""))
+
+source(paste(LocalPath2CustomFunctions, "ErrorOutput.R", sep=""))
+source(paste(LocalPath2CustomFunctions, "CheckExistenceOfFolder.R", sep=""))
+source(paste(LocalPath2CustomFunctions, "CreateArborescenceRNAseq.R", sep=""))
 
 #--------------------------------------------------
 # Read Targets.txt file and find ssh parameters
@@ -92,8 +95,8 @@ cat(" \n========================================================================
 cat(" \n|| * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * ", sep="")
 cat(" \n||\t Create / check arborescence of ", LocalPath2NewProject, sep="")
 cat(" \n|| .-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.\n", sep="")
-source(paste(LocalPath2CustomFunctions, "RNAseqCreateArborescence.R", sep=""))
-RNAseqCreateArborescence(path2MainFolder=LocalPath2NewProject)
+
+CreateArborescenceRNAseq(path2MainFolder=LocalPath2NewProject)
 
 #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 #*                                                                *
@@ -129,6 +132,17 @@ system(mycode)
 #cat(" \n Downloading bam folder from remote server", sep="")
 #mycode <- paste("`scp -r ", sshpath, ":", RemotePath2MainFolderName, "/", ProjectName, "/aligned/bam/ ", LocalPath2NewProject, "`", sep="")
 #system(mycode)
+
+# Download GRanges folder
+cat(" \n Downloading GRanges folder from remote server", sep="")
+mycode <- paste("`scp -r ", sshpath, ":", RemotePath2MainFolderName, "/", ProjectName, "/GRangesRData/ ", LocalPath2NewProject, "`", sep="")
+system(mycode)
+# Download wig folder
+cat(" \n Downloading wig folder from remote server", sep="")
+mycode <- paste("`scp -r ", sshpath, ":", RemotePath2MainFolderName, "/", ProjectName, "/wig/ ", LocalPath2NewProject, "`", sep="")
+system(mycode)
+
+
 
 
 #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@

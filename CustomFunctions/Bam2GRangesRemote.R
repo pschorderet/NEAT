@@ -23,15 +23,15 @@ args            <- commandArgs(TRUE)
 path2expFolder  <- paste(args[1], "/", sep="")
 path2bam	<- paste(args[2], "/", sep="")		# path to sample
 path2bamRX	<- paste(args[2], "_RX/", sep="")
-path2CustFct	<- paste(args[3], "/", sep="")		# path to CustomFunctions
+path2GRanges	<- paste(args[3], "/", sep="") 
+path2GRangesRX	<- paste(args[3], "_RX/", sep="")
+path2CustFct	<- paste(args[4], "/", sep="")		# path to CustomFunctions
+
 
 path2MainFolder	<- path2expFolder
-path2GRangesRData <- paste(path2MainFolder, "aligned/GRangesRData/", sep="")
-path2GRangesRDataRX <- paste(path2MainFolder, "aligned/GRangesRData_RX/", sep="") 
-path2statTable <- paste(path2MainFolder, "DataStructure/statTable.bed", sep="")
-path2wig <- paste(path2MainFolder, "/wig", sep="")
-
 path2Targets	<- paste(path2MainFolder, "DataStructure/Targets.txt", sep="")
+path2statTable 	<- paste(path2MainFolder, "DataStructure/statTable.bed", sep="")
+path2wig 	<- paste(path2MainFolder, "/wig", sep="")
 normConstant	<- 1e6
 
 
@@ -58,7 +58,7 @@ source(paste(path2CustFct, "OutputNumberOfReadsFromGRanges.R", sep=""))
 #------------------------------------------------------------
 # Read Targets files
 
-if(file.exists(path2Targets)==FALSE){ErrorOutput(paste("No Targets.txt file in\t", path2Targets, sep="")) }
+if(file.exists(path2Targets)==FALSE) { ErrorOutput(paste("No Targets.txt file in\t", path2Targets, sep="")) }
 cat(" \n\n Targets file provided: \n\n", sep="")
 Targets <- read.delim(path2Targets, comment.char="#")
 print(Targets)
@@ -142,17 +142,21 @@ cat("   \n ---------------------------------------------------------", sep="")
 myChIPrx <- "TRUE"
 countsRX <- NULL
 
-bamGRangesRDataRXPath <- paste(paste(path2GRangesRDataRX, allsamples, sep=""), ".bam.GRanges.RData", sep="")
-if(DoesTheFileExist(path2file=bamGRangesRDataRXPath)!=TRUE){
+#cat("\n\n", allsamples, sep="\n")
+
+bamGRangesRXPath <- paste(paste(path2GRangesRX, allsamples, sep=""), ".bam.GRanges.RData", sep="")
+if(DoesTheFileExist(path2file=bamGRangesRXPath)!=TRUE){
 	# If .bam files cannot be found, assume RX is not used and set everything to 1
         bamPathRX <- paste(path2file=path2bamRX, allsamples, ".bam", sep="")
-        if(DoesTheFileExist(path2file=bamPathRX)!=TRUE){
+        
+	if(DoesTheFileExist(path2file=bamPathRX)!=TRUE){
                 # do nothing
 		cat(" \n\n +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-", sep="")
                 cat("   \n +-+-+-+-+-+-+-+-+-        NOTE       -+-+-+-+-+-+-+-+-+-+-\n", sep="")
 		cat("   \n Some RX.bam files do not exists. \n Assume no ChIPrx normalization.\n", sep="")
 		cat("   \n +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-\n\n\n", sep="")	
 		myChIPrx <- "FALSE"		
+		countsRX <- rep(normConstant, length(allsamples))
         } else {
 		# Create GRangesRData files
 		cat(" \n\n **********************************************************\n", sep="")       
@@ -170,8 +174,8 @@ if(DoesTheFileExist(path2file=bamGRangesRDataRXPath)!=TRUE){
 #
 if(myChIPrx == "TRUE"){
 
-	GRangesSamplesRX <- list.files(path2GRangesRDataRX, pattern = "*.bam.GRanges.RData$")  
-	if(DoesTheFileExist(path2file=paste(paste(path2GRangesRDataRX, allsamples, sep=""), ".bam.GRanges.RData", sep=""))==TRUE){
+	GRangesSamplesRX <- list.files(path2GRangesRX, pattern = "*.bam.GRanges.RData$")  
+	if(DoesTheFileExist(path2file=paste(paste(path2GRangesRX, allsamples, sep=""), ".bam.GRanges.RData", sep=""))==TRUE){
 	
 		# If .bam files cannot be found, assume RX is not used and set everything to 1
 		bamPathRX <- paste(path2file=path2bamRX, allsamples, ".bam", sep="")
@@ -180,7 +184,7 @@ if(myChIPrx == "TRUE"){
 		}
 		# Load each sample into its .GRanges named object
 		for(i in 1:length(GRangesSamplesRX)){
-			path2load <- paste(path2GRangesRDataRX, GRangesSamplesRX[i], sep="")
+			path2load <- paste(path2GRangesRX, GRangesSamplesRX[i], sep="")
 			load(path2load)
 			assign(GRangesSamplesRX[i], GRangesObj)
 			countsRX <- c(countsRX, length(get(GRangesSamplesRX[i])))
@@ -201,9 +205,9 @@ cat("   \n ---------------------------------------------------------", sep="")
 #------------------------------------------------------------
 # Load GRanges objects
 #
-bamGRangesRDataPath <- paste(paste(path2GRangesRData, allsamples, sep=""), ".bam.GRanges.RData", sep="")
+bamGRangesPath <- paste(paste(path2GRanges, allsamples, sep=""), ".bam.GRanges.RData", sep="")
 
-if(DoesTheFileExist(path2file=bamGRangesRDataPath)!=TRUE){
+if(DoesTheFileExist(path2file=bamGRangesPath)!=TRUE){
 	# If .bam files cannot be found, abort
 	bamPath <- paste(path2file=path2bam, allsamples, ".bam", sep="")
 	if(DoesTheFileExist(path2file=bamPath)!=TRUE){
@@ -224,11 +228,11 @@ if(DoesTheFileExist(path2file=bamGRangesRDataPath)!=TRUE){
 # Load GRanges objects
 #
 counts <- NULL
-GRangesSamples <- list.files(path2GRangesRData, pattern = "*.bam.GRanges.RData$")
-if(DoesTheFileExist(path2file=paste(paste(path2GRangesRData, allsamples, sep=""), ".bam.GRanges.RData", sep=""))==TRUE){
+GRangesSamples <- list.files(path2GRanges, pattern = "*.bam.GRanges.RData$")
+if(DoesTheFileExist(path2file=paste(paste(path2GRanges, allsamples, sep=""), ".bam.GRanges.RData", sep=""))==TRUE){
 	# Load each sample into its .GRanges named object
 	for(i in 1:length(GRangesSamples)){
-		path2load <- paste(path2GRangesRData, GRangesSamples[i], sep="")
+		path2load <- paste(path2GRanges, GRangesSamples[i], sep="")
 		load(path2load)
 		assign(GRangesSamples[i], GRangesObj)
 		counts <- c(counts, length(get(GRangesSamples[i])))
@@ -266,6 +270,9 @@ cat("   \n #                   Creating wig files                  #", sep="")
 cat("   \n #                                                       #", sep="")
 cat("   \n ---------------------------------------------------------\n", sep="")
 
+CheckExistenceOfFolder(path2wig)
+
+cat("\n\n", sep="")
 
 # Set variables and paths
 seqlengths <- c(chromosomesFile[,2])
@@ -273,7 +280,7 @@ names(seqlengths) <- chromosomesFile[,1]
 #seqlengths
 
 # Slice the genome into bins
-#bins <- tileGenome(seqlengths, tilewidth=500, cut.last.tile.in.chrom=TRUE)
+bins <- tileGenome(seqlengths, tilewidth=500, cut.last.tile.in.chrom=TRUE)
 
 # Read in the statTable file countaining the ChIPrx normaization factors
 path2statTable <- paste(path2MainFolder, "DataStructure/statTable.bed", sep="")
@@ -292,29 +299,29 @@ for(h in 1:length(GRangesSamples)){
 	cat("\n Creating wig file:\t", GRangesSamples[h], "\n", sep="")
 
 	# h=1
-#	gr <- CountOverlaps2GRanges(GRanges1=bins, GRanges2=get(GRangesSamples[h]), normFactRX=statTable$NormFactRX[h], normToLibrarySize=FALSE)
-#	df <- data.frame(seqnames=seqnames(gr), starts=start(gr)-1, ends=end(gr), value=elementMetadata(gr)$ValueRX)
+	gr <- CountOverlaps2GRanges(GRanges1=bins, GRanges2=get(GRangesSamples[h]), normFactRX=statTable$NormFactRX[h], normToLibrarySize=FALSE)
+	df <- data.frame(seqnames=seqnames(gr), starts=start(gr)-1, ends=end(gr), value=elementMetadata(gr)$ValueRX)
   
 	# Delete line that have no value
-#	dfnon0 <- df[which(df$value!=0),]
+	dfnon0 <- df[which(df$value!=0),]
   
 	# Set path to current wig file
-#	path2wigfilename <- paste(path2wig, "/", GRangesSamples[h], ".wig", sep="")
+	path2wigfilename <- paste(path2wig, "/", GRangesSamples[h], ".wig", sep="")
   
 	# Copy dfnon0 to tmp file
-#	write.table(dfnon0, file=path2wigfilename_tmp, quote=F, sep="\t", row.names=F, col.names=F)
+	write.table(dfnon0, file=path2wigfilename_tmp, quote=F, sep="\t", row.names=F, col.names=F)
   
 	# Add header to the file
-#	header = paste("track type=wiggle_0 name='", allsamples[h], "' description='coverata' visibility=dense color=0,100,200 priority=20", sep="")
+	header = paste("track type=wiggle_0 name='", allsamples[h], "' description='coverata' visibility=dense color=0,100,200 priority=20", sep="")
   
 	# Copy header to tmp file
-#	write.table(header, file=path2wigfile_header, quote=F, sep="\t", row.names=F, col.names=F)
+	write.table(header, file=path2wigfile_header, quote=F, sep="\t", row.names=F, col.names=F)
   
 	# Consolidate files
-#	mycode <- paste("`echo '", header, "' > ", path2wigfilename, "`", sep="")
-#	system(mycode)
-#	mycode <- paste("`cat ", path2wigfile_header, " ", path2wigfilename_tmp, " > ", path2wigfilename, "`", sep="")
-#	system(mycode)
+	mycode <- paste("`echo '", header, "' > ", path2wigfilename, "`", sep="")
+	system(mycode)
+	mycode <- paste("`cat ", path2wigfile_header, " ", path2wigfilename_tmp, " > ", path2wigfilename, "`", sep="")
+	system(mycode)
 
 }
 

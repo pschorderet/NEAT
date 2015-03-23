@@ -50,9 +50,9 @@ path2Tophat <- paste(path2MainFolder, "Tophat/", sep="")
 
 # Source pepsfunctions
 source(paste(path2CustFct, "Bam2GRangesRData.R", sep=""))
-source(paste(path2CustFct, "CheckExistenceOfFolder", sep=""))
+source(paste(path2CustFct, "CheckExistenceOfFolder.R", sep=""))
 source(paste(path2CustFct, "CountOverlaps2matrix.R", sep=""))
-source(paste(path2CustFct, "RNAseqCreateArborescence.R", sep=""))
+source(paste(path2CustFct, "CreateArborescenceRNAseq.R", sep=""))
 source(paste(path2CustFct, "DoesTheFileExist.R", sep=""))
 source(paste(path2CustFct, "ErrorOutput.R", sep=""))
 source(paste(path2CustFct, "LoadMartGRanges.R", sep=""))
@@ -116,7 +116,8 @@ cat(" \n\n\n ===================================================================
 cat(" \n || * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * ", sep="")
 cat(" \n ||\t Create / check arborescence of ", paste(path2MainFolder, sep=""), sep="")
 cat(" \n || .-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.\n", sep="")
-RNAseqCreateArborescence(path2MainFolder=path2MainFolder)
+
+CreateArborescenceRNAseq(path2MainFolder=path2MainFolder)
 
 
 #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
@@ -136,7 +137,7 @@ cat(" \n\n Targets file provided: \n\n", sep="")
 Targets <- read.delim(path2Targets, comment.char="#")
 print(Targets)
 
-res <- readLines(LocalPath2Targets)
+res <- readLines(path2Targets)
 for(i in 1:length(res)){
   #i=21
   newLine <- res[i]

@@ -53,7 +53,13 @@ LocalPath2CustomFunctions <- paste( LocalPath2NEAT, "CustomFunctions", "/", sep=
 LocalPath2Targets <- paste( LocalPath2NewProject, "DataStructure/Targets.txt", sep="")
 LocalPath2bam <- paste( LocalPath2NewProject, "bam/", sep="")
 LocalPath2saf <- paste( LocalPath2bam, "aligned/", sep="" )
+
 source(paste( LocalPath2CustomFunctions, "/ErrorOutput.R", sep=""))
+source(paste(LocalPath2CustomFunctions, "CheckExistenceOfFolder.R", sep=""))
+source(paste(LocalPath2CustomFunctions, "CreateArborescenceChIPseq.R", sep=""))
+
+#--------------------------------------------------
+# Read Targets.txt file and find ssh parameters
 
 res <- readLines(LocalPath2Targets)
 for(i in 1:length(res)){
@@ -94,8 +100,8 @@ cat(" \n========================================================================
 cat(" \n|| * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * ", sep="")
 cat(" \n||\t Create / check arborescence of ", LocalPath2NewProject, sep="")
 cat(" \n|| .-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.\n", sep="")
-source(paste(LocalPath2CustomFunctions, "ChIPseqCreateArborescence.R", sep=""))
-ChIPseqCreateArborescence(path2MainFolder=LocalPath2NewProject)
+
+CreateArborescenceChIPseq(path2MainFolder=LocalPath2NewProject)
 
 #--------------------------------------------------
 # Read Targets.txt file and find ssh parameters
@@ -132,11 +138,11 @@ system(mycode)
 cat(mycode)
 
 #--------------------------------------------------
-# Transfer QC bigwig, narrowPeak and broadPeak folders from *RemotePath2MainFolderName*
+# Transfer QC wig, narrowPeak and broadPeak folders from *RemotePath2MainFolderName*
 #
 cat(" \n\n\n======================================================================================", sep="")
 cat(" \n|| * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * ", sep="")
-cat(" \n||\t Downloading QC, bigwig, narrowPeaks, broadPeaks and bam folders", sep="")
+cat(" \n||\t Downloading QC, wig, narrowPeaks, broadPeaks and bam folders", sep="")
 cat(" \n|| .-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.\n\n", sep="")
 
 # Download QC folder
@@ -161,8 +167,14 @@ system(mycode)
 #system(mycode)
 # Download GRanges folder
 cat(" \n Downloading GRanges folder from remote server", sep="")
-mycode <- paste("`scp -r ", sshpath, ":", RemotePath2MainFolderName, "/", ProjectName, "/aligned/GRangesRData/ ", LocalPath2NewProject, "`", sep="")
+mycode <- paste("`scp -r ", sshpath, ":", RemotePath2MainFolderName, "/", ProjectName, "/GRangesRData/ ", LocalPath2NewProject, "`", sep="")
 system(mycode)
+# Download wig folder
+cat(" \n Downloading wig folder from remote server", sep="")
+mycode <- paste("`scp -r ", sshpath, ":", RemotePath2MainFolderName, "/", ProjectName, "/wig/ ", LocalPath2NewProject, "`", sep="")
+system(mycode)
+
+
 
 #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 #                                                                 #
