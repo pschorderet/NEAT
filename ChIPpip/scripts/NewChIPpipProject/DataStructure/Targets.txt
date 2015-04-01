@@ -60,4 +60,4 @@
 #
 OriFileName	FileName	OriInpName	InpName	Factor	Replicate	FileShort	Experiment	Date
 PSa36-1_R1	PSa36-1_noDox_K4me3	PSa37-3_R1	PSa37-3_noDox_Inp	K4me3	1	noDox	1	2015-01-01
-PSa36-2_R1	PSa36-2_Dox_K4me3	PSa37-4_R1	PSa37-4_Dox_Inp K4me3	2	Dox	1	2015-01-01
+PSa36-2_R1	PSa36-2_Dox_K4me3	PSa37-4_R1	PSa37-4_Dox_Inp	K4me3	2	Dox	1	2015-01-01
