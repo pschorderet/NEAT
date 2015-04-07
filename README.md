@@ -31,7 +31,7 @@ NEAT has been developed as four main modules:
 
     (vii)	Bigwig
     
-    (vi)    Wig
+    (viii)	Wig
 
 [ 3 ]       Transfer project to local computer
 
