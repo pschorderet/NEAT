@@ -2,32 +2,40 @@
 
 NEAT is a next generation analysis toolkit that supports the analysis of large data including metagene analysis (ChIPseq) and differential gene expression analysis (RNAseq). 
 
-NEAT can be run either on a cluster via the command line or directly through the respective applications. This allows users to generate metagene analysis (for ChIPseq data) as well as differentially expressed gene analysis (for RNAseq data) using a simple and reproducable pipeline. All files including count tables, RPKM values, DEG, venn diagrams, feature-centered enrichment plots, smear plots, etc are automatically saved and archived for a userfriendly and reproducable flow. 
+NEAT can be run either on a cluster via the command line or directly through the respective applications. This allows users to generate metagene analysis (for ChIPseq data) as well as differentially expressed gene analysis (for RNAseq data) using a simple and reproducable pipeline without even needing to connect to a remote cluster via the terminal. All files including count tables, RPKM values, DEG, venn diagrams, feature-centered enrichment plots, smear plots, etc are automatically saved and archived for a user-friendly and reproducible flow. 
 
 The NEAT toolkit can easily be implemented in any institution with limited to no programming knowledge.
-NEAT has been developped in collaboration with wet-lab scientists as well as bioinformaticiens to insure user-friendliness, management of complicated experimental setups and reproducibility in the big data era.
+NEAT has been developed in collaboration with wet-lab scientists as well as bioinformaticiens to insure user-friendliness, management of complicated experimental setups and reproducibility in the big data era.
 
 To start using NEAT, please follow the tutorials found in the 'Vignette' folder
 
 
 ### What NEAT can do
-NEAT has been developed as two main modules:
+NEAT has been developed as four main modules:
 
-[ 1 ]       Build a pipeline
+[ 1 ]       Create a new project
+
+[ 2 ]       Build a pipeline
 
     (i)     Unzip and rename
 
     (ii)    QC
+    
+    (iii)	ChIP-rx normalization
 
-    (iii)   Map
+    (iv)	Map
 
-    (iv)    Filter
+    (v)		Filter
 
-    (v)     Peakcalling
+    (vi)	Peakcalling
 
-    (vi)    Bigwig
+    (vii)	Bigwig
+    
+    (vi)    Wig
 
-[ 2 ]       Analyze a project
+[ 3 ]       Transfer project to local computer
+
+[ 4 ]       Analyze project
 
     (i)     Create human-readable data (pdf graphes, xls sheets, etc)
 
