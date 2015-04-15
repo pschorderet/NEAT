@@ -194,6 +194,7 @@ foreach $line (@Targets4) {
         $line =~ /^[# : = " OriFileName FileName OriInpName InpName]/ and next;
         push(@inputs, $line);
 }
+my @samples2unzip	= @samples;
 
 #*----------------------------------------------------------------------*
 # Remove duplicated elements in the list @samples and @inputs
@@ -202,6 +203,34 @@ foreach $line (@Targets4) {
 @allinputs	= @inputs;
 %seen           = ();
 @inputs         = grep { ! $seen{$_} ++ } @inputs;
+
+# Remove samples that have "_R2" as these are the paired lanes of "_R1"
+my @samplesPE;
+my @samplesNoPE;
+if( $PE ){
+
+	print "\nPE experiment. \n";
+        foreach my $i (0 .. $#samples) {
+                if ( grep /\_R2$/, $samples[$i] ){
+#                        print "\t '_R2' sample found. \t ($samples[$i]) \n";
+                        push(@samplesPE, $samples[$i]);
+                }
+                else{
+#                       print "\t Main sample found.  \t ($samples[$i]) \n";
+                        push(@samplesNoPE, $samples[$i]);
+                }
+        }
+
+	@samples = @samplesNoPE;
+
+}
+
+#print "\n\n\norisamples:   @orisamples\n";
+print "samples2unzip:   @samples2unzip\n";
+print "samples: \t @samples\n";
+#print "samplesNoPE: \t @samplesNoPE\n";
+print "samplesPE: \t @samplesPE\n";
+
 @samplesInputs  = @samples;
 push (@samplesInputs, @inputs);
 
@@ -331,13 +360,13 @@ if( $unzip =~ "TRUE" ){
         my @myJobs;
 
 	#<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
-	foreach my $i (0 .. $#samples) {
+	foreach my $i (0 .. $#samples2unzip) {
 
 		# Prepare a personal qsub script
-		my $QSUBint  = "$tmpscr/$myJobName/$samples[$i]\_$myJobName\.sh";
+		my $QSUBint  = "$tmpscr/$myJobName/$samples2unzip[$i]\_$myJobName\.sh";
 		`cp $scrhead $QSUBint`;
 
-		my $cmd		= "gunzip -c $path2fastqgz/$orisamples[$i]\.fastq\.gz > $path2fastq/$samples[$i]\.fastq";
+		my $cmd		= "gunzip -c $path2fastqgz/$orisamples[$i]\.fastq\.gz > $path2fastq/$samples2unzip[$i]\.fastq";
 		`echo "$cmd" >> $QSUBint`;
 	
 		#---------------------------------------------
@@ -545,11 +574,11 @@ if( $chiprx =~ "TRUE" ){
 
                         #-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
                         #-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+          IMPORTANT CODE HERE         -+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-                        my $cmd         = "$aligncommand1 -n $ndiff $refGenomeRX $path2fastq/$samplesInputs[$i]\_1.fastq > $path2currentSampleDir/$samplesInputs[$i]\_1.sai";
+                        my $cmd         = "$aligncommand1 -n $ndiff $refGenomeRX $path2fastq/$samplesInputs[$i]\.fastq > $path2currentSampleDir/$samplesInputs[$i]\.sai";
                         `echo "$cmd" >> $QSUBint`;
-                        $cmd            = "$aligncommand1 -n $ndiff $refGenomeRX $path2fastq/$samplesInputs[$i]\_2.fastq > $path2currentSampleDir/$samplesInputs[$i]\_2.sai";
+                        $cmd            = "$aligncommand1 -n $ndiff $refGenomeRX $path2fastq/$samplesInputs[$i]\.fastq > $path2currentSampleDir/$samplesPE[$i]\.sai";
                         `echo "$cmd" >> $QSUBint`;
-                        $cmd            = "bwa sampe $refGenomeRX $path2currentSampleDir/$samplesInputs[$i]\_1.sai $path2currentSampleDir/$samplesInputs[$i]\_2.sai $path2fastq/$samplesInputs\_1.fastq $path2fastq/$samplesInputs[$i]\_2.fastq > $path2currentSampleDir/$samplesInputs[$i]\.sam";
+                        $cmd            = "bwa sampe $refGenomeRX $path2currentSampleDir/$samplesInputs[$i]\.sai $path2currentSampleDir/$samplesPE[$i]\.sai $path2fastq/$samplesInputs[$i]\_1.fastq $path2fastq/$samplesPE[$i]\.fastq > $path2currentSampleDir/$samplesInputs[$i]\.sam";
                         `echo "$cmd" >> $QSUBint`;
                         #--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--
 
@@ -663,11 +692,11 @@ if( $map =~ "TRUE" ){
 			
 			#-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 			#-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+          IMPORTANT CODE HERE         -+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-			my $cmd		= "$aligncommand1 -n $ndiff $refGenome $path2fastq/$samplesInputs[$i]\_1.fastq > $path2currentSampleDir/$samplesInputs[$i]\_1.sai";
+			my $cmd		= "$aligncommand1 -n $ndiff $refGenome $path2fastq/$samplesInputs[$i]\.fastq > $path2currentSampleDir/$samplesInputs[$i]\.sai";
 			`echo "$cmd" >> $QSUBint`;
-			$cmd		= "$aligncommand1 -n $ndiff $refGenome $path2fastq/$samplesInputs[$i]\_2.fastq > $path2currentSampleDir/$samplesInputs[$i]\_2.sai";
+			$cmd		= "$aligncommand1 -n $ndiff $refGenome $path2fastq/$samplesPE[$i]\.fastq > $path2currentSampleDir/$samplesPE[$i]\.sai";
 			`echo "$cmd" >> $QSUBint`;
-			$cmd		= "bwa sampe $refGenome $path2currentSampleDir/$samplesInputs[$i]\_1.sai $path2currentSampleDir/$samplesInputs[$i]\_2.sai $path2fastq/$samplesInputs\_1.fastq $path2fastq/$samplesInputs[$i]\_2.fastq > $path2currentSampleDir/$samplesInputs[$i]\.sam";
+			$cmd		= "bwa sampe $refGenome $path2currentSampleDir/$samplesInputs[$i]\.sai $path2currentSampleDir/$samplesPE[$i]\.sai $path2fastq/$samplesInputs[$i]\.fastq $path2fastq/$samplesPE[$i]\.fastq > $path2currentSampleDir/$samplesInputs[$i]\.sam";
 			`echo "$cmd" >> $QSUBint`;
 			#--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--
 
@@ -773,7 +802,7 @@ if( $filter =~ "TRUE" ){
 		
 		# -----------------------------------------		
 		# Get unique matches only
-		my $samplep = $samplesInputs[$i];
+		#my $samplep = $samplesInputs[$i];
 		if( $makeunique && ($enforceisize==0) ){
 
 			#-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -817,7 +846,7 @@ if( $filter =~ "TRUE" ){
 			
 				}
 			}
-			$prefixp = "$prefixp\.i";
+			my $prefixp = "$prefixp\.i";
 		}
 
 		# remove pcr stacks

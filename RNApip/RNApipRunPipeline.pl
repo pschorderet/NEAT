@@ -34,48 +34,48 @@ while(<INPUT>) {
                 $_ =~ m/"(.+?)"/;
                 $email = "$1";
         }
-	if (/# My_project_title/) {
+	elsif (/# My_project_title/) {
                 $_ =~ m/"(.+?)"/;
                 $expFolder = "$1";
         }
-	if (/# Reference_genome/) {
+	elsif (/# Reference_genome/) {
                 $_ =~ m/"(.+?)"/;
                 $genome = "$1";
         }
-	if (/# Remote_path_to_proj/) {
+	elsif (/# Remote_path_to_proj/) {
                 $_ =~ m/"(.+?)"/;
                 $userFolder = "$1";
         }
-	if (/# Remote_path_to_NEAT/) {
+	elsif (/# Remote_path_to_NEAT/) {
                 $_ =~ m/"(.+?)"/;
                 $path2RNAseq = "$1\/RNApip";
                 $path2RNAseqScripts = join("", $path2RNAseq, "/scripts");
         }
-	if (/# Remote_path_to_orifastq_gz/) {
+	elsif (/# Remote_path_to_orifastq_gz/) {
                 $_ =~ m/"(.+?)"/;
                 $path2fastqgz = "$1";
         }
-	if (/# Remote_path_to_chrLens_dat/) {
+	elsif (/# Remote_path_to_chrLens_dat/) {
                 $_ =~ m/"(.+?)"/;
                 $chrlens = "$1";
         }
-	if (/# Remote_path_to_RefGen_fasta/) {
+	elsif (/# Remote_path_to_RefGen_fasta/) {
                 $_ =~ m/"(.+?)"/;
                 $refGenome = "$1";
         }
-	if (/# Remote_path_to_ann_gtf_file/) {
+	elsif (/# Remote_path_to_ann_gtf_file/) {
                 $_ =~ m/"(.+?)"/;
                 $path2gtfFile = "$1";
         }
-	if (/# Aligner_algo_short/) {
+	elsif (/# Aligner_algo_short/) {
                 $_ =~ m/"(.+?)"/;
                 $aligner = "$1";
         }
-	if (/# Paired_end_seq_run/) {
+	elsif (/# Paired_end_seq_run/) {
                 $_ =~ m/"(.+?)"/;
                 $PE = "$1";
         }
-	if (/# Steps_to_execute_pipe/) {
+	elsif (/# Steps_to_execute_pipe/) {
                 $_ =~ m/"(.+?)"/;
                 @steps2execute = ();
                 if (grep /\bunzip\b/i, $_ )             { $unzip                = "TRUE"; push @steps2execute, "Unzip";         }
@@ -102,15 +102,15 @@ while(<INPUT>) {
                 $_ =~ m/"(.+?)"/;
                 $removepcr = "$1";
         }
-	if (/# Filter.makeUniqueRead/) {
+	elsif (/# Filter.makeUniqueRead/) {
                 $_ =~ m/"(.+?)"/;
                 $makeunique = "$1";
         }
-	if (/# Filter.maxEditDist/) {
+	elsif (/# Filter.maxEditDist/) {
                 $_ =~ m/"(.+?)"/;
                 $ndiff = "$1";
         }
-	if (/# Align.command.opt/) {
+	elsif (/# Align.command.opt/) {
                 $_ =~ m/"(.+?)"/;
                 $aligncommand = "$1";
         }
@@ -140,6 +140,38 @@ foreach $line (@Targets2) {
         $line =~ /^[# = " OriFileName FileName OriInpName InpName]/ and next;
         push(@samples, $line);
 }
+my @samples2unzip	= @samples;
+#*----------------------------------------------------------------------*
+# Remove duplicated elements in the list @samples and @inputs
+%seen		= ();
+@samples	= grep { ! $seen{$_} ++ } @samples;
+
+# Remove samples that have "_R2" as these are the paired lanes of "_R1"
+my @samplesPE;
+my @samplesNoPE;
+if( $PE ){
+
+	print "\nPE experiment. \n";
+	foreach my $i (0 .. $#samples) {
+        	if ( grep /\_R2$/, $samples[$i] ){ 	
+			print "\t $i\. '_R2' sample found. \t ($samples[$i]) \n";
+			push(@samplesPE, $samples[$i]);
+		}
+		else{	
+			print "\t $i\. Main sample found.  \t ($samples[$i]) \n";
+			push(@samplesNoPE, $samples[$i]);
+		}
+	}
+	
+	@samples = @samplesNoPE;
+
+}
+
+#print "\n\n\norisamples:   @orisamples\n";
+print "samples2unzip:   @samples2unzip\n";
+print "samples: \t @samples\n";
+#print "samplesNoPE: \t @samplesNoPE\n";
+print "samplesPE: \t @samplesPE\n";
 
 #*----------------------------------------------------------------------*
 # Define paths

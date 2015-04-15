@@ -195,6 +195,40 @@ foreach $line (@Targets4) {
         push(@inputs, $line);
 }
 
+
+#*----------------------------------------------------------------------*
+# Remove duplicated elements in the list @samples and @inputs
+%seen           = ();
+@samples        = grep { ! $seen{$_} ++ } @samples;
+
+# Remove samples that have "_R2" as these are the paired lanes of "_R1"
+my @samplesPE;
+my @samplesNoPE;
+if( $PE ){
+
+	print "\nPE experiment. \n";
+        foreach my $i (0 .. $#samples) {
+                if ( grep /\_R2$/, $samples[$i] ){
+                        print "\t $i\. '_R2' sample found. \t ($samples[$i]) \n";
+                        push(@samplesPE, $samples[$i]);
+                }
+                else{
+                     	print "\t $i\. Main sample found.  \t ($samples[$i]) \n";
+                        push(@samplesNoPE, $samples[$i]);
+                }
+        }
+
+	@samples = @samplesNoPE;
+
+}
+
+#print "\n\n\norisamples:   @orisamples\n";
+print "samples2unzip:   @samples2unzip\n";
+print "samples: \t @samples\n";
+#print "samplesNoPE: \t @samplesNoPE\n";
+print "samplesPE: \t @samplesPE\n";
+
+
 #*----------------------------------------------------------------------*
 # Define paths
 my $path2expFolder	= "$userFolder/$expFolder";
