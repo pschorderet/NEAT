@@ -114,6 +114,9 @@ allsamples <- c(levels(Targets$FileName), levels(Targets$InpName))
 if(length(which(allsamples=="-")) != 0){
   allsamples <- allsamples[-which(allsamples=="-")]    
 }
+if(length(grep("_R", allsamples)) != 0){
+  allsamples <- allsamples[-grep("_R", allsamples)]
+}
 cat("\n Samples provided: ", allsamples, sep="\n")
 
 #------------------------------------------------------------

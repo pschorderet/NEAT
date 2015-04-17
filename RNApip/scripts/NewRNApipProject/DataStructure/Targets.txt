@@ -37,8 +37,8 @@
 #
 # Remote_path_to_orifastq_gz	=	"/data/schorderet/NEAT/RNApip/scripts/testdata"
 # Remote_path_to_chrLens_dat	=	"/data/schorderet/reference_files/mm9/chr_lens.dat"
-# Remote_path_to_RefGen_fasta	=	"/data/ergun/ref/mm9/bowtie/"
-# Remote_path_to_ann_gtf_file	=	"/data/ergun/ref/mm9/mm9_gtf/Mus_musculus.NCBIM37.67.allchr.gtf";
+# Remote_path_to_RefGen_fasta	=	"/data/schorderet/reference_files/mm9/bowtie/"
+# Remote_path_to_ann_gtf_file	=	"/data/schorderet/reference_files/mm9/annotations/Mus_musculus.NCBIM37.67.allchr.gtf";
 #
 #------------------------------------------------
 #----------------- PARAMETERS -------------------
@@ -56,3 +56,5 @@
 OriFileName	FileName	OriInpName	InpName	Factor	Replicate	FileShort	Experiment	Date
 PSa29-5_R1	PSa29-5_noDox	-	-	RNA	1	noDox	1	2015-01-01
 PSa29-6_R1	PSa29-6_Dox	-	-	RNA	2	Dox	1	2015-01-01
+#------------------------------------------------
+#----------- PE CORRESPONDING SECTION -----------

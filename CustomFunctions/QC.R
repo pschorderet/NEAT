@@ -35,6 +35,7 @@ Targets <- read.delim(path2Targets, comment.char="#")
 #--------------------------------------------------
 # Create virtuel paths to all fastq
 Targets			<- read.delim(path2Targets, comment.char="#")
+colnames(Targets)	<- c("OriFileName", "FileName", "OriInpName", "InpName", "Factor", "Replicate", "FileShort", "Experiment", "Date")
 samples			<- Targets$FileName
 path2samplesfastq	<- paste(path2fastq, "/", samples, ".fastq", sep="")
 names(path2samplesfastq) <- Targets$FileName

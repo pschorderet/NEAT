@@ -48,7 +48,7 @@ path2Mart <- paste(path2NEAT, "MartObjects/", sep="")
 path2ReferenceFiles <- paste(path2NEAT,"ReferenceFiles/", sep="")
 path2CustFct <- paste(path2NEAT,"CustomFunctions/", sep="")
 path2Targets <- paste(path2MainFolder, "DataStructure/Targets.txt", sep="")
-path2bedwig <- paste(path2MainFolder, "/bedwig", sep="")
+path2wig <- paste(path2MainFolder, "/wig", sep="")
 
 # Source CustomFunctions
 source(paste(path2CustFct, "Bam2GRangesRData.R", sep=""))
@@ -247,7 +247,11 @@ library(TaxonDatabase, character.only = TRUE)
 
 
 source(paste(path2CustFct, "CountOverlaps2GRanges.R", sep=""))
+source(paste(path2CustFct, "CheckExistenceOfFolder.R", sep=""))
 
+path2wig <- paste(path2MainFolder, "/wig", sep="")
+
+CheckExistenceOfFolder(path2wig)
 
 # Set variables and paths
 path2chrlens <- paste(path2MainFolder, "DataStructure/", refGenome, "/chr_lens.dat", sep="")
@@ -259,7 +263,7 @@ seqlengths
 # Slice the genome into bins
 bins <- tileGenome(seqlengths, tilewidth=500, cut.last.tile.in.chrom=TRUE)
 bins
-currentGR <- get(GRangesSamples[1])
+
 
 # Read in the statTable file countaining the ChIPrx normaization factors
 path2statTable <- paste(path2MainFolder, "DataStructure/statTable.bed", sep="")
@@ -268,8 +272,9 @@ statTable <- read.table(path2statTable, header=TRUE, comment.char="#")
 # Disable scientific notation to ensure no 'e' are found in the wig files
 options(scipen=999)
 # Set paths to tmp files
-path2wigfilename_tmp <- paste(path2bedwig, "/tmp.wig", sep="")
-path2wigfile_header <- paste(path2bedwig, "/header.wig", sep="")
+
+path2wigfilename_tmp <- paste(path2wig, "/tmp.wig", sep="")
+path2wigfile_header <- paste(path2wig, "/header.wig", sep="")
 
 for(h in 1:length(GRangesSamples)){
   # h=1
@@ -278,7 +283,7 @@ for(h in 1:length(GRangesSamples)){
   # Delete line that have no value
   dfnon0 <- df[which(df$value!=0),]
   # Set path to current wig file
-  path2wigfilename <- paste(path2bedwig, "/", GRangesSamples[h], ".wig", sep="")
+  path2wigfilename <- paste(path2wig, "/", GRangesSamples[h], ".wig", sep="")
   # Copy dfnon0 to tmp file
   write.table(dfnon0, file=path2wigfilename_tmp, quote=F, sep="\t", row.names=F, col.names=F)
   # Add header to the file
@@ -300,8 +305,8 @@ mycode <- paste("`rm ", path2wigfile_header, "`", sep="")
 system(mycode)
 
 
-
-
+print(statTable)
+print(statTable)
 
 
 

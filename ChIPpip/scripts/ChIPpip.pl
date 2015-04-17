@@ -477,9 +477,9 @@ if( $qc =~ "TRUE" ) {
 
 		#-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 		#-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+          IMPORTANT CODE HERE         -+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-		my $code 	= "$tmpscr/QC.R" ;
+		`cp $path2CustFct/QC.R $tmpscr/`;
+		my $code	= "$tmpscr/QC.R";
 		my $cmd		= "Rscript $code $path2expFolder &>> $path2qsub/QCReport.log";
-		#my $cmd         = "Rscript $code $path2expFolder";
 		`echo "$cmd" >> $QSUBint`;
 		#--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--
 
@@ -504,6 +504,7 @@ if( $qc =~ "TRUE" ) {
 	# Prepar file containing the jobs to run
 
 	# Add the next job iteration
+	# Other	jobs do	not depend on the completion of	this, so no dependencies are needed
 	my $finalcmd    = "FINAL=\`qsub -N $iterateJobName -o $path2qsub -e $path2qsub $IterateSH`";
 
 	open $QSUB, ">>", "$QSUB" or die "Can't open '$QSUB'";
@@ -580,6 +581,12 @@ if( $chiprx =~ "TRUE" ){
                         `echo "$cmd" >> $QSUBint`;
                         $cmd            = "bwa sampe $refGenomeRX $path2currentSampleDir/$samplesInputs[$i]\.sai $path2currentSampleDir/$samplesPE[$i]\.sai $path2fastq/$samplesInputs[$i]\_1.fastq $path2fastq/$samplesPE[$i]\.fastq > $path2currentSampleDir/$samplesInputs[$i]\.sam";
                         `echo "$cmd" >> $QSUBint`;
+			# Uniquely mapped reads
+                        $cmd         = "grep -E '\\sX0:i:1\\s' $path2currentSampleDir/$samplesInputs[$i]\.sam > $path2currentSampleDir/$samplesInputs[$i]\.u.sam";
+                        `echo "$cmd" >> $QSUBint`;
+                        # sam to bam
+                        $cmd            = "samtools view -b $path2currentSampleDir/$samplesInputs[$i]\.u.sam -T $refGenomeRX -o $path2currentSampleDir/$samplesInputs[$i]\.bam";
+                        `echo "$cmd" >> $QSUBint`;
                         #--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--
 
                 } else {
@@ -623,7 +630,7 @@ if( $chiprx =~ "TRUE" ){
         # Add the next job line to the $mapQSUB
         foreach( @myJobs ){ $_ = "\$".$_ ; }
         my $myJobsVec   = join(":", @myJobs);
-        my $finalcmd    = "FINAL=\`qsub -N $iterateJobName -o $path2qsub -e $path2qsub -W depend=afterany\:$myJobsVec $IterateSH`";
+        my $finalcmd    = "FINAL=\`qsub -N $iterateJobName -o $path2qsub -e $path2qsub -W depend=afterok\:$myJobsVec $IterateSH`";
         open $QSUB, ">>", "$QSUB" or die "Can't open '$QSUB'";
         print $QSUB "$finalcmd\n";
         close $QSUB;
@@ -1023,8 +1030,7 @@ if( $peakcalling =~ "TRUE" ){
 	my @myJobsSamples;
 
 	# Copy script and create folder
-	`cp $path2ChIPseqScripts/$peakcaller $tmpscr`;
-
+	`cp $path2CustFct/$peakcaller $tmpscr/`;
 
 	#<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
 	foreach my $i (0 .. $#samples) {
@@ -1369,7 +1375,8 @@ if( $granges =~ "TRUE" ){
 
                 #-----------------------------------------------------------
                 # Parameters
-                my $code                = "$path2CustFct/Bam2GRangesRemote.R";
+		`cp $path2CustFct/Bam2GRangesRemote.R $tmpscr/`;
+                my $code        = "$tmpscr/Bam2GRangesRemote.R";
 
                 #-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
                 #-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+          IMPORTANT CODE HERE         -+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
