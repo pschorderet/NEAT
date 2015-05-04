@@ -1,0 +1,93 @@
+#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
+#                                                                                     #
+#                             Species specificities                                   #
+#                                                                                     #
+#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
+#
+#
+# For each database, please make sure that it is properly installed on your system before use
+#
+#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-|
+#
+#------------------------------------------------
+#----------------    HUMAN    -------------------
+#
+# Known genes
+#
+# Proj_TaxonDatabase	=	"TxDb.Hsapiens.UCSC.hg19.knownGene"
+# Proj_TaxonDatabaseDic	=	"org.Hs.eg.db"
+# Proj_TaxonBSgenome	=	"BSgenome.Hsapiens.UCSC.hg19"
+#
+#
+# LincRNAs
+#
+# Proj_TaxonDatabase	=	"TxDb.Hsapiens.UCSC.hg19.lincRNAsTranscripts"
+# Proj_TaxonDatabaseDic	=	"org.Hs.eg.db"
+# Proj_TaxonBSgenome	=	"BSgenome.Hsapiens.UCSC.hg19"
+#
+#------------------------------------------------
+#----------------     MOUSE    ------------------
+#
+# Known genes
+#
+# Proj_TaxonDatabase	=	"TxDb.Mmusculus.UCSC.mm9.knownGene"
+# Proj_TaxonDatabaseDic	=	"org.Mm.eg.db"
+# Proj_TaxonBSgenome	=	"BSgenome.Mmusculus.UCSC.mm9"
+# Proj_TaxonDatabaseKey	=	"ENTREZID"
+#
+#------------------------------------------------
+#----------------  DROSOPHILA  ------------------
+#
+# Known genes (Ensembl)
+#
+# Proj_TaxonDatabase	=	"TxDb.Dmelanogaster.UCSC.dm3.ensGene"
+# Proj_TaxonDatabaseDic	=	"org.Dm.eg.db"
+# Proj_TaxonBSgenome	=	"BSgenome.Dmelanogaster.UCSC.dm3"
+# Proj_TaxonDatabaseKey	=	"FLYBASE"
+#
+#------------------------------------------------
+#----------------   CHICKEN   -------------------
+#
+# Known genes (Ensembl)
+#
+# Proj_TaxonDatabase	=	"TxDb.Dmelanogaster.UCSC.dm3.ensGene"
+# Proj_TaxonDatabaseDic	=	"org.Gg.eg.db"
+# Proj_TaxonBSgenome	=	"BSgenome.Ggallus.UCSC.galGal4"
+#
+#------------------------------------------------
+#----------------  ZEBRAFISH  -------------------
+#
+# Known genes
+#
+# Proj_TaxonDatabase	=	""
+# Proj_TaxonDatabaseDic	=	"org.Dr.eg.db"
+# Proj_TaxonBSgenome	=	"BSgenome.Drerio.UCSC.danRer7"
+#
+#------------------------------------------------
+#----------------  C. ELEGANS  ------------------
+#
+# Known genes (Ensembl)
+#
+# Proj_TaxonDatabase	=	"TxDb.Celegans.UCSC.ce6.ensGene"
+# Proj_TaxonDatabaseDic	=	"org.Ce.eg.db"
+# Proj_TaxonBSgenome	=	"BSgenome.Celegans.UCSC.ce6"
+#
+#------------------------------------------------
+#----------------    YEAST    -------------------
+#
+# Known genes
+#
+# Proj_TaxonDatabase	=	"TxDb.Scerevisiae.UCSC.sacCer3.sgdGene"
+# Proj_TaxonDatabaseDic	=	"org.Sc.sgd.db"
+# Proj_TaxonBSgenome	=	"BSgenome.Scerevisiae.UCSC.sacCer3"
+#
+#
+#------------------------------------------------
+#---------   Information and updates   ----------
+#
+# Bioconductor Databases and genome annotations:
+# 		http://www.bioconductor.org/packages/3.0/data/annotation/
+#
+# Genomes and annotation files (for Tophat):
+#		http://cole-trapnell-lab.github.io/cufflinks//igenome_table/index.html
+#

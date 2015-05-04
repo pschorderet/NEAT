@@ -27,7 +27,7 @@
 # Proj_TaxonDatabase	=	"TxDb.Mmusculus.UCSC.mm9.knownGene"
 # Proj_TaxonDatabaseDic	=	"org.Mm.eg.db"
 # Proj_TaxonBSgenome	=	"BSgenome.Mmusculus.UCSC.mm9"
-#
+# Proj_TaxonDatabaseKey	=	"ENTREZID"
 #
 #------------------------------------------------
 #---------------- REMOTE INFO -------------------
@@ -37,8 +37,8 @@
 #
 # Remote_path_to_orifastq_gz	=	"/data/schorderet/NEAT/RNApip/scripts/testdata"
 # Remote_path_to_chrLens_dat	=	"/data/schorderet/reference_files/mm9/chr_lens.dat"
-# Remote_path_to_RefGen_fasta	=	"/data/schorderet/reference_files/mm9/bowtie/"
-# Remote_path_to_ann_gtf_file	=	"/data/schorderet/reference_files/mm9/annotations/Mus_musculus.NCBIM37.67.allchr.gtf";
+# Remote_path_to_RefGen_fasta	=	"/data/schorderet/reference_files/dm3/Sequence/BowtieIndex/"
+# Remote_path_to_ann_gtf_file	=	"/data/schorderet/reference_files/dm3/Annotation/Genes/genes.gtf"
 #
 #------------------------------------------------
 #----------------- PARAMETERS -------------------

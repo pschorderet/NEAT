@@ -17,7 +17,7 @@ library(AnnotationDbi); library(Rsamtools); library(GenomicRanges); library(Geno
 
 #------------------------------------------------------------
 # Function
-Sqlite2Bed <- function(TaxonDatabaseKG, TaxonDatabaseDict){
+Sqlite2Bed <- function(TaxonDatabaseKG, TaxonDatabaseDict, Key){
   
   # Load database
   #---------------------------------------------------------------------
@@ -25,9 +25,27 @@ Sqlite2Bed <- function(TaxonDatabaseKG, TaxonDatabaseDict){
   library(TaxonDatabaseDict, character.only = TRUE)  # org.Mm.eg.db
   
   exonRanges <- exonsBy(get(TaxonDatabaseKG), by = "gene")
-  
-  symb <- select(get(TaxonDatabaseDict), names(exonRanges), "SYMBOL")
-  #   head(symb)
+#  symb <- select(get(TaxonDatabaseDict), names(exonRanges), columns = "SYMBOL")
+#  symb <- select(get(TaxonDatabaseDict), names(exonRanges), "SYMBOL", "FLYBASE")
+#  symb <- select(get(TaxonDatabaseDict), names(exonRanges), "SYMBOL", "FLYBASE")
+symb <- select(get(TaxonDatabaseDict), names(exonRanges), "SYMBOL", Key)
+
+
+#    TaxonDatabaseKG <- "TxDb.Mmusculus.UCSC.mm9.knownGene"
+#    TaxonDatabaseDict <- "org.Mm.eg.db"
+#    library(TaxonDatabaseKG, character.only = TRUE)
+#    library(TaxonDatabaseDict, character.only = TRUE)
+#    exonRanges <- exonsBy(get(TaxonDatabaseKG), by = "gene")
+#    symb <- select(get(TaxonDatabaseDict), names(exonRanges), columns = "SYMBOL")
+#    mouseDB1 <- get("TxDb.Mmusculus.UCSC.mm9.knownGene")
+#    keytypes(mouseDB1)
+#    help('select')
+#    mouseDB2 <- get("org.Mm.eg.db")
+#    keytypes(mouseDB)
+#    symb <- select(get(TaxonDatabaseDict), names(exonRanges), columns = "SYMBOL")
+#   
+
+  #  head(symb)
   #   sum(is.na(symb[,2]))
   #   any(duplicated(symb[,2]))
   #   all.equal(names(exonRanges), symb[,1])

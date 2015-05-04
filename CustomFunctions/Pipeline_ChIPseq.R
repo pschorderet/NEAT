@@ -20,6 +20,7 @@
 #     MainFolder <- "EXAMPLE/"; path2MainFolder <- paste("~/Desktop/", MainFolder, sep="")
 #     path2NEAT='/Users/patrick/NEAT/'; path2MainFolder ='~/Documents/Sciences/Kingston/DIPG/DIPG_consolidated_ChIPseq/';
 #     nameOfBed <- "mm9_TSS_10kb.bed" ; binNumber = 100 ; strand <- "+" ; Venn <- FALSE ; normInp <- FALSE
+#     binNumber = 100 ; strand <- "+" ; Venn <- FALSE ; normInp <- FALSE
 #     nameOfBed <- "mm9_Transcripts.bed" ;
 #     nameOfBed <- "mm9_Enhancers" ;
 #     runmeank <- 5
@@ -180,6 +181,9 @@ allsamples <- c(levels(Targets$FileName), levels(Targets$InpName))
 # Remove '-' when no input is provided
 if(length(which(allsamples=="-")) != 0){
   allsamples <- allsamples[-which(allsamples=="-")]    
+}
+if(length(grep("_R", allsamples)) != 0){
+  allsamples <- allsamples[-grep("_R2", allsamples)]
 }
 
 #------------------------------------------------------------

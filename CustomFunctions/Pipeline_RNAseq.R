@@ -142,10 +142,16 @@ for(i in 1:length(res)){
   #i=21
   newLine <- res[i]
   # Store some variables
+  # Reference_genome
   if(length(grep("Reference_genome\t", newLine))==1) { 
     currentline <- gsub("# ", "", newLine); currentline <- gsub("\t", "", currentline); currentline <- gsub("\"", "", currentline);
     refGenome <- unlist(strsplit(currentline, split = "\\="))[2]
-  }    
+  }   
+  # Key
+  if(length(grep("Proj_TaxonDatabaseKey\t", newLine))==1) { 
+    currentline <- gsub("# ", "", newLine); currentline <- gsub("\t", "", currentline); currentline <- gsub("\"", "", currentline);
+    Key <- unlist(strsplit(currentline, split = "\\="))[2]
+  }   
 }
 
 #------------------------------------------------------------
@@ -166,6 +172,9 @@ chromosomes <- chromosomesFile$V1
 # Load datasets provided in Targets file
 samples <- Targets$FileName
 allsamples <- levels(Targets$FileName)
+if(length(grep("_R", allsamples)) != 0){
+  allsamples <- allsamples[-grep("_R2", allsamples)]
+}
 
 #------------------------------------------------------------
 # Check existence of .bam.GRanges.RData or .bam files
@@ -221,7 +230,7 @@ OutputNumberOfReadsFromGRanges(GRangesSamples)
 #
 #------------------------------------------------------------
 # Load .sqlite file
-exonRanges <- Sqlite2Bed(TaxonDatabaseKG=TaxonDatabaseKG, TaxonDatabaseDict=TaxonDatabaseDict)
+exonRanges <- Sqlite2Bed(TaxonDatabaseKG=TaxonDatabaseKG, TaxonDatabaseDict=TaxonDatabaseDict, Key=Key)
 
 #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 #                                                                 #
