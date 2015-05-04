@@ -1,9 +1,4 @@
 
-#-----------------------------------------------------------------
-# TEST LINES (DISREGARD)
-# path2NEAT='/Users/patrick/Desktop/NEAT/'; path2MainFolder ='/Users/patrick/Desktop/EXAMPLE/'; topNgenes = 100; toHighlight = 10; 
-# path2NEAT='/Users/patrick/NEAT/'; path2MainFolder ='~/Documents/Sciences/Kingston/DIPG/DIPG_2014-07-07_RNAseq/'; topNgenes = 100; toHighlight = 10; 
-# path2NEAT='/Users/patrick/NEAT/'; path2MainFolder ='~/Documents/Sciences/Kingston/DIPG/DIPG_consolidated_RNAseq/'; topNgenes = 500; toHighlight = 10; 
 
 #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 #******************************************************************
@@ -21,12 +16,13 @@
 # parameters first:                                               #
 #                                                                 #
 #     path2NEAT <- "~/NEAT/"                                      #
-#     MainFolder <- "MY_NEW_RNA_PROJECT/"; path2MainFolder <- paste("~/Desktop/", MainFolder, sep="")
+#     MainFolder <- "Britta_UPR_2014_01_01/"; path2MainFolder <- paste("~/Desktop/", MainFolder, sep="")
+#     MainFolder <- "Britta_UPR_2014_01_01/"; path2MainFolder <- paste("~/Documents/Sciences/Kingston/RNApip_projects/", MainFolder, sep="")
 #     topNgenes <- 2000; toHighlight <- 20;
 #                                                                 #
 # * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * #
 
-version <- "1.0.1 Jan 2015"
+version <- "1.0.2 Mai 2015"
 
 #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 #*                                                                *
@@ -75,6 +71,8 @@ tDb <- res[grep("Proj_TaxonDatabase", res)]; tDb <- gsub("# ","",tDb); tDb <- gs
 TaxonDatabaseKG <- unlist(strsplit(tDb, split = "\\="))[2]
 tDbDict <- res[grep("Proj_TaxonDatabaseDic", res)]; tDbDict <- gsub("# ","",tDbDict); tDbDict <- gsub("\t","",tDbDict); tDbDict <- gsub("\"","",tDbDict)
 TaxonDatabaseDict <- unlist(strsplit(tDbDict, split = "\\="))[2]
+tDbKey <- res[grep("Proj_TaxonDatabaseKey", res)]; tDbKey <- gsub("# ","",tDbKey); tDbKey <- gsub("\t","",tDbKey); tDbKey <- gsub("\"","",tDbKey)
+Key <- unlist(strsplit(tDbKey, split = "\\="))[2]
 
 # Find if run is SE or PE
 SE <- res[grep("Paired_end_seq_run", res)]; SE <- gsub("# ","",SE); SE <- gsub("\t","",SE); SE <- gsub("\"","",SE)
@@ -101,6 +99,7 @@ cat(" \n ||\t Number of DEG genes : \t\t\t\t", topNgenes, sep="")
 cat(" \n ||\t Number of genes to highlight : \t", toHighlight, sep="")
 cat(" \n ||\t Taxon database : \t\t\t\t\t", TaxonDatabaseKG, sep="")
 cat(" \n ||\t Taxon database dict : \t\t\t\t", TaxonDatabaseDict, sep="")
+cat(" \n ||\t Taxon database key : \t\t\t\t", Key, sep="")
 cat(" \n ||", sep="")
 cat(" \n ||\t Sequencing run type : \t\t\t\t", sep="")
 if(SE=="TRUE"){ cat("Single-end", sep="") }
@@ -137,7 +136,20 @@ cat(" \n\n Targets file provided: \n\n", sep="")
 Targets <- read.delim(path2Targets, comment.char="#")
 print(Targets)
 
+# Read the Targets file and store different parameters
 res <- readLines(path2Targets)
+
+# Figure out which lines contain the SAMPLES INFO
+sample_start_line <- grep("SAMPLES INFO", res)+3
+sample_end_line <- grep("PE CORRESPONDING SECTION", res)-2
+TargetsTrimmed <- NULL
+
+int <- res[sample_start_line:sample_end_line]; intsplit <- strsplit(int, split='\t')
+TargetsTrimmed <- data.frame(matrix(unlist(intsplit), nrow=length(int), byrow=T))
+colnames(TargetsTrimmed) <- colnames(Targets)
+#TargetsTrimmed
+
+# Other parameters
 for(i in 1:length(res)){
   #i=21
   newLine <- res[i]
@@ -146,12 +158,7 @@ for(i in 1:length(res)){
   if(length(grep("Reference_genome\t", newLine))==1) { 
     currentline <- gsub("# ", "", newLine); currentline <- gsub("\t", "", currentline); currentline <- gsub("\"", "", currentline);
     refGenome <- unlist(strsplit(currentline, split = "\\="))[2]
-  }   
-  # Key
-  if(length(grep("Proj_TaxonDatabaseKey\t", newLine))==1) { 
-    currentline <- gsub("# ", "", newLine); currentline <- gsub("\t", "", currentline); currentline <- gsub("\"", "", currentline);
-    Key <- unlist(strsplit(currentline, split = "\\="))[2]
-  }   
+  }
 }
 
 #------------------------------------------------------------
@@ -299,6 +306,7 @@ CT <- read.table(nameCT, header=TRUE)
 head(CT)
 colnames(CT) <- c("GeneNames", CTallsamples[1])
 CTall <-CT
+head(CTall)
 # cbind all others
 if(length(CTallsamples)>1){
   for(k in 2:length(CTallsamples)){
@@ -310,6 +318,7 @@ if(length(CTallsamples)>1){
     colnames(CTall)[k+1] <- CTallsamples[k]
   }
 }
+head(CTall)
 # Save countTable containaing all samples
 cat(" \n\n *\t\tStore countTable in : \t\t", paste(path2CountTables, "CountTable_OverExons_AllSamples.bed", sep=""), sep="")    
 cat(" \n\n - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - \n", sep="")
@@ -335,9 +344,11 @@ cat(" \n \t Compute DGEList \t", sep="")
 lib.size <- NULL
 for(i in 1:length(GRangesSamples)){lib.size <- c(lib.size, length(get(GRangesSamples[i])))}
 
-#d <- DGEList(counts=CTall, group=factor(Targets$Replicate), genes=rownames(CTall))
-d <- DGEList(counts=CTall, lib.size=lib.size, group=Targets$Replicate, genes=rownames(CTall))
-#d <- DGEList(counts=CTall, group=Targets$Replicate, genes=rownames(CTall))
+#dim(CTall)
+#length(Targets$Replicate)
+#length(TargetsTrimmed$Replicate)
+d <- DGEList(counts=CTall, lib.size=lib.size, group=TargetsTrimmed$Replicate, genes=rownames(CTall))
+#d <- DGEList(counts=CTall, lib.size=lib.size, group=factor(TargetsTrimmed$Replicate), genes=rownames(CTall))
 #dim(CTall)
 #colnames(CTall)
 #--------------------------------------------------
@@ -347,9 +358,9 @@ d <- calcNormFactors(d)
 
 # If there are no replicates
 if(length(which(duplicated(Targets$Replicate)==FALSE))!=length(Targets$Replicate)){
-  cat(" \n \t Estimate common dispersion", sep="")
+  cat(" \n \t Estimate common dispersio and tagwise dispersion \t ", sep="")
   d <- estimateCommonDisp(d, verbose=TRUE)
-  cat(" \n \t Estimate tagwise dispersion", sep="")
+  # cat(" \n \t Estimate tagwise dispersion \t ", sep="")
   d <- estimateTagwiseDisp(d, verbose=TRUE)
   bcv <- d$common.dispersion
   # Save the QC1 plot of common dispersion
@@ -409,15 +420,20 @@ pdf(paste(path2Plots, Sys.Date(), "_plotSmears.pdf", sep=""), paper='USr', useDi
 
 #  ! ! ! ! ! ! ! ! This isn't suited for replicates ! ! ! ! ! ! ! !
 # Find all combinations of samples and store in cmp
-cmp <- combinations(n=length(d$samples$group), r=2, v=d$samples$group, repeats.allowed=FALSE)
-#symb2ID <- select(get(TaxonDatabaseDict), names(exonRanges), "SYMBOL")
+#cmp <- combinations(n=length(d$samples$group), r=2, v=d$samples$group, repeats.allowed=FALSE)
+cmp <- combinations(n=length(d$samples$group), r=2, v=rownames(d$samples), repeats.allowed=FALSE)
+
+for(k in 1:nrow(cmp)){
+  cmp[k,1] <- d$samples$group[which(rownames(d$samples)==cmp[k,1])]
+  cmp[k,2] <- d$samples$group[which(rownames(d$samples)==cmp[k,2])]
+}
+#cmp
 
 # Run exactTest for each comparison
 for(k in 1:nrow(cmp)){  
 
     # Set the comparisons
     comp <- exactTest(d, pair=c(cmp[k,1], cmp[k,2]), dispersion = bcv^2)    
-    
     # Set title
     name1 <- as.character(Targets$FileName[which(Targets$Replicate==cmp[k,1])])[1]
     name2 <- as.character(Targets$FileName[which(Targets$Replicate==cmp[k,2])])[1]
@@ -472,10 +488,7 @@ for(k in 1:nrow(cmp)){
       text(x=up$logCPM, y=up$logFC, labels=up$genes, cex=0.5, pos=4, srt=40)
       text(x=xcoord[2], y=ycoord[2], labels=paste(c("Upregulated\n", sort(up$genes)), sep="", collapse="\n"), cex=0.5, adj = c( 0, 1 ))    
     }
-    
-    # GO term analysis
-    #Genes2GOTerm(geneList=toptags, geneUniverse=exonRanges, GOdb="ensembl", orgLib=TaxonDatabaseDict)
-    
+        
 }
 cat("\n\n", sep="")
 dev.off() # "_plotSmears.pdf"
@@ -508,8 +521,8 @@ vennList <- split(vennTable, rep(1:ncol(vennTable), each = nrow(vennTable)))
 
 if(length(vennList)>5){
   toKeep <- 1:5
-  cat(" \n\t There are too many elements to compare in a Venn plot", sep="")
-  cat(" \n\t Only the 5 first elements will be compared", sep="")
+  cat(" \n\t There are too many elements to compare in a single Venn plot.", sep="")
+  cat(" \n\t Only the 5 first elements will be compared: \n", sep="")
   cat(" \t\t ", DEGlist[toKeep], sep="\n\t\t")
   vennList <- vennList[toKeep]
   vennTable <- vennTable[,toKeep]
