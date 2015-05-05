@@ -6,9 +6,12 @@
 #
 # Remote Server
 #
+# Unzip_comand_line	=	"gunzip -c"
+# Zip_file_extension	=	".gz"
+#
 # Filter_removePCRdup	=	"1"
 # Filter_makeUniqueRead	=	"1"
 # Filter_maxEditDist	=	"1"
 # Align_command_opt	=	"/usr/local/bin/tophat2.4 --bowtie1 --no-mixed --no-discordant -g 1 -p 4 -G"
 #
-#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-|
+#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=

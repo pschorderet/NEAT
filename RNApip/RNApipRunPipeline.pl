@@ -98,19 +98,27 @@ my ($removepcr, $makeunique, $ndiff, $aligncommand)				= ("NA", "NA", "NA", "NA"
 
 while(<INPUT>) {
 
-        if (/# Filter.removePCRdup/) {
+	if (/# Unzip_comand/) {
+                $_ =~ m/"(.+?)"/;
+                $unzipCommand = "$1";
+        }
+	elsif (/# Zip_file_extension/) {
+                $_ =~ m/"(.+?)"/;
+                $zipExtension = "$1";
+        }
+        elsif (/# Filter_removePCRdup/) {
                 $_ =~ m/"(.+?)"/;
                 $removepcr = "$1";
         }
-	elsif (/# Filter.makeUniqueRead/) {
+	elsif (/# Filter_makeUniqueRead/) {
                 $_ =~ m/"(.+?)"/;
                 $makeunique = "$1";
         }
-	elsif (/# Filter.maxEditDist/) {
+	elsif (/# Filter_maxEditDist/) {
                 $_ =~ m/"(.+?)"/;
                 $ndiff = "$1";
         }
-	elsif (/# Align.command.opt/) {
+	elsif (/# Align_command_opt/) {
                 $_ =~ m/"(.+?)"/;
                 $aligncommand = "$1";
         }
@@ -140,13 +148,14 @@ foreach $line (@Targets2) {
         $line =~ /^[# = " OriFileName FileName OriInpName InpName]/ and next;
         push(@samples, $line);
 }
-my @samples2unzip	= @samples;
+
 #*----------------------------------------------------------------------*
 # Remove duplicated elements in the list @samples and @inputs
 %seen		= ();
 @samples	= grep { ! $seen{$_} ++ } @samples;
 
 # Remove samples that have "_R2" as these are the paired lanes of "_R1"
+my @samples2unzip	= @samples;
 my @samplesPE;
 my @samplesNoPE;
 if( $PE ){
@@ -162,9 +171,7 @@ if( $PE ){
 			push(@samplesNoPE, $samples[$i]);
 		}
 	}
-	
 	@samples = @samplesNoPE;
-
 }
 
 #print "\n\n\norisamples:   @orisamples\n";
@@ -214,7 +221,7 @@ print "\n";
 print "\n .........................................";
 print "\n Performing following modules:";
 print "\n .........................................";
-print "\n unzip:\t\t\t $unzip";
+print "\n unzip:\t\t\t $unzip \t ($unzipCommand filename.fastq$zipExtension)";
 print "\n qc:\t\t\t $qc";
 print "\n map:\t\t\t $map";
 print "\n filter:\t\t $filter";

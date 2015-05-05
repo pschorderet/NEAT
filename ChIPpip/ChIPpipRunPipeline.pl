@@ -121,6 +121,14 @@ my ($removepcr, $makeunique, $ndiff, $aligncommand1, $fdr, $posopt, $densityopt,
 
 while(<INPUT>) {
 
+	if (/# Unzip_comand/) {
+                $_ =~ m/"(.+?)"/;
+                $unzipCommand = "$1";
+        }
+	elsif (/# Zip_file_extension/) {
+                $_ =~ m/"(.+?)"/;
+                $zipExtension = "$1";
+        }
 	if (/# Bwa_maxEditDist/) {
                 $_ =~ m/"(.+?)"/;
                 $ndiff = "$1";
@@ -204,6 +212,7 @@ foreach $line (@Targets4) {
 # Remove samples that have "_R2" as these are the paired lanes of "_R1"
 my @samplesPE;
 my @samplesNoPE;
+my @samples2unzip = @samples;
 if( $PE ){
 
 	print "\nPE experiment. \n";
@@ -272,7 +281,7 @@ print "\n";
 print "\n .........................................";
 print "\n Performing following modules:";
 print "\n .........................................";
-print "\n unzip:\t\t\t $unzip";
+print "\n unzip:\t\t\t $unzip \t ($unzipCommand filename.fastq$zipExtension)";
 print "\n qc:\t\t\t $qc";
 print "\n chiprx:\t\t $chiprx";
 print "\n map:\t\t\t $map";

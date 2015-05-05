@@ -121,9 +121,13 @@ my ($removepcr, $makeunique, $ndiff, $aligncommand1, $fdr, $posopt, $densityopt,
 
 while(<INPUT>) {
 
-        if (/# Bwa_maxEditDist/) {
+	if (/# Unzip_comand/) {
                 $_ =~ m/"(.+?)"/;
-                $ndiff = "$1";
+                $unzipCommand = "$1";
+        }
+        elsif (/# Zip_file_extension/) {
+                $_ =~ m/"(.+?)"/;
+                $zipExtension = "$1";
 	}
         elsif (/# Align_command_line_1/) {
                 $_ =~ m/"(.+?)"/;
@@ -194,7 +198,6 @@ foreach $line (@Targets4) {
         $line =~ /^[# : = " OriFileName FileName OriInpName InpName]/ and next;
         push(@inputs, $line);
 }
-my @samples2unzip	= @samples;
 
 #*----------------------------------------------------------------------*
 # Remove duplicated elements in the list @samples and @inputs
@@ -207,8 +210,8 @@ my @samples2unzip	= @samples;
 # Remove samples that have "_R2" as these are the paired lanes of "_R1"
 my @samplesPE;
 my @samplesNoPE;
+my @samples2unzip = @samples;
 if( $PE ){
-
 	print "\nPE experiment. \n";
         foreach my $i (0 .. $#samples) {
                 if ( grep /\_R2$/, $samples[$i] ){
@@ -220,9 +223,7 @@ if( $PE ){
                         push(@samplesNoPE, $samples[$i]);
                 }
         }
-
 	@samples = @samplesNoPE;
-
 }
 
 #print "\n\n\norisamples:   @orisamples\n";
@@ -284,7 +285,7 @@ print "\n";
 print "\n .........................................";
 print "\n Performing following modules:";
 print "\n .........................................";
-print "\n unzip:\t\t\t $unzip";
+print "\n unzip:\t\t\t $unzip \t ($unzipCommand filename.fastq$zipExtension)";
 print "\n qc:\t\t\t $qc";
 print "\n chiprx:\t\t $chiprx";
 print "\n map:\t\t\t $map";
@@ -366,7 +367,7 @@ if( $unzip =~ "TRUE" ){
 		my $QSUBint  = "$tmpscr/$myJobName/$samples2unzip[$i]\_$myJobName\.sh";
 		`cp $scrhead $QSUBint`;
 
-		my $cmd		= "gunzip -c $path2fastqgz/$orisamples[$i]\.fastq\.gz > $path2fastq/$samples2unzip[$i]\.fastq";
+		my $cmd		= "$unzipCommand $path2fastqgz/$orisamples[$i]\.fastq\$zipExtension > $path2fastq/$samples2unzip[$i]\.fastq";
 		`echo "$cmd" >> $QSUBint`;
 	
 		#---------------------------------------------
@@ -388,7 +389,7 @@ if( $unzip =~ "TRUE" ){
 
 		#-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 		#-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+          IMPORTANT CODE HERE         -+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-		my $cmd         = "gunzip -c $path2fastqgz/$oriinputs[$i]\.fastq\.gz > $path2fastq/$inputs[$i]\.fastq";
+		my $cmd         = "$unzipCommand $path2fastqgz/$oriinputs[$i]\.fastq\$zipExtension > $path2fastq/$inputs[$i]\.fastq";
 		`echo "$cmd" >> $QSUBint`;
 		#--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--
 
