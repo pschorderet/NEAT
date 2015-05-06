@@ -28,7 +28,6 @@
 # Proj_TaxonDatabase	=	"TxDb.Mmusculus.UCSC.mm9.knownGene"
 # Proj_TaxonDatabaseDic	=	"org.Mm.eg.db"
 # Proj_TaxonBSgenome	=	"BSgenome.Mmusculus.UCSC.mm9"
-# Proj_TaxonDatabaseKey	=	"ENTREZID"
 #
 #
 #------------------------------------------------
@@ -39,10 +38,10 @@
 #
 # Remote_path_to_orifastq_gz	=	"/data/schorderet/NEAT/ChIPpip/scripts/testdata"
 # Remote_path_to_chrLens_dat	=	"/data/schorderet/reference_files/mm9/chr_lens.dat"
-# Remote_path_to_RefGen_fasta	=	"/data/schorderet/reference_files/mm9/Sequence/BWA/mm9.fa"
+# Remote_path_to_RefGen_fasta	=	"/data/ref/mm9/bwa/mm9.fa"
 #
 # Remote_path_to_chrLens_dat_ChIP_rx	=	"/data/schorderet/reference_files/dm3/chr_lens.dat"
-# Remote_path_to_RefGen_fasta_ChIP_rx	=	"/data/schorderet/reference_files/dm3/Sequence/BWA/dm3.fa"
+# Remote_path_to_RefGen_fasta_ChIP_rx	=	"/data/ref/dm3/bwa/dm3.fa"
 #
 #------------------------------------------------
 #----------------- PARAMETERS -------------------
@@ -52,7 +51,7 @@
 # Remove_from_bigwig	=	"random, chrM"
 # PeakCaller_R_script	=	"PeakCaller_SPP.R"
 #
-# Steps_to_execute_pipe	=	"unzip + qc + chiprx_NO + map + filter + peakcalling + cleanbigwig + cleanfiles + granges"
+# Steps_to_execute_pipe	=	"unzip + qc + chiprx + map_D + filter_D + peakcalling_D + cleanbigwig_D + granges_D"
 #
 #
 #
@@ -62,5 +61,3 @@
 OriFileName	FileName	OriInpName	InpName	Factor	Replicate	FileShort	Experiment	Date
 PSa36-1_R1	PSa36-1_noDox_K4me3	PSa37-3_R1	PSa37-3_noDox_Inp	K4me3	1	noDox	1	2015-01-01
 PSa36-2_R1	PSa36-2_Dox_K4me3	PSa37-4_R1	PSa37-4_Dox_Inp	K4me3	2	Dox	1	2015-01-01
-#------------------------------------------------
-#----------- PE CORRESPONDING SECTION -----------

@@ -6,6 +6,8 @@
 #
 # Remote Server
 #
+# Ressource_manager	=	"qsub"
+#
 # Unzip_comand_line	=	"gunzip -c"
 # Zip_file_extension	=	".gz"
 #

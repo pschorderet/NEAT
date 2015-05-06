@@ -120,8 +120,13 @@ open(INPUT, $AdvSettings) || die "Error opening $AdvSettings : $!\n\n\n";
 my ($removepcr, $makeunique, $ndiff, $aligncommand1, $fdr, $posopt, $densityopt, $enforceisize)		= ("NA", "NA", "NA", "NA", "NA", "NA", "NA", "NA");
 
 while(<INPUT>) {
-
-	if (/# Unzip_comand/) {
+	if (/# Ressource_manager/) {
+                $_ =~ m/"(.+?)"/;
+		if (grep /\bqsub/i, $_ )	{ $SUBkey	= "qsub";}
+		if (grep /\bbsub/i, $_ )      	{ $SUBkey    	= "bsub";}
+		$SUBcommand = "$1";
+        }
+	elsif (/# Unzip_comand/) {
                 $_ =~ m/"(.+?)"/;
                 $unzipCommand = "$1";
         }
@@ -256,6 +261,8 @@ print "\n#######################################################################
 print "\n";
 print "\n My email:\t\t $email";
 print "\n";
+print "\n Ressource manager:\t $SUBcommand ($SUBkey)";
+print "\n";
 print "\n expFolder:\t\t $expFolder";
 print "\n genome:\t\t $genome";
 print "\n userFolder:\t\t $userFolder";
@@ -305,9 +312,9 @@ print "\n";
 # subdir names
 
 my $tmpscr		= "$path2expFolder/scripts";
-my $scrhead		= "$path2ChIPseqScripts/QSUB_header.sh";
+#my $scrhead		= "$path2ChIPseqScripts/QSUB_header.sh";
 my $path2iterate	= "$tmpscr/iterate";
-my $path2qsub		= "$path2iterate/qsub";
+my $path2qsub		= "$path2iterate/$SUBkey";
 my $path2DataStructure	= "$path2expFolder/DataStructure";
 my $path2chrlens        = "$path2DataStructure/$genome";
 
@@ -322,7 +329,7 @@ unless( -d "$path2chrlens" )                    { `mkdir $path2chrlens`;        
 
 # ------ Copy temp.sh file to $tmpscr
 
-`cp $scrhead $tmpscr`;
+#`cp $scrhead $tmpscr`;
 my $nameOfChIPseqFile	= "ChIPpip";
 
 
@@ -345,7 +352,7 @@ if($chiprx =~ "TRUE"){
 # ------ ChIPseqMainIterative.sh to iterate later
 
 my $ChIPseqMainIterative = "$path2iterate/$nameOfChIPseqFile\_$expFolder\.sh";
-`cp $scrhead $ChIPseqMainIterative`;
+#`cp $scrhead $ChIPseqMainIterative`;
 open $ChIPseqMainIterative, ">>", "$ChIPseqMainIterative" or die "Can't open '$ChIPseqMainIterative'\n";
 print $ChIPseqMainIterative "`echo \"perl $path2iterate\/$nameOfChIPseqFile\_$expFolder\.pl $path2expFolder\"`";
 close $ChIPseqMainIterative;
@@ -357,7 +364,13 @@ close $ChIPseqMainIterative;
 # Prepar file containing the jobs to run
 
 # Add the first iteration of the script to $SubmitJobsToCluster
-my $firstcmd    = "FIRST=`qsub -N Iterate_$expFolder -o $path2qsub -e $path2qsub $ChIPseqMainIterative`";
+#my $firstcmd    = "FIRST=`qsub -N Iterate_$expFolder -o $path2qsub -e $path2qsub $ChIPseqMainIterative`";
+
+my $firstcmd    = NULL;
+if($SUBkey =~ "qsub"){	$firstcmd    = "FIRST=`$SUBcommand -N Iterate_$expFolder -o $path2qsub -e $path2qsub $ChIPseqMainIterative`";}
+if($SUBkey =~ "bsub"){	$firstcmd    = "FIRST=`$SUBcommand -J Iterate_$expFolder -o $path2qsub -e $path2qsub $ChIPseqMainIterative`";}
+
+
 my $IterateSH	= "$path2iterate/Iterate_$expFolder.sh";
 open $IterateSH, ">", "$IterateSH" or die "Can't open '$IterateSH'";
 print $IterateSH "#!/bin/bash\n";
@@ -370,7 +383,7 @@ close $IterateSH;
 # Submit jobs to run 
 
 #print "\n\n--------------------------------------------------------------------------------------------------\n";
-#print "\n  Submitting job to cluster: \t `sh $IterateSH` \n";
+#print "\n  Submitting job to $SUBkey cluster: \t `sh $IterateSH` \n";
 `sh $IterateSH`;
 
 #*----------------------------------------------------------------------*

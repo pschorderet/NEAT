@@ -96,6 +96,12 @@ open(INPUT, $AdvSettings) || die "Error opening $AdvSettings : $!\n\n\n";
 my ($removepcr, $makeunique, $ndiff, $aligncommand)                             = ("NA", "NA", "NA", "NA");
 
 while(<INPUT>) {
+	if (/# Ressource_manager/) {
+                $_ =~ m/"(.+?)"/;
+                if (grep /\bqsub/i, $_ )        { $SUBkey	= "qsub";}
+                if (grep /\bbsub/i, $_ )        { $SUBkey	= "bsub";}
+                $SUBcommand = "$1";
+        }
 	if (/# Unzip_comand/) {
                 $_ =~ m/"(.+?)"/;
                 $unzipCommand = "$1";
@@ -195,6 +201,8 @@ print "\n#######################################################################
 print "\n";
 print "\n My email:\t\t $email";
 print "\n";
+print "\n Ressource manager:\t $SUBcommand ($SUBkey)";
+print "\n";
 print "\n expFolder:\t\t $expFolder";
 print "\n genome:\t\t $genome";
 print "\n userFolder:\t\t $userFolder";
@@ -257,6 +265,11 @@ my $path2bam                    = "$path2expFolder/bam";
 #my $path2bamRX                  = "$path2expFolder/bam_RX";
 my $path2GRanges                = "$path2expFolder/GRangesRData";
 #my $path2GRangesRX              = "$path2expFolder/GRangesRData_RX";
+my $firstcmd                    = NULL;
+my $cmd                         = NULL;
+my $cmd2			= NULL;
+my $finalcmd                    = NULL;
+my $finalcmd2                   = NULL;
 
 #************************************************************************
 #									*
@@ -276,7 +289,7 @@ if( $unzip =~ "TRUE" ){
 	#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 	my $myJobName		= "unzip";
 	my $iterateJobName	= "Iterate_$myJobName\_$expFolder";
-	my $path2qsub		= "$tmpscr/$myJobName/qsub";
+	my $path2qsub		= "$tmpscr/$myJobName/$SUBkey";
 
 	#-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-
         # Create folders
@@ -302,7 +315,7 @@ if( $unzip =~ "TRUE" ){
 
 		# Prepare a personal qsub script
 		my $QSUBint  = "$tmpscr/$myJobName/$samples2unzip[$i]\_$myJobName\.sh";
-		`cp $scrhead $QSUBint`;
+#		`cp $scrhead $QSUBint`;
 
 		my $cmd         = "$unzipCommand $path2fastqgz/$orisamples[$i]\.fastq\$zipExtension > $path2fastq/$samples2unzip[$i]\.fastq";
 		`echo "$cmd" >> $QSUBint`;
@@ -311,7 +324,8 @@ if( $unzip =~ "TRUE" ){
 		# Keep track of the jobs in @myJobs
 		my $jobName	= "Sample_$myJobName$i";
 		push(@myJobs, $jobName);
-		$cmd		= "$jobName=`qsub -o $path2qsub -e $path2qsub $QSUBint`";
+		if($SUBkey =~ "qsub"){  $cmd            = "$jobName=`$SUBcommand -o $path2qsub -e $path2qsub $QSUBint`";}
+                if($SUBkey =~ "bsub"){  $cmd            = "$jobName=`$SUBcommand -o $path2qsub -e $path2qsub $QSUBint`";}
 		open $QSUB, ">>", "$QSUB" or die "Can't open '$QSUB'";
 		print $QSUB "$cmd\n";
 		close $QSUB;     
@@ -327,10 +341,17 @@ if( $unzip =~ "TRUE" ){
 	# Prepar file containing the jobs to run
 
 	# Add the next job line to the $mapQSUB
-	foreach( @myJobs ){ $_ = "\$".$_ ; }
-	my $myJobsVec	= join(":", @myJobs);
-	my $finalcmd    = "FINAL=\`qsub -N $iterateJobName -o $path2qsub -e $path2qsub -W depend=afterok\:$myJobsVec $IterateSH`";
-
+	if($SUBkey =~ "qsub"){
+                foreach( @myJobs ){ $_ = "\$".$_ ; }
+                my $myJobsVec   = join(":", @myJobs);
+                $finalcmd	= "FINAL=\`$SUBcommand -N $iterateJobName -o $path2qsub -e $path2qsub -W depend=afterok\:$myJobsVec $IterateSH`";
+        }
+	if($SUBkey =~ "bsub"){
+                foreach( @myJobs ){ $_ = "done(\"".$_."\")" ; }
+                my $myJobsVec   = join(" && ", @myJobs);
+                $finalcmd	= "FINAL=\`$SUBcommand -J $iterateJobName -o $path2qsub -e $path2qsub -w \'$myJobsVec\' $IterateSH`";
+        }
+	
 	open $QSUB, ">>", "$QSUB" or die "Can't open '$QSUB'";
 	print $QSUB "$finalcmd\n";
 	close $QSUB;
@@ -339,7 +360,7 @@ if( $unzip =~ "TRUE" ){
 	# Submit jobs to run
 
 	print "\n\n--------------------------------------------------------------------------------------------------\n";
-	print "\n Submitting job to cluster: \t `sh $QSUB` \n";
+	print "\n Submitting job to $SUBkey cluster: \t `sh $QSUB` \n";
 	`sh $QSUB`;
 
 	#*----------------------------------------------------------------------*
@@ -364,7 +385,7 @@ if( $qc =~ "TRUE" ) {
 	#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 	my $myJobName		= "QC";
 	my $iterateJobName	= "Iterate_$myJobName\_$expFolder";
-	my $path2qsub		= "$tmpscr/$myJobName/qsub";
+	my $path2qsub		= "$tmpscr/$myJobName/$SUBkey";
 
 	#-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-
         # Create folders
@@ -388,7 +409,7 @@ if( $qc =~ "TRUE" ) {
 	
 		# Prepare a personal qsub script
                 my $QSUBint     = "$tmpscr/$myJobName/$myJobName\_qsub.sh";
-                `cp $scrhead $QSUBint`;
+#               `cp $scrhead $QSUBint`;
 	
 		#-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 		#-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+          IMPORTANT CODE HERE         -+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -402,7 +423,8 @@ if( $qc =~ "TRUE" ) {
                 # Keep track of the jobs in @myJobs
                 my $jobName     = "$myJobName$i";
                 push(@myJobs, $jobName);
-                $cmd            = "$jobName=`qsub -o $path2qsub -e $path2qsub $QSUBint`";
+		if($SUBkey =~ "qsub"){  $cmd            = "$jobName=`$SUBcommand -o $path2qsub -e $path2qsub $QSUBint`";}
+                if($SUBkey =~ "bsub"){  $cmd            = "$jobName=`$SUBcommand -o $path2qsub -e $path2qsub $QSUBint`";}
                 open $QSUB, ">>", "$QSUB" or die "Can't open '$QSUB'";
                 print $QSUB "$cmd\n";
                 close $QSUB;
@@ -420,7 +442,19 @@ if( $qc =~ "TRUE" ) {
 	
         # Add the next job line to the $mapQSUB
 	# Other jobs do not depend on the completion of this, so no dependencies are needed
-        my $finalcmd    = "FINAL=\`qsub -N $iterateJobName -o $path2qsub -e $path2qsub $IterateSH`";
+#       my $finalcmd    = "FINAL=\`qsub -N $iterateJobName -o $path2qsub -e $path2qsub $IterateSH`";
+	
+	if($SUBkey =~ "qsub"){
+                foreach( @myJobs ){ $_ = "\$".$_ ; }
+                my $myJobsVec   = join(":", @myJobs);
+                $finalcmd	= "FINAL=\`$SUBcommand -N $iterateJobName -o $path2qsub -e $path2qsub $IterateSH`";
+        }
+	if($SUBkey =~ "bsub"){
+                foreach( @myJobs ){ $_ = "done(\"".$_."\")" ; }
+                my $myJobsVec   = join(" && ", @myJobs);
+                $finalcmd	= "FINAL=\`$SUBcommand -J $iterateJobName -o $path2qsub -e $path2qsub $IterateSH`";
+        }
+
 
         open $QSUB, ">>", "$QSUB" or die "Can't open '$QSUB'";
         print $QSUB "$finalcmd\n";
@@ -430,7 +464,7 @@ if( $qc =~ "TRUE" ) {
 	# Submit jobs to run
 
 	print "\n\n--------------------------------------------------------------------------------------------------\n";
-	print "\n Submitting job to cluster: \t `sh $QSUB` \n";
+	print "\n Submitting job to $SUBkey cluster: \t `sh $QSUB` \n";
 	`sh $QSUB`;
 
 	#*----------------------------------------------------------------------*
@@ -457,7 +491,7 @@ if( $map =~ "TRUE" ){
 	my $myJobName		= "map";
 	my $iterateJobName	= "Iterate_$myJobName\_$expFolder";
 	my $myJobName2		= "rename";
-	my $path2qsub		= "$tmpscr/$myJobName/qsub";
+	my $path2qsub		= "$tmpscr/$myJobName/$SUBkey";
 
 	#-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-
         # Create folders
@@ -485,9 +519,9 @@ if( $map =~ "TRUE" ){
 
 		# Prepare a personal qsub script
 		my $QSUBint		= "$tmpscr/$myJobName/$samples[$i]\_$myJobName\.sh";
-		`cp $scrhead $QSUBint`;
+#		`cp $scrhead $QSUBint`;
 		my $QSUBintRename	= "$tmpscr/$myJobName/$samples[$i]\_$myJobName2\.sh";
-		`cp $scrhead $QSUBintRename`;
+#		`cp $scrhead $QSUBintRename`;
 
 
 		# Create a folder for each sample to store files
@@ -525,9 +559,18 @@ if( $map =~ "TRUE" ){
 		my $jobName2	= "$myJobName2$i";
 		push(@myJobs2, $jobName2);
 		
-		my $cmd1	= "$jobName=`qsub -o $path2qsub -e $path2qsub $QSUBint`";
-		$jobName = "\$".$jobName ;
-		my $cmd2	= "$jobName2=`qsub -o $path2qsub -e $path2qsub -W depend=afterany\:$jobName $QSUBintRename`";
+		#my $cmd1	= "$jobName=`qsub -o $path2qsub -e $path2qsub $QSUBint`";
+		if($SUBkey =~ "qsub"){  $cmd1           = "$jobName=`$SUBcommand -o $path2qsub -e $path2qsub $QSUBint`";}
+                if($SUBkey =~ "bsub"){  $cmd1           = "$jobName=`$SUBcommand -o $path2qsub -e $path2qsub $QSUBint`";}
+
+		if($SUBkey =~ "qsub"){
+			$jobName = "\$".$jobName ;
+                	$cmd2		= "$jobName2=\`$SUBcommand -o $path2qsub -e $path2qsub -W depend=afterany\:$jobName $QSUBintRename`";
+        	}
+		if($SUBkey =~ "bsub"){
+			$jobName = $jobName ;
+                	$cmd2		= "$jobName2=\`$SUBcommand -o $path2qsub -e $path2qsub -w \done('$jobName\') $QSUBintRename`";
+        	}
 
 		open $QSUB, ">>", "$QSUB" or die "Can't open '$QSUB'";
 		print $QSUB "$cmd1\n";
@@ -546,12 +589,19 @@ if( $map =~ "TRUE" ){
 
 	#*----------------------------------------------------------------------*
 	# Prepar file containing the jobs to run
-
 	# Add the next job line to the $mapQSUB
-	foreach( @myJobs2 ){ $_ = "\$".$_ ; }
-	my $myJobsVec   = join(":", @myJobs2);
 
-	my $finalcmd	= "FINAL=\`qsub -N $iterateJobName -o $path2qsub -e $path2qsub -W depend=afterok\:$myJobsVec $IterateSH`";
+	if($SUBkey =~ "qsub"){
+                foreach( @myJobs ){ $_ = "\$".$_ ; }
+                my $myJobsVec   = join(":", @myJobs);
+                $finalcmd	= "FINAL=\`$SUBcommand -N $iterateJobName -o $path2qsub -e $path2qsub -W depend=afterok\:$myJobsVec $IterateSH`";
+        }
+	if($SUBkey =~ "bsub"){
+                foreach( @myJobs ){ $_ = "done(\"".$_."\")" ; }
+                my $myJobsVec   = join(" && ", @myJobs);
+                $finalcmd	= "FINAL=\`$SUBcommand -J $iterateJobName -o $path2qsub -e $path2qsub -w \'$myJobsVec\' $IterateSH`";
+        }
+
 	open $QSUB, ">>", "$QSUB" or die "Can't open '$QSUB'";
 	print $QSUB "$finalcmd\n";
 	close $QSUB;
@@ -560,7 +610,7 @@ if( $map =~ "TRUE" ){
 	# Submit jobs to run
 	
 	print "\n\n--------------------------------------------------------------------------------------------------\n";
-	print "\n Submitting job to cluster: \t `sh $QSUB` \n";
+	print "\n Submitting job to $SUBkey cluster: \t `sh $QSUB` \n";
 	`sh $QSUB`;
 
 	#*----------------------------------------------------------------------*
@@ -589,7 +639,7 @@ if( $filter =~ "TRUE" ){
 	#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 	my $myJobName		= "filter";
 	my $iterateJobName	= "Iterate_$myJobName\_$expFolder";
-	my $path2qsub		= "$tmpscr/$myJobName/qsub";
+	my $path2qsub		= "$tmpscr/$myJobName/$SUBkey";
 
 	#-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-
         # Create folders
@@ -614,7 +664,7 @@ if( $filter =~ "TRUE" ){
 
 		# Prepare a personal qsub script
 		my $QSUBint	= "$tmpscr/$myJobName/$samples[$i]\_$myJobName\.sh";
-		`cp $scrhead $QSUBint`;
+#		`cp $scrhead $QSUBint`;
 
 		# -----------------------------------------
                 # Remove pcr duplications
@@ -647,7 +697,9 @@ if( $filter =~ "TRUE" ){
 		# Keep track of the jobs in @myJobs
 		my $jobName	= "$myJobName$i";
 		push(@myJobs, "$jobName");
-		$cmd        	= "$jobName=`qsub -o $path2qsub -e $path2qsub $QSUBint`";
+		#$cmd        	= "$jobName=`qsub -o $path2qsub -e $path2qsub $QSUBint`";
+		if($SUBkey =~ "qsub"){  $cmd           = "$jobName=`$SUBcommand -o $path2qsub -e $path2qsub $QSUBint`";}
+                if($SUBkey =~ "bsub"){  $cmd           = "$jobName=`$SUBcommand -o $path2qsub -e $path2qsub $QSUBint`";}
 		open $QSUB, ">>", "$QSUB" or die "Can't open '$QSUB'";
 		print $QSUB "$cmd\n";
 		close $QSUB;
@@ -664,9 +716,17 @@ if( $filter =~ "TRUE" ){
 	# Prepar file containing the jobs to run
 	
 	# Add the next job line to the $QSUB
-	foreach( @myJobs ){ $_ = "\$".$_ ; }
-	my $myJobsVec   = join(":", @myJobs);
-	my $finalcmd    = "FINAL=\`qsub -N $iterateJobName -o $path2qsub -e $path2qsub -W depend=afterany\:$myJobsVec $IterateSH`";
+	if($SUBkey =~ "qsub"){
+                foreach( @myJobs ){ $_ = "\$".$_ ; }
+                my $myJobsVec   = join(":", @myJobs);
+                $finalcmd	= "FINAL=\`$SUBcommand -N $iterateJobName -o $path2qsub -e $path2qsub -W depend=afterany\:$myJobsVec $IterateSH`";
+        }
+	if($SUBkey =~ "bsub"){
+                foreach( @myJobs ){ $_ = "done(\"".$_."\")" ; }
+                my $myJobsVec   = join(" && ", @myJobs);
+                $finalcmd	= "FINAL=\`$SUBcommand -J $iterateJobName -o $path2qsub -e $path2qsub -w \'$myJobsVec\' $IterateSH`";
+        }
+
 	open $QSUB, ">>", "$QSUB" or die "Can't open '$QSUB'";
 	print $QSUB "$finalcmd\n";
 	close $QSUB;
@@ -675,7 +735,7 @@ if( $filter =~ "TRUE" ){
 	# Submit jobs to run
 
 	print "\n\n--------------------------------------------------------------------------------------------------\n";
-	print "\n Submitting job to cluster: \t `sh $QSUB` \n";
+	print "\n Submitting job to $SUBkey cluster: \t `sh $QSUB` \n";
 	`sh $QSUB`;
 
 	#*----------------------------------------------------------------------*
@@ -694,7 +754,7 @@ if($cleanfiles =~ "TRUE"){
 	#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
         my $myJobName           = "cleanfiles";
 	my $iterateJobName	= "Iterate_$myJobName\_$expFolder";
-        my $path2qsub           = "$tmpscr/$myJobName/qsub";
+        my $path2qsub           = "$tmpscr/$myJobName/$SUBkey";
 	my $myJobName2          = "rename_Tophat";
 	my $iterateJobName2	= "Iterate_$myJobName2\_$expFolder";
 
@@ -732,7 +792,7 @@ if($cleanfiles =~ "TRUE"){
 
                 # Prepare a personal qsub script
                 my $QSUBint     = "$tmpscr/$myJobName/$samples[$i]\_$myJobName\.sh";
-                `cp $scrhead $QSUBint`;
+ #              `cp $scrhead $QSUBint`;
 
 		#-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
                 #-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+          IMPORTANT CODE HERE         -+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -746,7 +806,8 @@ if($cleanfiles =~ "TRUE"){
                 # Keep track of the jobs in @myJobs
                 my $jobName     = "$myJobName$i";
                 push(@myJobs, "$jobName");
-                $cmd            = "$jobName=`qsub -o $path2qsub -e $path2qsub $QSUBint`";
+		if($SUBkey =~ "qsub"){  $cmd           = "$jobName=`$SUBcommand -o $path2qsub -e $path2qsub $QSUBint`";}
+                if($SUBkey =~ "bsub"){  $cmd           = "$jobName=`$SUBcommand -o $path2qsub -e $path2qsub $QSUBint`";}
                 open $QSUB, ">>", "$QSUB" or die "Can't open '$QSUB'";
                 print $QSUB "$cmd\n";
                 close $QSUB;
@@ -769,10 +830,24 @@ if($cleanfiles =~ "TRUE"){
         # Prepar file containing the jobs to run
 
 	# Add the next job line to the $QSUB
-        foreach( @myJobs ){ $_ = "\$".$_ ; }
-        my $myJobsVec   = join(":", @myJobs);
-        my $finalcmd    = "RENAME=\`qsub -N $iterateJobName2 -o $path2qsub -e $path2qsub -W depend=afterany\:$myJobsVec $QSUBintRename`";
-	my $finalcmd2	= "FINAL=\`qsub -N $iterateJobName -o $path2qsub -e $path2qsub -W depend=afterany\:\$RENAME $IterateSH`";
+	if($SUBkey =~ "qsub"){
+                foreach( @myJobs ){ $_ = "\$".$_ ; }
+                my $myJobsVec   = join(":", @myJobs);
+                $finalcmd	= "RENAME=\`$SUBcommand -N $iterateJobName2 -o $path2qsub -e $path2qsub -W depend=afterok\:$myJobsVec $QSUBintRename`";
+        }
+	if($SUBkey =~ "bsub"){
+                foreach( @myJobs ){ $_ = "done(\"".$_."\")" ; }
+                my $myJobsVec   = join(" && ", @myJobs);
+                $finalcmd	= "RENAME=\`$SUBcommand -J $iterateJobName2 -o $path2qsub -e $path2qsub -w \'$myJobsVec\' $QSUBintRename`";
+        }
+
+	if($SUBkey =~ "qsub"){
+                $finalcmd2	= "FINAL=\`$SUBcommand -N $iterateJobName -o $path2qsub -e $path2qsub -W depend=afterany\:\$RENAME $IterateSH`";
+        }
+	if($SUBkey =~ "bsub"){
+                $finalcmd2	= "FINAL=\`$SUBcommand -J $iterateJobName -o $path2qsub -e $path2qsub -w done('RENAME\') $IterateSH`";
+        }
+
         open $QSUB, ">>", "$QSUB" or die "Can't open '$QSUB'";
         print $QSUB "$finalcmd\n";
         print $QSUB "$finalcmd2\n";
@@ -782,7 +857,7 @@ if($cleanfiles =~ "TRUE"){
         # Submit jobs to run
 
         print "\n\n--------------------------------------------------------------------------------------------------\n";
-        print "\n Submitting job to cluster: \t `sh $QSUB` \n";
+        print "\n Submitting job to $SUBkey cluster: \t `sh $QSUB` \n";
         `sh $QSUB`;
 
         #*----------------------------------------------------------------------*
@@ -806,4 +881,103 @@ if( $granges =~ "TRUE" ){
         print "\n Creating GRanges\n";
 
 	#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          
+        my $myJobName           = "granges";
+	my $iterateJobName	= "Iterate_$myJobName\_$expFolder";
+        my $path2qsub           = "$tmpscr/$myJobName/$SUBkey";
+
+	#-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-
+        # Create folders
+	unless( -d "$path2GRanges" )	{ `mkdir $path2GRanges`; }
+
+	#-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-
+        # Create file to store jobs in
+        unless( -d "$tmpscr/$myJobName" )	{ `mkdir $tmpscr/$myJobName`; }
+        unless( -d "$path2qsub" )               { `mkdir $path2qsub`; }
+        my $QSUB        = "$tmpscr/$myJobName/$myJobName\.sh";
+        open $QSUB, ">", "$QSUB" or die "Can't open '$QSUB'";
+        print $QSUB "#!/bin/bash\n";
+        close $QSUB;
+        `chmod 777 $QSUB`;
+        print "\n Store all of the following '$myJobName' jobs in $QSUB \n";
+        my @myJobs;
+
+	#<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+	foreach my $i (0) {
+                #-----------------------------------------------------------
+                # Prepare a personal qsub script
+                my $QSUBint  = "$tmpscr/$myJobName/$myJobName\_qsub.sh";
+#               `cp $scrhead $QSUBint`;
+
+                #-----------------------------------------------------------
+                # Parameters
+		`cp $path2CustFct/Bam2GRangesRemote.R $tmpscr/`;
+                my $code	= "$tmpscr/Bam2GRangesRemote.R";
+
+                #-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+                #-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+          IMPORTANT CODE HERE         -+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+                my $cmd         = "Rscript $code $path2expFolder $path2bam $path2GRanges $path2CustFct &>> $path2qsub/GRanges.log";
+                `echo "$cmd" >> $QSUBint`;
+                #--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--
+
+		#---------------------------------------------
+                # Keep track of the jobs in @myJobs
+                my $jobName     = "$myJobName$i";
+                push(@myJobs, "$jobName");
+		if($SUBkey =~ "qsub"){  $cmd           = "$jobName=`$SUBcommand -o $path2qsub -e $path2qsub $QSUBint`";}
+                if($SUBkey =~ "bsub"){  $cmd           = "$jobName=`$SUBcommand -o $path2qsub -e $path2qsub $QSUBint`";}
+                open $QSUB, ">>", "$QSUB" or die "Can't open '$QSUB'";
+                print $QSUB "$cmd\n";
+                close $QSUB;
+	}
+
+        #*----------------------------------------------------------------------*
+        # Change Targets.txt file for next iteration
+        print "\n--------------------------------------------------------------------------------------------------\n";
+        print "\n Changing '$myJobName' variable to FALSE and proceed";
+        `/usr/bin/perl -p -i -e "s/$myJobName/$myJobName\_DONE/gi" $Targets`;
+
+        #*----------------------------------------------------------------------*
+        # Prepar file containing the jobs to run
+
+        # Add the next job line to the $QSUB
+	if($SUBkey =~ "qsub"){
+                foreach( @myJobs ){ $_ = "\$".$_ ; }
+                my $myJobsVec   = join(":", @myJobs);
+                $finalcmd	= "FINAL=\`$SUBcommand -N $iterateJobName -o $path2qsub -e $path2qsub -W depend=afterok\:$myJobsVec $IterateSH`";
+        }
+	if($SUBkey =~ "bsub"){
+                foreach( @myJobs ){ $_ = "done(\"".$_."\")" ; }
+                my $myJobsVec   = join(" && ", @myJobs);
+                $finalcmd	= "FINAL=\`$SUBcommand -J $iterateJobName -o $path2qsub -e $path2qsub -w \'$myJobsVec\' $IterateSH`";
+        }
+
+	open $QSUB, ">>", "$QSUB" or die "Can't open '$QSUB'";
+        print $QSUB "$finalcmd\n";
+        close $QSUB;
+
+        #*----------------------------------------------------------------------*
+        # Submit jobs to run
+
+        print "\n\n--------------------------------------------------------------------------------------------------\n";
+        print "\n Submitting job to $SUBkey cluster: \t `sh $QSUB` \n";
+        `sh $QSUB`;
+
+        #*----------------------------------------------------------------------*
+        # Exit script
+
+        print "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n";
+        print "\n Exiting $myJobName section with no known error \n";
+        print "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n\n\n";
+
+        exit 0;
+
+}
+
+exit 0;
+
+
+print "\n*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-\n\n";
+
+#*----------------------------------------------------------------------*
+
+
