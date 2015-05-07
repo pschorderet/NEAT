@@ -99,8 +99,8 @@ my ($removepcr, $makeunique, $ndiff, $aligncommand)				= ("NA", "NA", "NA", "NA"
 while(<INPUT>) {
 	if (/# Ressource_manager/) {
                 $_ =~ m/"(.+?)"/;
-                if (grep /\bqsub/i, $_ )        { $SUBkey	= "qsub";}
-                if (grep /\bbsub/i, $_ )        { $SUBkey	= "bsub";}
+                if (grep /\bqsub/i, $_ )        { $SUBkey	= "qsub"; $SUBheader    = "QSUB_header.sh";}
+                if (grep /\bbsub/i, $_ )        { $SUBkey	= "bsub"; $SUBheader    = "BSUB_header.sh";}
                 $SUBcommand = "$1";
         }
 	if (/# Unzip_comand/) {
@@ -250,7 +250,7 @@ print "\n";
 # subdir names
 
 my $tmpscr		= "$path2expFolder/scripts";
-my $scrhead		= "$path2RNAseqScripts/QSUB_header.sh";
+my $scrhead		= "$path2RNAseqScripts/$SUBheader";
 my $path2iterate	= "$tmpscr/iterate";
 my $path2qsub		= "$path2iterate/$SUBkey";
 my $path2DataStructure	= "$path2expFolder/DataStructure";

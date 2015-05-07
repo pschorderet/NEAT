@@ -122,8 +122,8 @@ my ($removepcr, $makeunique, $ndiff, $aligncommand1, $fdr, $posopt, $densityopt,
 while(<INPUT>) {
 	if (/# Ressource_manager/) {
                 $_ =~ m/"(.+?)"/;
-		if (grep /\bqsub/i, $_ )	{ $SUBkey	= "qsub";}
-		if (grep /\bbsub/i, $_ )      	{ $SUBkey    	= "bsub";}
+		if (grep /\bqsub/i, $_ )	{ $SUBkey	= "qsub"; $SUBheader	= "QSUB_header.sh";}
+		if (grep /\bbsub/i, $_ )      	{ $SUBkey    	= "bsub"; $SUBheader    = "BSUB_header.sh";}
 		$SUBcommand = "$1";
         }
 	elsif (/# Unzip_comand/) {
@@ -312,7 +312,7 @@ print "\n";
 # subdir names
 
 my $tmpscr		= "$path2expFolder/scripts";
-#my $scrhead		= "$path2ChIPseqScripts/QSUB_header.sh";
+my $scrhead		= "$path2ChIPseqScripts/$SUBheader";
 my $path2iterate	= "$tmpscr/iterate";
 my $path2qsub		= "$path2iterate/$SUBkey";
 my $path2DataStructure	= "$path2expFolder/DataStructure";
@@ -329,7 +329,7 @@ unless( -d "$path2chrlens" )                    { `mkdir $path2chrlens`;        
 
 # ------ Copy temp.sh file to $tmpscr
 
-#`cp $scrhead $tmpscr`;
+`cp $scrhead $tmpscr`;
 my $nameOfChIPseqFile	= "ChIPpip";
 
 
@@ -352,7 +352,7 @@ if($chiprx =~ "TRUE"){
 # ------ ChIPseqMainIterative.sh to iterate later
 
 my $ChIPseqMainIterative = "$path2iterate/$nameOfChIPseqFile\_$expFolder\.sh";
-#`cp $scrhead $ChIPseqMainIterative`;
+`cp $scrhead $ChIPseqMainIterative`;
 open $ChIPseqMainIterative, ">>", "$ChIPseqMainIterative" or die "Can't open '$ChIPseqMainIterative'\n";
 print $ChIPseqMainIterative "`echo \"perl $path2iterate\/$nameOfChIPseqFile\_$expFolder\.pl $path2expFolder\"`";
 close $ChIPseqMainIterative;
@@ -364,10 +364,8 @@ close $ChIPseqMainIterative;
 # Prepar file containing the jobs to run
 
 # Add the first iteration of the script to $SubmitJobsToCluster
-#my $firstcmd    = "FIRST=`qsub -N Iterate_$expFolder -o $path2qsub -e $path2qsub $ChIPseqMainIterative`";
-
 my $firstcmd    = NULL;
-if($SUBkey =~ "qsub"){	$firstcmd	= "FIRST=`$SUBcommand -N Iterate_$expFolder -o $path2qsub -e $path2qsub $ChIPseqMainIterative`";}
+if($SUBkey =~ "qsub"){	$firstcmd	= "FIRST=`$SUBcommand -o $path2qsub -e $path2qsub $ChIPseqMainIterative`";}
 if($SUBkey =~ "bsub"){  $firstcmd	= "$SUBcommand -J Iterate_$expFolder -o $path2qsub\/Iterate_$expFolder.out -e $path2qsub\/Iterate_$expFolder.err $ChIPseqMainIterative";}
 
 
