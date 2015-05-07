@@ -367,8 +367,8 @@ close $ChIPseqMainIterative;
 #my $firstcmd    = "FIRST=`qsub -N Iterate_$expFolder -o $path2qsub -e $path2qsub $ChIPseqMainIterative`";
 
 my $firstcmd    = NULL;
-if($SUBkey =~ "qsub"){	$firstcmd    = "FIRST=`$SUBcommand -N Iterate_$expFolder -o $path2qsub -e $path2qsub $ChIPseqMainIterative`";}
-if($SUBkey =~ "bsub"){	$firstcmd    = "FIRST=`$SUBcommand -J Iterate_$expFolder -o $path2qsub -e $path2qsub $ChIPseqMainIterative`";}
+if($SUBkey =~ "qsub"){	$firstcmd	= "FIRST=`$SUBcommand -N Iterate_$expFolder -o $path2qsub -e $path2qsub $ChIPseqMainIterative`";}
+if($SUBkey =~ "bsub"){  $firstcmd	= "$SUBcommand -J Iterate_$expFolder -o $path2qsub\/Iterate_$expFolder.out -e $path2qsub\/Iterate_$expFolder.err $ChIPseqMainIterative";}
 
 
 my $IterateSH	= "$path2iterate/Iterate_$expFolder.sh";

@@ -14,7 +14,7 @@
 #---------------- GENERAL INFO ------------------
 #
 # My_personal_email	=	"<my.email@harvard.edu>"	
-# My_personal_ssh	=	"schorderet@canute.mgh.harvard.edu"
+# My_personal_ssh	=	""
 # 
 # My_project_title	=	"<PROJECT_NAME>"
 # Reference_genome	=	"mm9"
