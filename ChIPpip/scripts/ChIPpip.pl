@@ -391,7 +391,7 @@ if( $unzip =~ "TRUE" ){
 
 		#---------------------------------------------
 		# Keep track of the jobs in @myJobs
-		my $jobName	= "$myJobName$i";
+		my $jobName	= "Sample_$myJobName$i";
 		push(@myJobs, $jobName);
 		if($SUBkey =~ "qsub"){	$cmd	= "$jobName=`$SUBcommand -o $path2qsub -e $path2qsub $QSUBint`";}
 		if($SUBkey =~ "bsub"){  $cmd	= "`$SUBcommand -J $jobName -o $path2qsub\/$jobName.out -e $path2qsub\/$jobName.err $QSUBint`";}
@@ -416,7 +416,7 @@ if( $unzip =~ "TRUE" ){
 
 		#---------------------------------------------
 		# Keep track of the jobs in @myJobs
-		my $jobName     = "$myJobName$i";
+		my $jobName     = "Inp_$myJobName$i";
 		push(@myJobs, $jobName);
 		if($SUBkey =~ "qsub"){	$cmd	= "$jobName=`$SUBcommand -o $path2qsub -e $path2qsub $QSUBint`";}
 		if($SUBkey =~ "bsub"){  $cmd	= "`$SUBcommand -J $jobName -o $path2qsub\/$jobName.out -e $path2qsub\/$jobName.err $QSUBint`";}
@@ -447,7 +447,6 @@ if( $unzip =~ "TRUE" ){
 	}
 	open $QSUB, ">>", "$QSUB" or die "Can't open '$QSUB'";
 	print $QSUB "$finalcmd\n";
-	print $QSUB "echo GOOD\n";
 	close $QSUB;
 
 	#*----------------------------------------------------------------------*
