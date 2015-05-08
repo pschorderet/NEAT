@@ -117,7 +117,7 @@ while(<INPUT>) {
 my $AdvSettings = "$path2expFolder/DataStructure/AdvancedSettings.txt";
 open(INPUT, $AdvSettings) || die "Error opening $AdvSettings : $!\n\n\n";
 
-my ($removepcr, $makeunique, $ndiff, $aligncommand1, $fdr, $posopt, $densityopt, $enforceisize)              = ("NA", "NA", "NA", "NA", "NA", "NA", "NA", "NA");
+my ($removepcr, $makeunique, $aligncommand1, $fdr, $posopt, $densityopt, $enforceisize)              = ("NA", "NA", "NA", "NA", "NA", "NA", "NA");
 
 while(<INPUT>) {
 	if (/# Ressource_manager/) {
@@ -139,10 +139,6 @@ while(<INPUT>) {
                 $_ =~ m/"(.+?)"/;
                 $aligncommand1 = "$1";
 	}
-	elsif (/# Bwa_maxEditDist/) {
-                $_ =~ m/"(.+?)"/;
-                $ndiff = "$1";
-        }
         elsif (/# Filter_removePCRdup/) {
                 $_ =~ m/"(.+?)"/;
                 $removepcr = "$1";
@@ -508,7 +504,7 @@ if( $qc =~ "TRUE" ) {
 		#-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 		#-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+          IMPORTANT CODE HERE         -+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 		`cp $path2CustFct/QC.R $tmpscr/`;
-		my $code	= "$tmpscr/QC.R";
+		my $code	= "$path2CustFct/QC.R";
 		my $cmd		= "Rscript $code $path2expFolder &>> $path2qsub/QCReport.log";
 		`echo "$cmd" >> $QSUBint`;
 		#--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--
@@ -617,9 +613,9 @@ if( $chiprx =~ "TRUE" ){
 
                         #-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
                         #-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+          IMPORTANT CODE HERE         -+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-                        my $cmd         = "$aligncommand1 -n $ndiff $refGenomeRX $path2fastq/$samplesInputs[$i]\.fastq > $path2currentSampleDir/$samplesInputs[$i]\.sai";
+                        my $cmd         = "$aligncommand1 $refGenomeRX $path2fastq/$samplesInputs[$i]\.fastq > $path2currentSampleDir/$samplesInputs[$i]\.sai";
                         `echo "$cmd" >> $QSUBint`;
-                        $cmd            = "$aligncommand1 -n $ndiff $refGenomeRX $path2fastq/$samplesInputs[$i]\.fastq > $path2currentSampleDir/$samplesPE[$i]\.sai";
+                        $cmd            = "$aligncommand1 $refGenomeRX $path2fastq/$samplesInputs[$i]\.fastq > $path2currentSampleDir/$samplesPE[$i]\.sai";
                         `echo "$cmd" >> $QSUBint`;
                         $cmd            = "bwa sampe $refGenomeRX $path2currentSampleDir/$samplesInputs[$i]\.sai $path2currentSampleDir/$samplesPE[$i]\.sai $path2fastq/$samplesInputs[$i]\_1.fastq $path2fastq/$samplesPE[$i]\.fastq > $path2currentSampleDir/$samplesInputs[$i]\.sam";
                         `echo "$cmd" >> $QSUBint`;
@@ -635,7 +631,7 @@ if( $chiprx =~ "TRUE" ){
 
                         #-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
                         #-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+          IMPORTANT CODE HERE         -+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-                        my $cmd         = "$aligncommand1 -n $ndiff $refGenomeRX $path2fastq/$samplesInputs[$i]\.fastq > $path2currentSampleDir/$samplesInputs[$i]\.sai";
+                        my $cmd         = "$aligncommand1 $refGenomeRX $path2fastq/$samplesInputs[$i]\.fastq > $path2currentSampleDir/$samplesInputs[$i]\.sai";
                         `echo "$cmd" >> $QSUBint`;
                         my $cmd2        = "`bwa samse $refGenomeRX $path2currentSampleDir/$samplesInputs[$i]\.sai $path2fastq/$samplesInputs[$i]\.fastq > $path2currentSampleDir/$samplesInputs[$i]\.sam`";
                         `echo "$cmd2" >> $QSUBint`;
@@ -751,9 +747,9 @@ if( $map =~ "TRUE" ){
 			
 			#-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 			#-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+          IMPORTANT CODE HERE         -+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-			my $cmd		= "$aligncommand1 -n $ndiff $refGenome $path2fastq/$samplesInputs[$i]\.fastq > $path2currentSampleDir/$samplesInputs[$i]\.sai";
+			my $cmd		= "$aligncommand1 $refGenome $path2fastq/$samplesInputs[$i]\.fastq > $path2currentSampleDir/$samplesInputs[$i]\.sai";
 			`echo "$cmd" >> $QSUBint`;
-			$cmd		= "$aligncommand1 -n $ndiff $refGenome $path2fastq/$samplesPE[$i]\.fastq > $path2currentSampleDir/$samplesPE[$i]\.sai";
+			$cmd		= "$aligncommand1 $refGenome $path2fastq/$samplesPE[$i]\.fastq > $path2currentSampleDir/$samplesPE[$i]\.sai";
 			`echo "$cmd" >> $QSUBint`;
 			$cmd		= "bwa sampe $refGenome $path2currentSampleDir/$samplesInputs[$i]\.sai $path2currentSampleDir/$samplesPE[$i]\.sai $path2fastq/$samplesInputs[$i]\.fastq $path2fastq/$samplesPE[$i]\.fastq > $path2currentSampleDir/$samplesInputs[$i]\.sam";
 			`echo "$cmd" >> $QSUBint`;
@@ -763,7 +759,7 @@ if( $map =~ "TRUE" ){
 
 			#-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 			#-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+          IMPORTANT CODE HERE         -+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-			my $cmd		= "$aligncommand1 -n $ndiff $refGenome $path2fastq/$samplesInputs[$i]\.fastq > $path2currentSampleDir/$samplesInputs[$i]\.sai";
+			my $cmd		= "$aligncommand1 $refGenome $path2fastq/$samplesInputs[$i]\.fastq > $path2currentSampleDir/$samplesInputs[$i]\.sai";
 			`echo "$cmd" >> $QSUBint`;
 			my $cmd2	= "bwa samse $refGenome $path2currentSampleDir/$samplesInputs[$i]\.sai $path2fastq/$samplesInputs[$i]\.fastq > $path2currentSampleDir/$samplesInputs[$i]\.sam";
 			`echo "$cmd2" >> $QSUBint`;

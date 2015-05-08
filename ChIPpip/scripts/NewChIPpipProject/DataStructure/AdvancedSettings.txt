@@ -11,8 +11,7 @@
 # Unzip_comand_line	=	"gunzip -c"
 # Zip_file_extension	=	".gz"
 #
-# Align_command_line_1	=	"bwa aln"
-# Bwa_maxEditDist	=	"1"
+# Align_command_line_1	=	"bwa aln -n 1"
 #
 # Filter_removePCRdup	=	"1"
 # Filter_makeUniqueRead	=	"1"
