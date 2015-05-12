@@ -11,7 +11,8 @@
 # Unzip_comand_line	=	"gunzip -c"
 # Zip_file_extension	=	".gz"
 #
-# Align_command_line_1	=	"bwa aln -n 1"
+# Align_command_line_1	=	"bwa aln"
+# Bwa_maxEditDist	=	"1"
 #
 # Filter_removePCRdup	=	"1"
 # Filter_makeUniqueRead	=	"1"
@@ -23,5 +24,7 @@
 # PeakCaller_fdr	=	"0.01"
 # PeakCaller_posopt	=	"1"
 # PeakCaller_densityopt	=	"1"
+#
+# Wigfile_binSize	=	"100"
 #
 #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-|

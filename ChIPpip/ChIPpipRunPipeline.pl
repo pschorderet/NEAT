@@ -95,7 +95,6 @@ while(<INPUT>) {
                 $_ =~ m/"(.+?)"/;
                 $peakcaller = "$1";
         }
-
 	elsif (/# Steps_to_execute_pipe\b/) {
                 $_ =~ m/"(.+?)"/;
                 @steps2execute = ();
@@ -122,8 +121,8 @@ my ($removepcr, $makeunique, $ndiff, $aligncommand1, $fdr, $posopt, $densityopt,
 while(<INPUT>) {
 	if (/# Ressource_manager/) {
                 $_ =~ m/"(.+?)"/;
-		if (grep /\bqsub/i, $_ )	{ $SUBkey	= "qsub"; $SUBheader	= "QSUB_header.sh";}
-		if (grep /\bbsub/i, $_ )      	{ $SUBkey    	= "bsub"; $SUBheader    = "BSUB_header.sh";}
+		if (grep /\bqsub/i, $_ )	{ $SUBkey	= "qsub"; $SUBheader	= "QSUB_header.sh";	}
+		if (grep /\bbsub/i, $_ )      	{ $SUBkey    	= "bsub"; $SUBheader    = "BSUB_header.sh";	}
 		$SUBcommand = "$1";
         }
 	elsif (/# Unzip_comand/) {
@@ -237,10 +236,10 @@ if( $PE ){
 }
 
 #print "\n\n\norisamples:   @orisamples\n";
-print "samples2unzip:   @samples2unzip\n";
-print "samples: \t @samples\n";
+#print "samples2unzip:   @samples2unzip\n";
+#print "samples: \t @samples\n";
 #print "samplesNoPE: \t @samplesNoPE\n";
-print "samplesPE: \t @samplesPE\n";
+#print "samplesPE: \t @samplesPE\n";
 
 
 #*----------------------------------------------------------------------*
@@ -354,7 +353,8 @@ if($chiprx =~ "TRUE"){
 my $ChIPseqMainIterative = "$path2iterate/$nameOfChIPseqFile\_$expFolder\.sh";
 `cp $scrhead $ChIPseqMainIterative`;
 open $ChIPseqMainIterative, ">>", "$ChIPseqMainIterative" or die "Can't open '$ChIPseqMainIterative'\n";
-print $ChIPseqMainIterative "`echo \"perl $path2iterate\/$nameOfChIPseqFile\_$expFolder\.pl $path2expFolder\"`";
+#print $ChIPseqMainIterative "`echo \"perl $path2iterate\/$nameOfChIPseqFile\_$expFolder\.pl $path2expFolder\"`";
+print $ChIPseqMainIterative "perl $path2iterate\/$nameOfChIPseqFile\_$expFolder\.pl $path2expFolder";
 close $ChIPseqMainIterative;
 # Change permissions of file so that it can be executed later on
 `chmod 777 $ChIPseqMainIterative`;

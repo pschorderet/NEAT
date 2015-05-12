@@ -23,12 +23,17 @@ CountOverlaps2GRanges <- function(GRanges1, GRanges2, normFactRX, normToLibraryS
   gr <- GRanges1
 
   #   length(which(tabChIP!=0))
-#   length(GRanges1)
-#   length(GRanges2)
-#   which(tabChIP!=0)
+  #   length(GRanges1)
+  #   length(GRanges2)
+  #   which(tabChIP!=0)
 
   gr$RawValue <- tabChIP
   gr$ValueRX <- tabChIP*normFactRX
+  
+	if(normToLibrarySize == "TRUE"){
+		gr$ValueRX <- gr$ValueRX/length(GRanges2)
+	}
+
   return(gr)
 
 }

@@ -26,7 +26,7 @@ path2bamRX	<- paste(args[2], "_RX/", sep="")
 path2GRanges	<- paste(args[3], "/", sep="") 
 path2GRangesRX	<- paste(args[3], "_RX/", sep="")
 path2CustFct	<- paste(args[4], "/", sep="")		# path to CustomFunctions
-
+binLength	<- as.numeric(args[5])
 
 path2MainFolder	<- path2expFolder
 path2Targets	<- paste(path2MainFolder, "DataStructure/Targets.txt", sep="")
@@ -283,7 +283,7 @@ names(seqlengths) <- chromosomesFile[,1]
 #seqlengths
 
 # Slice the genome into bins
-bins <- tileGenome(seqlengths, tilewidth=500, cut.last.tile.in.chrom=TRUE)
+bins <- tileGenome(seqlengths, tilewidth=binLength, cut.last.tile.in.chrom=TRUE)
 
 # Read in the statTable file countaining the ChIPrx normaization factors
 path2statTable <- paste(path2MainFolder, "DataStructure/statTable.bed", sep="")
@@ -302,7 +302,9 @@ for(h in 1:length(GRangesSamples)){
 	cat("\n Creating wig file:\t", GRangesSamples[h], "\n", sep="")
 
 	# h=1
-	gr <- CountOverlaps2GRanges(GRanges1=bins, GRanges2=get(GRangesSamples[h]), normFactRX=statTable$NormFactRX[h], normToLibrarySize=FALSE)
+	# bins
+	gr <- CountOverlaps2GRanges(GRanges1=bins, GRanges2=get(GRangesSamples[h]), normFactRX=statTable$NormFactRX[h], normToLibrarySize=TRUE)
+
 	df <- data.frame(seqnames=seqnames(gr), starts=start(gr)-1, ends=end(gr), value=elementMetadata(gr)$ValueRX)
   
 	# Delete line that have no value
@@ -315,7 +317,7 @@ for(h in 1:length(GRangesSamples)){
 	write.table(dfnon0, file=path2wigfilename_tmp, quote=F, sep="\t", row.names=F, col.names=F)
   
 	# Add header to the file
-	header = paste("track type=wiggle_0 name='", allsamples[h], "' description='coverata' visibility=dense color=0,100,200 priority=20", sep="")
+	header = paste("track type=wiggle_0 name='", GRangesSamples[h], "' description='coverata' visibility=dense color=0,100,200 priority=20", sep="")
   
 	# Copy header to tmp file
 	write.table(header, file=path2wigfile_header, quote=F, sep="\t", row.names=F, col.names=F)
