@@ -56,3 +56,7 @@
 OriFileName	FileName	OriInpName	InpName	Factor	Replicate	FileShort	Experiment	Date
 PSa29-5_R1	PSa29-5_noDox	-	-	RNA	1	noDox	1	2015-01-01
 PSa29-6_R1	PSa29-6_Dox	-	-	RNA	2	Dox	1	2015-01-01
+#
+#------------------------------------------------
+#----------- PE corresponding samples -----------
+

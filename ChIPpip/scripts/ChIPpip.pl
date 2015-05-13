@@ -391,7 +391,8 @@ if( $unzip =~ "TRUE" ){
 
 		#---------------------------------------------
 		# Keep track of the jobs in @myJobs
-		my $jobName	= "Sample_$myJobName$i";
+#		my $jobName	= "Sample_$myJobName$i";
+		my $jobName     = "$samples2unzip[$i]_$myJobName$i";
 		push(@myJobs, $jobName);
 		if($SUBkey =~ "qsub"){	$cmd	= "$jobName=`$SUBcommand -o $path2qsub -e $path2qsub $QSUBint`";}
 		if($SUBkey =~ "bsub"){  $cmd	= "$SUBcommand -J $jobName -o $path2qsub\/$jobName.out -e $path2qsub\/$jobName.err $QSUBint";}
@@ -416,7 +417,8 @@ if( $unzip =~ "TRUE" ){
 
 		#---------------------------------------------
 		# Keep track of the jobs in @myJobs
-		my $jobName     = "Inp_$myJobName$i";
+#		my $jobName     = "Inp_$myJobName$i";
+		my $jobName     = "$inputs[$i]_$myJobName$i";
 		push(@myJobs, $jobName);
 		if($SUBkey =~ "qsub"){	$cmd	= "$jobName=`$SUBcommand -o $path2qsub -e $path2qsub $QSUBint`";}
 		if($SUBkey =~ "bsub"){  $cmd	= "$SUBcommand -J $jobName -o $path2qsub\/$jobName.out -e $path2qsub\/$jobName.err $QSUBint";}
@@ -651,7 +653,8 @@ if( $chiprx =~ "TRUE" ){
 
                 #---------------------------------------------
                 # Keep track of the jobs in @myJobs
-                my $jobName     = "$myJobName$i";
+#		my $jobName     = "$myJobName$i";
+		my $jobName     = "$samplesInputs[$i]_$myJobName$i";
                 push(@myJobs, $jobName);
 		if($SUBkey =~ "qsub"){  $cmd	= "$jobName=`$SUBcommand -o $path2qsub -e $path2qsub $QSUBint`";}
 		if($SUBkey =~ "bsub"){  $cmd    = "$SUBcommand -J $jobName -o $path2qsub\/$jobName.out -e $path2qsub\/$jobName.err $QSUBint";}
@@ -773,7 +776,8 @@ if( $map =~ "TRUE" ){
 
 		#---------------------------------------------
 		# Keep track of the jobs in @myJobs
-		my $jobName     = "$myJobName$i";
+#		my $jobName     = "$myJobName$i";
+		my $jobName     = "$samplesInputs[$i]_$myJobName$i";
 		push(@myJobs, $jobName);
 		if($SUBkey =~ "qsub"){  $cmd	= "$jobName=`$SUBcommand -o $path2qsub -e $path2qsub $QSUBint`";}
 		if($SUBkey =~ "bsub"){  $cmd	= "$SUBcommand -J $jobName -o $path2qsub\/$jobName.out -e $path2qsub\/$jobName.err $QSUBint";}
@@ -923,7 +927,8 @@ if( $filter =~ "TRUE" ){
 		
 		#---------------------------------------------
 		# Keep track of the jobs in @myJobs
-		my $jobName	= "$myJobName$i";
+#		my $jobName	= "$myJobName$i";
+		my $jobName     = "$samplesInputs[$i]_$myJobName$i";
 		push(@myJobs, "$jobName");
 		if($SUBkey =~ "qsub"){  $cmd	= "$jobName=`$SUBcommand -o $path2qsub -e $path2qsub $QSUBint`";}
 		if($SUBkey =~ "bsub"){  $cmd    = "$SUBcommand -J $jobName -o $path2qsub\/$jobName.out -e $path2qsub\/$jobName.err $QSUBint";}
@@ -1043,7 +1048,8 @@ if( $peakcalling =~ "TRUE" ){
 
 		#---------------------------------------------
 		# Keep track of the jobs in @myJobs
-		my $jobName	= "$myJobName$i";
+#		my $jobName	= "$myJobName$i";
+		my $jobName     = "$samples[$i]_$myJobName$i";
 		push(@myJobsSamples, "$jobName");
 		if($SUBkey =~ "qsub"){  $cmd	= "$jobName=`$SUBcommand -o $path2qsub -e $path2qsub $QSUBint`";}
 		if($SUBkey =~ "bsub"){  $cmd    = "$SUBcommand -J $jobName -o $path2qsub\/$jobName.out -e $path2qsub\/$jobName.err $QSUBint";}
@@ -1179,7 +1185,8 @@ if( $cleanbigwig =~ "TRUE" ){
 
 		# Keep track of the jobs in @myJobs
 		#---------------------------------------------
-		my $jobName	= "$myJobName$i";
+#		my $jobName	= "$myJobName$i";
+		my $jobName     = "$samples[$i]_$myJobName$i";
 		push(@myJobs, $jobName);
 		if($SUBkey =~ "qsub"){  $cmd	= "$jobName=`$SUBcommand -o $path2qsub -e $path2qsub $QSUBint`";}
 		if($SUBkey =~ "bsub"){  $cmd    = "$SUBcommand -J $jobName -o $path2qsub\/$jobName.out -e $path2qsub\/$jobName.err $QSUBint";}
@@ -1291,7 +1298,8 @@ if($cleanfiles =~ "TRUE"){
 		}
 		#---------------------------------------------
 		# Keep track of the jobs in @myJobs
-		my $jobName     = "$myJobName$i";
+#		my $jobName     = "$myJobName$i";
+		my $jobName     = "$samplesInputs[$i]_$myJobName$i";
 		push(@myJobs, "$jobName");
 		if($SUBkey =~ "qsub"){  $cmd	= "$jobName=`$SUBcommand -o $path2qsub -e $path2qsub $QSUBint`";}
 		if($SUBkey =~ "bsub"){  $cmd    = "$SUBcommand -J $jobName -o $path2qsub\/$jobName.out -e $path2qsub\/$jobName.err $QSUBint";}
@@ -1445,17 +1453,4 @@ if( $granges =~ "TRUE" ){
         #*----------------------------------------------------------------------*
         # Exit script
 
-        print "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n";
-        print "\n Exiting $myJobName section with no known error \n";
-        print "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n\n\n";
-
-        exit 0;
-
-}
-
-
-exit 0;
-
-print "\n*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-\n\n";
-
-#*-----------------------------------------------------------------         
+        print "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~                                                                                                                                                                                                                                                                                                                                                                                                                                        
