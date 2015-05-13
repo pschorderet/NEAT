@@ -95,6 +95,7 @@ my $AdvSettings = "$path2expFolder/DataStructure/AdvancedSettings.txt";
 open(INPUT, $AdvSettings) || die "Error opening $AdvSettings : $!\n\n\n";
 
 my ($removepcr, $makeunique, $ndiff, $aligncommand)				= ("NA", "NA", "NA", "NA");
+my ($SUBkey, $SUBheader, $SUBdependCondition, $SUBcommand)                      = ("NA", "NA", "NA", "NA");
 
 while(<INPUT>) {
 	if (/# Ressource_manager/) {
@@ -127,6 +128,11 @@ while(<INPUT>) {
                 $_ =~ m/"(.+?)"/;
                 $aligncommand = "$1";
         }
+	elsif (/# Wigfile_binSize/) {
+                $_ =~ m/"(.+?)"/;
+                $wigBinSize = "$1";
+        }
+
 
 } # end of AdvancedSettings.txt
 
@@ -180,10 +186,10 @@ if( $PE ){
 }
 
 #print "\n\n\norisamples:   @orisamples\n";
-print "samples2unzip:   @samples2unzip\n";
-print "samples: \t @samples\n";
+#print "samples2unzip:   @samples2unzip\n";
+#print "samples: \t @samples\n";
 #print "samplesNoPE: \t @samplesNoPE\n";
-print "samplesPE: \t @samplesPE\n";
+#print "samplesPE: \t @samplesPE\n";
 
 #*----------------------------------------------------------------------*
 # Define paths
@@ -287,7 +293,8 @@ my $nameOfRNAseqFile	= "RNApip";
 my $RNAseqMainIterative = "$path2iterate/$nameOfRNAseqFile\_$expFolder\.sh";
 `cp $scrhead $RNAseqMainIterative`;
 open $RNAseqMainIterative, ">>", "$RNAseqMainIterative" or die "Can't open '$RNAseqMainIterative'\n";
-print $RNAseqMainIterative "`echo \"perl $path2iterate\/$nameOfRNAseqFile\_$expFolder\.pl $path2expFolder\"`";
+#print $RNAseqMainIterative "`echo \"perl $path2iterate\/$nameOfRNAseqFile\_$expFolder\.pl $path2expFolder\"`";
+print $RNAseqMainIterative "perl $path2iterate\/$nameOfRNAseqFile\_$expFolder\.pl $path2expFolder";
 close $RNAseqMainIterative;
 # Change permissions of file so that it can be executed later on
 `chmod 777 $RNAseqMainIterative`;
@@ -299,7 +306,8 @@ close $RNAseqMainIterative;
 # Add the first iteration of the script to $SubmitJobsToCluster
 my $firstcmd    = NULL;
 if($SUBkey =~ "qsub"){	$firstcmd	= "FIRST=`$SUBcommand -N Iterate_$expFolder -o $path2qsub -e $path2qsub $RNAseqMainIterative`";}
-if($SUBkey =~ "bsub"){	$firstcmd	= "FIRST=`$SUBcommand -J Iterate_$expFolder -o $path2qsub -e $path2qsub $RNAseqMainIterative`";}
+if($SUBkey =~ "bsub"){  $firstcmd       = "$SUBcommand -J Iterate_$expFolder -o $path2qsub\/Iterate_$expFolder.out -e $path2qsub\/Iterate_$expFolder.err $RNAseqMainIterative";}
+
 my $IterateSH	= "$path2iterate/Iterate\_$expFolder\.sh";
 open $IterateSH, ">", "$IterateSH" or die "Can't open '$IterateSH'";
 print $IterateSH "#!/bin/bash\n";

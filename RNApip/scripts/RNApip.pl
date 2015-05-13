@@ -93,13 +93,14 @@ while(<INPUT>) {
 my $AdvSettings = "$path2expFolder/DataStructure/AdvancedSettings.txt";
 open(INPUT, $AdvSettings) || die "Error opening $AdvSettings : $!\n\n\n";
 
-my ($removepcr, $makeunique, $ndiff, $aligncommand)                             = ("NA", "NA", "NA", "NA");
+my ($removepcr, $makeunique, $aligncommand)                             = ("NA", "NA", "NA");
+my ($SUBkey, $SUBheader, $SUBdependCondition, $SUBcommand)		= ("NA", "NA", "NA", "NA");
 
 while(<INPUT>) {
 	if (/# Ressource_manager/) {
                 $_ =~ m/"(.+?)"/;
-                if (grep /\bqsub/i, $_ )        { $SUBkey	= "qsub"; $SUBheader    = "QSUB_header.sh";}
-                if (grep /\bbsub/i, $_ )        { $SUBkey	= "bsub"; $SUBheader    = "BSUB_header.sh";}
+		if (grep /\bqsub/i, $_ )        { $SUBkey = "qsub"; $SUBheader  = "QSUB_header.sh";     $QSUBdependCondition = "afterok";    }
+                if (grep /\bbsub/i, $_ )        { $SUBkey = "bsub"; $SUBheader  = "BSUB_header.sh";     $BSUBdependCondition = "ended";      }
                 $SUBcommand = "$1";
         }
 	if (/# Unzip_comand/) {
@@ -110,7 +111,6 @@ while(<INPUT>) {
                 $_ =~ m/"(.+?)"/;
                 $zipExtension = "$1";
         }
-
         elsif (/# Filter_removePCRdup/) {
                 $_ =~ m/"(.+?)"/;
                 $removepcr = "$1";
@@ -118,10 +118,6 @@ while(<INPUT>) {
 	elsif (/# Filter_makeUniqueRead/) {
                 $_ =~ m/"(.+?)"/;
                 $makeunique = "$1";
-        }
-	elsif (/# Filter_maxEditDist/) {
-                $_ =~ m/"(.+?)"/;
-                $ndiff = "$1";
         }
         elsif (/# Align_command.opt/) {
                 $_ =~ m/"(.+?)"/;
@@ -178,10 +174,10 @@ if( $PE ){
 }
 
 #print "\n\n\norisamples:   @orisamples\n";
-print "samples2unzip:   @samples2unzip\n";
-print "samples: \t @samples\n";
+#print "samples2unzip:   @samples2unzip\n";
+#print "samples: \t @samples\n";
 #print "samplesNoPE: \t @samplesNoPE\n";
-print "samplesPE: \t @samplesPE\n";
+#print "samplesPE: \t @samplesPE\n";
 
 #*----------------------------------------------------------------------*
 # Define paths
@@ -322,10 +318,12 @@ if( $unzip =~ "TRUE" ){
 		
 		#---------------------------------------------
 		# Keep track of the jobs in @myJobs
-		my $jobName	= "Sample_$myJobName$i";
+#		my $jobName	= "Sample_$myJobName$i";
+		my $jobName     = "$samples2unzip[$i]_$myJobName$i";
+
 		push(@myJobs, $jobName);
 		if($SUBkey =~ "qsub"){  $cmd            = "$jobName=`$SUBcommand -o $path2qsub -e $path2qsub $QSUBint`";}
-                if($SUBkey =~ "bsub"){  $cmd            = "$jobName=`$SUBcommand -o $path2qsub -e $path2qsub $QSUBint`";}
+		if($SUBkey =~ "bsub"){  $cmd		= "$SUBcommand -J $jobName -o $path2qsub\/$jobName.out -e $path2qsub\/$jobName.err $QSUBint";} 
 		open $QSUB, ">>", "$QSUB" or die "Can't open '$QSUB'";
 		print $QSUB "$cmd\n";
 		close $QSUB;     
@@ -344,14 +342,13 @@ if( $unzip =~ "TRUE" ){
 	if($SUBkey =~ "qsub"){
                 foreach( @myJobs ){ $_ = "\$".$_ ; }
                 my $myJobsVec   = join(":", @myJobs);
-                $finalcmd	= "FINAL=\`$SUBcommand -N $iterateJobName -o $path2qsub -e $path2qsub -W depend=afterok\:$myJobsVec $IterateSH`";
+                $finalcmd	= "FINAL=\`$SUBcommand -N $iterateJobName -o $path2qsub -e $path2qsub -W depend=$QSUBdependCondition\:$myJobsVec $IterateSH`";
         }
 	if($SUBkey =~ "bsub"){
-                foreach( @myJobs ){ $_ = "done(\"".$_."\")" ; }
+                foreach( @myJobs ){ $_ = "$BSUBdependCondition\(\"".$_."\")" ; }
                 my $myJobsVec   = join(" && ", @myJobs);
-#                $finalcmd	= "FINAL=\`$SUBcommand -J $iterateJobName -o $path2qsub -e $path2qsub -w \'$myJobsVec\' $IterateSH`";
-        }
-	
+                $finalcmd       = "\$SUBcommand -J $iterateJobName -o $path2qsub\/$iterateJobName.out -e $path2qsub\/$iterateJobName.err -w \'$myJobsVec\' $IterateSH";
+        }	
 	open $QSUB, ">>", "$QSUB" or die "Can't open '$QSUB'";
 	print $QSUB "$finalcmd\n";
 	close $QSUB;
@@ -415,17 +412,17 @@ if( $qc =~ "TRUE" ) {
 		#-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+          IMPORTANT CODE HERE         -+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 		`cp $path2CustFct/QC.R $tmpscr/`;
                 my $code	= "$tmpscr/QC.R";
-		my $cmd		= "Rscript $code $path2expFolder &>> $path2qsub/QCReport.log";
+		$cmd		= "Rscript $code $path2expFolder &>> $path2qsub/QCReport.log";
 		`echo "$cmd" >> $QSUBint`;
 		#--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--
 
 		#---------------------------------------------
                 # Keep track of the jobs in @myJobs
                 my $jobName     = "$myJobName$i";
+
                 push(@myJobs, $jobName);
 		if($SUBkey =~ "qsub"){  $cmd            = "$jobName=`$SUBcommand -o $path2qsub -e $path2qsub $QSUBint`";}
-#                 if($SUBkey =~ "bsub"){  $cmd            = "$jobName=`$SUBcommand -o $path2qsub -e $path2qsub $QSUBint`";}
-  
+		if($SUBkey =~ "bsub"){  $cmd		= "$SUBcommand -J $jobName -o $path2qsub\/$jobName.out -e $path2qsub\/$jobName.err $QSUBint";}
               	open $QSUB, ">>", "$QSUB" or die "Can't open '$QSUB'";
                 print $QSUB "$cmd\n";
                 close $QSUB;
@@ -443,19 +440,16 @@ if( $qc =~ "TRUE" ) {
 	
         # Add the next job line to the $mapQSUB
 	# Other jobs do not depend on the completion of this, so no dependencies are needed
-#       my $finalcmd    = "FINAL=\`qsub -N $iterateJobName -o $path2qsub -e $path2qsub $IterateSH`";
-	
 	if($SUBkey =~ "qsub"){
                 foreach( @myJobs ){ $_ = "\$".$_ ; }
                 my $myJobsVec   = join(":", @myJobs);
                 $finalcmd	= "FINAL=\`$SUBcommand -N $iterateJobName -o $path2qsub -e $path2qsub $IterateSH`";
         }
 	if($SUBkey =~ "bsub"){
-                foreach( @myJobs ){ $_ = "done(\"".$_."\")" ; }
+                foreach( @myJobs ){ $_ = "$BSUBdependCondition\(\"".$_."\")" ; }
                 my $myJobsVec   = join(" && ", @myJobs);
-#                 $finalcmd	= "FINAL=\`$SUBcommand -J $iterateJobName -o $path2qsub -e $path2qsub $IterateSH`";
+                $finalcmd       = "$SUBcommand -J $iterateJobName -o $path2qsub\/$iterateJobName.out -e $path2qsub\/$iterateJobName.err $IterateSH";
         }
-
 
         open $QSUB, ">>", "$QSUB" or die "Can't open '$QSUB'";
         print $QSUB "$finalcmd\n";
@@ -533,7 +527,7 @@ if( $map =~ "TRUE" ){
 			#-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+          IMPORTANT CODE HERE         -+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
 			# Lane 2 of sample i should be named the same except having a '_R2' instead od a '_R1'
-			my $cmd		= "$aligncommand $path2gtfFile -o $path2Tophat/$samples[$i] $refGenome/$genome $path2fastq/$samples[$i].fastq $path2fastq/$samplesPE[$i].fastq";
+			$cmd		= "$aligncommand $path2gtfFile -o $path2Tophat/$samples[$i] $refGenome/$genome $path2fastq/$samples[$i].fastq $path2fastq/$samplesPE[$i].fastq";
 			`echo "$cmd" >> $QSUBint`;
 			#--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--			
 
@@ -541,7 +535,7 @@ if( $map =~ "TRUE" ){
 			
 			#-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 			#-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+          IMPORTANT CODE HERE         -+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-			my $cmd		= "$aligncommand $path2gtfFile -o $path2Tophat/$samples[$i] $refGenome/$genome $path2fastq/$samples[$i].fastq";
+			$cmd		= "$aligncommand $path2gtfFile -o $path2Tophat/$samples[$i] $refGenome/$genome $path2fastq/$samples[$i].fastq";
 			`echo "$cmd" >> $QSUBint`;
 			#--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--
 
@@ -555,22 +549,25 @@ if( $map =~ "TRUE" ){
 
 		#---------------------------------------------
 		# Keep track of the jobs in @myJobs
-		my $jobName	= "$myJobName$i";
+#		my $jobName	= "$myJobName$i";
+		my $jobName     = "$samples[$i]_$myJobName$i";
 		push(@myJobs, $jobName);
-		my $jobName2	= "$myJobName2$i";
+#		my $jobName2	= "$myJobName2$i";
+		my $jobName2     = "$samples[$i]_$myJobName2$i";
 		push(@myJobs2, $jobName2);
 		
-		#my $cmd1	= "$jobName=`qsub -o $path2qsub -e $path2qsub $QSUBint`";
 		if($SUBkey =~ "qsub"){  $cmd1           = "$jobName=`$SUBcommand -o $path2qsub -e $path2qsub $QSUBint`";}
-#               if($SUBkey =~ "bsub"){  $cmd1           = "$jobName=`$SUBcommand -o $path2qsub -e $path2qsub $QSUBint`";}
+		if($SUBkey =~ "bsub"){  $cmd1		= "$SUBcommand -J $jobName -o $path2qsub\/$jobName.out -e $path2qsub\/$jobName.err $QSUBint";}
 
 		if($SUBkey =~ "qsub"){
-			$jobName2 = "\$".$jobName2 ;
-                	$cmd2		= "$jobName2=\`$SUBcommand -o $path2qsub -e $path2qsub -W depend=afterany\:$jobName $QSUBintRename`";
+#			foreach( @myJobs2 ){ $_ = "\$".$_ ; }
+#			my $myJobsVec2  = join(":", @myJobs2);
+                	$cmd2		= "$jobName2=\`$SUBcommand -o $path2qsub -e $path2qsub -W depend=$QSUBdependCondition\:$jobName $QSUBintRename`";
         	}
 		if($SUBkey =~ "bsub"){
-			$jobName2 = $jobName2;
-#                 	$cmd2		= "$jobName2=\`$SUBcommand -o $path2qsub -e $path2qsub -w \done('$jobName\') $QSUBintRename`";
+#			foreach( @myJobs2 ){ $_ = "$BSUBdependCondition\(\"".$_."\")" ; }
+#			my $myJobsVec2   = join(" && ", @myJobs2);
+			$cmd2		= "$SUBcommand -J $jobName2 -o $path2qsub\/$jobName2.out -e $path2qsub\/$jobName2.err -w $BSUBdependCondition\(\"$jobName\") $QSUBintRename";
         	}
 
 		open $QSUB, ">>", "$QSUB" or die "Can't open '$QSUB'";
@@ -595,14 +592,13 @@ if( $map =~ "TRUE" ){
 	if($SUBkey =~ "qsub"){
                 foreach( @myJobs2 ){ $_ = "\$".$_ ; }
                 my $myJobsVec   = join(":", @myJobs2);
-                $finalcmd	= "FINAL=\`$SUBcommand -N $iterateJobName -o $path2qsub -e $path2qsub -W depend=afterok\:$myJobsVec $IterateSH`";
+                $finalcmd	= "FINAL=\`$SUBcommand -N $iterateJobName -o $path2qsub -e $path2qsub -W depend=$QSUBdependCondition\:$myJobsVec $IterateSH`";
         }
 	if($SUBkey =~ "bsub"){
-                foreach( @myJobs2 ){ $_ = "done(\"".$_."\")" ; }
-                my $myJobsVec   = join(" && ", @myJobs2);
-#               $finalcmd	= "FINAL=\`$SUBcommand -J $iterateJobName -o $path2qsub -e $path2qsub -w \'$myJobsVec\' $IterateSH`";
+                foreach( @myJobs ){ $_ = "$BSUBdependCondition\(\"".$_."\")" ; }
+                my $myJobsVec   = join(" && ", @myJobs);
+                $finalcmd       = "\$SUBcommand -J $iterateJobName -o $path2qsub\/$iterateJobName.out -e $path2qsub\/$iterateJobName.err -w \'$myJobsVec\' $IterateSH";
         }
-
 	open $QSUB, ">>", "$QSUB" or die "Can't open '$QSUB'";
 	print $QSUB "$finalcmd\n";
 	close $QSUB;
@@ -672,18 +668,18 @@ if( $filter =~ "TRUE" ){
 
 		#-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 		#-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+          IMPORTANT CODE HERE         -+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-		my $cmd         = "mv $path2Tophat/$samples[$i]/$samples[$i]\.bam $path2Tophat/$samples[$i]/$samples[$i]\_unsorted.bam";
+		$cmd		= "mv $path2Tophat/$samples[$i]/$samples[$i]\.bam $path2Tophat/$samples[$i]/$samples[$i]\_unsorted.bam";
                 `echo "$cmd" >> $QSUBint`;
 		if( $removepcr ){
 			# bam to sorted bam
-			my $cmd		= "samtools sort $path2Tophat/$samples[$i]/$samples[$i]\_unsorted.bam $path2Tophat/$samples[$i]/$samples[$i]\_sortedwpcr";
+			$cmd		= "samtools sort $path2Tophat/$samples[$i]/$samples[$i]\_unsorted.bam $path2Tophat/$samples[$i]/$samples[$i]\_sortedwpcr";
 			`echo "$cmd" >> $QSUBint`;
 			$cmd		= "samtools rmdup -s $path2Tophat/$samples[$i]/$samples[$i]\_sortedwpcr.bam $path2Tophat/$samples[$i]/$samples[$i].bam";
 			`echo "$cmd" >> $QSUBint`;
 			
 		} else {
 			# bam to sorted bam
-			my $cmd = "samtools sort $path2Tophat/$samples[$i]/$samples[$i]\_unfiltered.bam $path2Tophat/$samples[$i]/$samples[$i].bam";
+			$cmd = "samtools sort $path2Tophat/$samples[$i]/$samples[$i]\_unfiltered.bam $path2Tophat/$samples[$i]/$samples[$i].bam";
 			`echo "$cmd" >> $QSUBint`;
 		}
 
@@ -696,11 +692,13 @@ if( $filter =~ "TRUE" ){
 		
 		#---------------------------------------------
 		# Keep track of the jobs in @myJobs
-		my $jobName	= "$myJobName$i";
+#		my $jobName	= "$myJobName$i";
+		my $jobName     = "$samples[$i]_$myJobName$i";
+
 		push(@myJobs, "$jobName");
 		#$cmd        	= "$jobName=`qsub -o $path2qsub -e $path2qsub $QSUBint`";
 		if($SUBkey =~ "qsub"){  $cmd           = "$jobName=`$SUBcommand -o $path2qsub -e $path2qsub $QSUBint`";}
-#               if($SUBkey =~ "bsub"){  $cmd           = "$jobName=`$SUBcommand -o $path2qsub -e $path2qsub $QSUBint`";}
+		if($SUBkey =~ "bsub"){  $cmd           = "$SUBcommand -J $jobName -o $path2qsub\/$jobName.out -e $path2qsub\/$jobName.err $QSUBint";}
 		open $QSUB, ">>", "$QSUB" or die "Can't open '$QSUB'";
 		print $QSUB "$cmd\n";
 		close $QSUB;
@@ -720,12 +718,12 @@ if( $filter =~ "TRUE" ){
 	if($SUBkey =~ "qsub"){
                 foreach( @myJobs ){ $_ = "\$".$_ ; }
                 my $myJobsVec   = join(":", @myJobs);
-                $finalcmd	= "FINAL=\`$SUBcommand -N $iterateJobName -o $path2qsub -e $path2qsub -W depend=afterany\:$myJobsVec $IterateSH`";
+                $finalcmd	= "FINAL=\`$SUBcommand -N $iterateJobName -o $path2qsub -e $path2qsub -W depend=$QSUBdependCondition\:$myJobsVec $IterateSH`";
         }
 	if($SUBkey =~ "bsub"){
-                foreach( @myJobs ){ $_ = "done(\"".$_."\")" ; }
+                foreach( @myJobs ){ $_ = "$BSUBdependCondition\(\"".$_."\")" ; }
                 my $myJobsVec   = join(" && ", @myJobs);
-#               $finalcmd	= "FINAL=\`$SUBcommand -J $iterateJobName -o $path2qsub -e $path2qsub -w \'$myJobsVec\' $IterateSH`";
+                $finalcmd       = "$SUBcommand -J $iterateJobName -o $path2qsub\/$iterateJobName.out -e $path2qsub\/$iterateJobName.err -w \'$myJobsVec\' $IterateSH";
         }
 
 	open $QSUB, ">>", "$QSUB" or die "Can't open '$QSUB'";
@@ -805,10 +803,12 @@ if($cleanfiles =~ "TRUE"){
 
                 #---------------------------------------------
                 # Keep track of the jobs in @myJobs
-                my $jobName     = "$myJobName$i";
+#               my $jobName     = "$myJobName$i";
+		my $jobName     = "$samples[$i]_$myJobName$i";
+
                 push(@myJobs, "$jobName");
 		if($SUBkey =~ "qsub"){  $cmd           = "$jobName=`$SUBcommand -o $path2qsub -e $path2qsub $QSUBint`";}
-#               if($SUBkey =~ "bsub"){  $cmd           = "$jobName=`$SUBcommand -o $path2qsub -e $path2qsub $QSUBint`";}
+		if($SUBkey =~ "bsub"){  $cmd           = "$SUBcommand -J $jobName -o $path2qsub\/$jobName.out -e $path2qsub\/$jobName.err $QSUBint";}
                 open $QSUB, ">>", "$QSUB" or die "Can't open '$QSUB'";
                 print $QSUB "$cmd\n";
                 close $QSUB;
@@ -834,19 +834,19 @@ if($cleanfiles =~ "TRUE"){
 	if($SUBkey =~ "qsub"){
                 foreach( @myJobs ){ $_ = "\$".$_ ; }
                 my $myJobsVec   = join(":", @myJobs);
-                $finalcmd	= "RENAME=\`$SUBcommand -N $iterateJobName2 -o $path2qsub -e $path2qsub -W depend=afterok\:$myJobsVec $QSUBintRename`";
+                $finalcmd	= "RENAME=\`$SUBcommand -N $iterateJobName2 -o $path2qsub -e $path2qsub -W depend=$QSUBdependCondition\:$myJobsVec $QSUBintRename`";
         }
 	if($SUBkey =~ "bsub"){
-                foreach( @myJobs ){ $_ = "done(\"".$_."\")" ; }
+                foreach( @myJobs ){ $_ = "$BSUBdependCondition\(\"".$_."\")" ; }
                 my $myJobsVec   = join(" && ", @myJobs);
-#               $finalcmd	= "RENAME=\`$SUBcommand -J $iterateJobName2 -o $path2qsub -e $path2qsub -w \'$myJobsVec\' $QSUBintRename`";
+                $finalcmd       = "$SUBcommand -J $iterateJobName2 -o $path2qsub\/$iterateJobName2.out -e $path2qsub\/$iterateJobName2.err -w \'$myJobsVec\' $QSUBintRename";
         }
 
 	if($SUBkey =~ "qsub"){
-                $finalcmd2	= "FINAL=\`$SUBcommand -N $iterateJobName -o $path2qsub -e $path2qsub -W depend=afterany\:\$RENAME $IterateSH`";
-        }
+                $finalcmd2	= "FINAL=\`$SUBcommand -N $iterateJobName -o $path2qsub -e $path2qsub -W depend=$QSUBdependCondition\:\$RENAME $IterateSH`";
+        }	
 	if($SUBkey =~ "bsub"){
-#               $finalcmd2	= "FINAL=\`$SUBcommand -J $iterateJobName -o $path2qsub -e $path2qsub -w done('RENAME\') $IterateSH`";
+                $finalcmd2       = "$SUBcommand -J $iterateJobName -o $path2qsub\/$iterateJobName.out -e $path2qsub\/$iterateJobName.err -w $BSUBdependCondition\(\"$iterateJobName2\") $IterateSH";
         }
 
         open $QSUB, ">>", "$QSUB" or die "Can't open '$QSUB'";
@@ -916,7 +916,7 @@ if( $granges =~ "TRUE" ){
 
                 #-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
                 #-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+          IMPORTANT CODE HERE         -+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-                my $cmd         = "Rscript $code $path2expFolder $path2bam $path2GRanges $path2CustFct &>> $path2qsub/GRanges.log";
+                my $cmd         = "Rscript $code $path2expFolder $path2bam $path2GRanges $path2CustFct $wigBinSize &>> $path2qsub/GRanges.log";
                 `echo "$cmd" >> $QSUBint`;
                 #--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--
 
@@ -925,7 +925,7 @@ if( $granges =~ "TRUE" ){
                 my $jobName     = "$myJobName$i";
                 push(@myJobs, "$jobName");
 		if($SUBkey =~ "qsub"){  $cmd           = "$jobName=`$SUBcommand -o $path2qsub -e $path2qsub $QSUBint`";}
-#               if($SUBkey =~ "bsub"){  $cmd           = "$jobName=`$SUBcommand -o $path2qsub -e $path2qsub $QSUBint`";}
+		if($SUBkey =~ "bsub"){  $cmd           = "$SUBcommand -J $jobName -o $path2qsub\/$jobName.out -e $path2qsub\/$jobName.err $QSUBint";}
                 open $QSUB, ">>", "$QSUB" or die "Can't open '$QSUB'";
                 print $QSUB "$cmd\n";
                 close $QSUB;
@@ -944,12 +944,12 @@ if( $granges =~ "TRUE" ){
 	if($SUBkey =~ "qsub"){
                 foreach( @myJobs ){ $_ = "\$".$_ ; }
                 my $myJobsVec   = join(":", @myJobs);
-                $finalcmd	= "FINAL=\`$SUBcommand -N $iterateJobName -o $path2qsub -e $path2qsub -W depend=afterok\:$myJobsVec $IterateSH`";
+                $finalcmd	= "FINAL=\`$SUBcommand -N $iterateJobName -o $path2qsub -e $path2qsub -W depend=$QSUBdependCondition\:$myJobsVec $IterateSH`";
         }
 	if($SUBkey =~ "bsub"){
-                foreach( @myJobs ){ $_ = "done(\"".$_."\")" ; }
+                foreach( @myJobs ){ $_ = "$BSUBdependCondition\(\"".$_."\")" ; }
                 my $myJobsVec   = join(" && ", @myJobs);
-#               $finalcmd	= "FINAL=\`$SUBcommand -J $iterateJobName -o $path2qsub -e $path2qsub -w \'$myJobsVec\' $IterateSH`";
+                $finalcmd       = "$SUBcommand -J $iterateJobName -o $path2qsub\/$iterateJobName.out -e $path2qsub\/$iterateJobName.err -w \'$myJobsVec\' $IterateSH";
         }
 
 	open $QSUB, ">>", "$QSUB" or die "Can't open '$QSUB'";
