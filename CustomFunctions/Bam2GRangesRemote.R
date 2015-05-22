@@ -190,12 +190,12 @@ if(myChIPrx == "TRUE"){
 			path2load <- paste(path2GRangesRX, GRangesSamplesRX[i], sep="")
 			load(path2load)
 			assign(GRangesSamplesRX[i], GRangesObj)
-			countsRX <- c(countsRX, length(get(GRangesSamplesRX[i])))
+			countsRX <- rbind(countsRX, c(GRangesSamplesRX[i], length(get(GRangesSamplesRX[i]))) )
 		}
 	}
 
 	OutputNumberOfReadsFromGRanges(GRangesSamplesRX)
-
+	countsRX <- t(t(as.numeric(countsRX[,2])))
 }
 
 
@@ -238,7 +238,7 @@ if(DoesTheFileExist(path2file=paste(paste(path2GRanges, allsamples, sep=""), ".b
 		path2load <- paste(path2GRanges, GRangesSamples[i], sep="")
 		load(path2load)
 		assign(GRangesSamples[i], GRangesObj)
-		counts <- c(counts, length(get(GRangesSamples[i])))
+		counts <- rbind(counts, c(GRangesSamples[i], length(get(GRangesSamples[i]))) )
 	}
 }
 OutputNumberOfReadsFromGRanges(GRangesSamples)
@@ -254,10 +254,10 @@ cat("   \n ---------------------------------------------------------\n", sep="")
 #------------------------------------------------------------
 # Create summary table with number of reads and scaling factor
 #
+
 NormFactRX <- round(normConstant/countsRX, 2)
 
-
-statTable <- cbind(allsamples, counts, countsRX, NormFactRX)
+statTable <- cbind(counts, countsRX, NormFactRX)
 colnames(statTable) <- c("FileName", "Counts", "CountsRX", "NormFactRX")
 
 write.table(statTable, file=path2statTable, quote=F, sep="\t", row.names=F, col.names=T)
