@@ -25,8 +25,8 @@ open(INPUT, $Targets) || die "Error opening $Targets : $!\n\n\n";
 my ($expFolder, $genome, $genomeRX, $userFolder, $path2ChIPseqScripts, $path2ChIPseq, $path2fastqgz)	= ("NA", "NA", "NA", "NA", "NA", "NA", "NA");
 my ($unzip, $qc, $chiprx, $map, $filter, $peakcalling, $cleanbigwig, $cleanfiles, $granges)		= ("FALSE", "FALSE", "FALSE", "FALSE", "FALSE", "FALSE", "FALSE", "FALSE", "FALSE");
 my (@sc, @lines2remove)											= ();
-# Find paths to different folders in the Targets.txt file
 
+# Find paths to different folders in the Targets.txt file
 while(<INPUT>) {
         if (/# My_personal_email\b/) {
                 $_ =~ m/"(.+?)"/;
@@ -121,49 +121,49 @@ my ($removepcr, $makeunique, $aligncommand1, $fdr, $posopt, $densityopt, $enforc
 my ($SUBkey, $SUBheader, $SUBdependCondition, $SUBcommand)					= ("NA", "NA", "NA", "NA");
 
 while(<INPUT>) {
-	if (/# Ressource_manager/) {
+	if (/# Ressource_manager\b/) {
                 $_ =~ m/"(.+?)"/;
                 if (grep /\bqsub/i, $_ )        { $SUBkey = "qsub"; $SUBheader	= "QSUB_header.sh";	$SUBdependCondition = "afterok";	}
                 if (grep /\bbsub/i, $_ )        { $SUBkey = "bsub"; $SUBheader	= "BSUB_header.sh";	$SUBdependCondition = "done";		}
                 $SUBcommand = "$1";
         }
-	if (/# Unzip_comand/) {
+	if (/# Unzip_comand\b/) {
                 $_ =~ m/"(.+?)"/;
                 $unzipCommand = "$1";
         }
-        elsif (/# Zip_file_extension/) {
+        elsif (/# Zip_file_extension\b/) {
                 $_ =~ m/"(.+?)"/;
                 $zipExtension = "$1";
 	}
-        elsif (/# Align_command_line_1/) {
+        elsif (/# Align_command_line_1\b/) {
                 $_ =~ m/"(.+?)"/;
                 $aligncommand1 = "$1";
 	}
-        elsif (/# Filter_removePCRdup/) {
+        elsif (/# Filter_removePCRdup\b/) {
                 $_ =~ m/"(.+?)"/;
                 $removepcr = "$1";
 	}
-        elsif (/# Filter_makeUniqueRead/) {
+        elsif (/# Filter_makeUniqueRead\b/) {
                 $_ =~ m/"(.+?)"/;
                 $makeunique = "$1";
         }
-        elsif (/# PeakCaller_fdr/) {
+        elsif (/# PeakCaller_fdr\b/) {
                 $_ =~ m/"(.+?)"/;
                 $fdr = "$1";
         }
-        elsif (/# PeakCaller_posopt/) {
+        elsif (/# PeakCaller_posopt\b/) {
                 $_ =~ m/"(.+?)"/;
                 $posopt = "$1";
         }
-        elsif (/# PeakCaller_densityopt/) {
+        elsif (/# PeakCaller_densityopt\b/) {
                 $_ =~ m/"(.+?)"/;
                 $densityopt = "$1";
         }
-        elsif (/# PeakCaller_enfSize/) {
+        elsif (/# PeakCaller_enfSize\b/) {
                 $_ =~ m/"(.+?)"/;
                 $enforceisize = "$1";
         }
-	elsif (/# Wigfile_binSize/) {
+	elsif (/# Wigfile_binSize\b/) {
                 $_ =~ m/"(.+?)"/;
                 $wigBinSize = "$1";
         }
@@ -220,27 +220,43 @@ foreach $line (@Targets4) {
 # Remove samples that have "_R2" as these are the paired lanes of "_R1"
 my @samplesPE;
 my @samplesNoPE;
+my @inputsPE;
+my @inputsNoPE;
+my @samplesInputsPE;
 my @samples2unzip = @samples;
+
 if( $PE ){
 	print "\nPE experiment. \n";
         foreach my $i (0 .. $#samples) {
                 if ( grep /\_R2$/, $samples[$i] ){
-#                        print "\t '_R2' sample found. \t ($samples[$i]) \n";
+                        #print "\t '_R2' sample found. \t ($samples[$i]) \n";
                         push(@samplesPE, $samples[$i]);
                 }
                 else{
-#                       print "\t Main sample found.  \t ($samples[$i]) \n";
+                       #print "\t Main sample found.  \t ($samples[$i]) \n";
                         push(@samplesNoPE, $samples[$i]);
                 }
         }
 	@samples = @samplesNoPE;
+	@samplesInputsPE = @samplesPE;
+
+	foreach my $i (0 .. $#inputs) {
+                if ( grep /\_R2$/, $inputs[$i] ){
+                        push(@inputsPE, $inputs[$i]);
+                }
+                else{
+                        push(@inputsNoPE, $inputs[$i]);
+                }
+        }
+	@inputs = @inputsNoPE;
+	push(@samplesInputsPE, @inputsPE)
 }
 
 #print "\n\n\norisamples:   @orisamples\n";
-print "samples2unzip:   @samples2unzip\n";
-print "samples: \t @samples\n";
+#print "samples2unzip:   @samples2unzip\n";
+#print "samples: \t @samples\n";
 #print "samplesNoPE: \t @samplesNoPE\n";
-print "samplesPE: \t @samplesPE\n";
+#print "samplesPE: \t @samplesPE\n";
 
 @samplesInputs  = @samples;
 push (@samplesInputs, @inputs);
@@ -520,7 +536,7 @@ if( $qc =~ "TRUE" ) {
                 my $jobName     = "$myJobName$i";
                 push(@myJobs, $jobName);
 		if($SUBkey =~ "qsub"){  $cmd	= "$jobName=`$SUBcommand -o $path2qsub -e $path2qsub $QSUBint`";}
-		if($SUBkey =~ "bsub"){  $cmd    = "`$SUBcommand -J $jobName -o $path2qsub\/$jobName.out -e $path2qsub\/$jobName.err $QSUBint`";}
+		if($SUBkey =~ "bsub"){  $cmd    = "$SUBcommand -J $jobName -o $path2qsub\/$jobName.out -e $path2qsub\/$jobName.err $QSUBint";}
 		open $QSUB, ">>", "$QSUB" or die "Can't open '$QSUB'";
                 print $QSUB "$cmd\n";
                 close $QSUB;
@@ -621,9 +637,9 @@ if( $chiprx =~ "TRUE" ){
                         #-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+          IMPORTANT CODE HERE         -+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
                         my $cmd         = "$aligncommand1 $refGenomeRX $path2fastq/$samplesInputs[$i]\.fastq > $path2currentSampleDir/$samplesInputs[$i]\.sai";
                         `echo "$cmd" >> $QSUBint`;
-                        $cmd            = "$aligncommand1 $refGenomeRX $path2fastq/$samplesInputs[$i]\.fastq > $path2currentSampleDir/$samplesPE[$i]\.sai";
+                        $cmd            = "$aligncommand1 $refGenomeRX $path2fastq/$samplesInputsPE[$i]\.fastq > $path2currentSampleDir/$samplesInputsPE[$i]\.sai";
                         `echo "$cmd" >> $QSUBint`;
-                        $cmd            = "bwa sampe $refGenomeRX $path2currentSampleDir/$samplesInputs[$i]\.sai $path2currentSampleDir/$samplesPE[$i]\.sai $path2fastq/$samplesInputs[$i]\_1.fastq $path2fastq/$samplesPE[$i]\.fastq > $path2currentSampleDir/$samplesInputs[$i]\.sam";
+                        $cmd            = "bwa sampe $refGenomeRX $path2currentSampleDir/$samplesInputs[$i]\.sai $path2currentSampleDir/$samplesInputsPE[$i]\.sai $path2fastq/$samplesInputs[$i]\_1.fastq $path2fastq/$samplesInputsPE[$i]\.fastq > $path2currentSampleDir/$samplesInputs[$i]\.sam";
                         `echo "$cmd" >> $QSUBint`;
 			# Uniquely mapped reads
                         $cmd         = "grep -E '\\sX0:i:1\\s' $path2currentSampleDir/$samplesInputs[$i]\.sam > $path2currentSampleDir/$samplesInputs[$i]\.u.sam";
@@ -756,9 +772,9 @@ if( $map =~ "TRUE" ){
 			#-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+          IMPORTANT CODE HERE         -+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 			my $cmd		= "$aligncommand1 $refGenome $path2fastq/$samplesInputs[$i]\.fastq > $path2currentSampleDir/$samplesInputs[$i]\.sai";
 			`echo "$cmd" >> $QSUBint`;
-			$cmd		= "$aligncommand1 $refGenome $path2fastq/$samplesPE[$i]\.fastq > $path2currentSampleDir/$samplesPE[$i]\.sai";
+			$cmd		= "$aligncommand1 $refGenome $path2fastq/$samplesInputsPE[$i]\.fastq > $path2currentSampleDir/$samplesInputsPE[$i]\.sai";
 			`echo "$cmd" >> $QSUBint`;
-			$cmd		= "bwa sampe $refGenome $path2currentSampleDir/$samplesInputs[$i]\.sai $path2currentSampleDir/$samplesPE[$i]\.sai $path2fastq/$samplesInputs[$i]\.fastq $path2fastq/$samplesPE[$i]\.fastq > $path2currentSampleDir/$samplesInputs[$i]\.sam";
+			$cmd		= "bwa sampe $refGenome $path2currentSampleDir/$samplesInputs[$i]\.sai $path2currentSampleDir/$samplesInputsPE[$i]\.sai $path2fastq/$samplesInputs[$i]\.fastq $path2fastq/$samplesInputsPE[$i]\.fastq > $path2currentSampleDir/$samplesInputs[$i]\.sam";
 			`echo "$cmd" >> $QSUBint`;
 			#--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--
 
@@ -1443,14 +1459,4 @@ if( $granges =~ "TRUE" ){
         print $QSUB "$finalcmd\n";
         close $QSUB;
 
-        #*----------------------------------------------------------------------*
-        # Submit jobs to run
-
-        print "\n\n--------------------------------------------------------------------------------------------------\n";
-	print "\n Submitting job to $SUBkey cluster: \t `sh $QSUB` \n";
-        `sh $QSUB`;
-
-        #*----------------------------------------------------------------------*
-        # Exit script
-
-	#*---------------------------------------------------------------------                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      
+        #*---------------                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              

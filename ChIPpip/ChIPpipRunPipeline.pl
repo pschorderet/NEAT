@@ -222,11 +222,11 @@ if( $PE ){
 	print "\nPE experiment. \n";
         foreach my $i (0 .. $#samples) {
                 if ( grep /\_R2$/, $samples[$i] ){
-                        print "\t $i\. '_R2' sample found. \t ($samples[$i]) \n";
+                        # print "\t $i\. '_R2' sample found. \t ($samples[$i]) \n";
                         push(@samplesPE, $samples[$i]);
                 }
                 else{
-                     	print "\t $i\. Main sample found.  \t ($samples[$i]) \n";
+                     	# print "\t $i\. Main sample found.  \t ($samples[$i]) \n";
                         push(@samplesNoPE, $samples[$i]);
                 }
         }

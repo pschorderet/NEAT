@@ -124,7 +124,7 @@ while(<INPUT>) {
                 $_ =~ m/"(.+?)"/;
                 $ndiff = "$1";
         }
-	elsif (/# Align_command_opt/) {
+	elsif (/# Align_command_line_1/) {
                 $_ =~ m/"(.+?)"/;
                 $aligncommand = "$1";
         }
@@ -174,11 +174,11 @@ if( $PE ){
 	print "\nPE experiment. \n";
 	foreach my $i (0 .. $#samples) {
         	if ( grep /\_R2$/, $samples[$i] ){ 	
-			print "\t $i\. '_R2' sample found. \t ($samples[$i]) \n";
+			# print "\t $i\. '_R2' sample found. \t ($samples[$i]) \n";
 			push(@samplesPE, $samples[$i]);
 		}
 		else{	
-			print "\t $i\. Main sample found.  \t ($samples[$i]) \n";
+			# print "\t $i\. Main sample found.  \t ($samples[$i]) \n";
 			push(@samplesNoPE, $samples[$i]);
 		}
 	}
@@ -234,7 +234,7 @@ print "\n";
 print "\n .........................................";
 print "\n Performing following modules:";
 print "\n .........................................";
-print "\n unzip:\t\t\t $unzip \t ($unzipCommand filename.fastq$zipExtension)";
+print "\n unzip:\t\t\t $unzip \t ($unzipCommand *filename*$zipExtension)";
 print "\n qc:\t\t\t $qc";
 print "\n map:\t\t\t $map";
 print "\n filter:\t\t $filter";

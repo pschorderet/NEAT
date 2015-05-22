@@ -24,57 +24,57 @@ open(INPUT, $Targets) || die "Error opening $Targets : $!\n\n\n";
 
 my ($expFolder, $genome, $userFolder, $path2RNAseqScripts, $path2RNAseq, $path2fastqgz, $chrlens, $path2gtfFile)                                = ("NA", "NA", "NA", "NA", "NA", "NA", "NA", "NA");
 my ($unzip, $qc, $map, $filter, $cleanfiles, $granges)                                                                                          = ("FALSE", "FALSE", "FALSE", "FALSE", "FALSE", "FALSE");
-
 my (@sc, @lines2remove)                                                                                                                         = ();
+
 # Find paths to different folders in the Targets.txt file
 while(<INPUT>) {
-        if (/# My_personal_email/) {
+        if (/# My_personal_email\b/) {
                 $_ =~ m/"(.+?)"/;
                 $email = "$1";
         }
-	elsif (/# My_project_title/) {
+	elsif (/# My_project_title\b/) {
                 $_ =~ m/"(.+?)"/;
                 $expFolder = "$1";
         }
-	elsif (/# Reference_genome/) {
+	elsif (/# Reference_genome\b/) {
                 $_ =~ m/"(.+?)"/;
                 $genome = "$1";
         }
-	elsif (/# Remote_path_to_proj/) {
+	elsif (/# Remote_path_to_proj\b/) {
                 $_ =~ m/"(.+?)"/;
                 $userFolder = "$1";
         }
-	elsif (/# Remote_path_to_NEAT/) {
+	elsif (/# Remote_path_to_NEAT\b/) {
                 $_ =~ m/"(.+?)"/;
             	$path2NEAT = "$1";
 		$path2RNAseq = "$1\/RNApip";
                 $path2RNAseqScripts = join("", $path2RNAseq, "/scripts");
         }
-	elsif (/# Remote_path_to_orifastq_gz/) {
+	elsif (/# Remote_path_to_orifastq_gz\b/) {
                 $_ =~ m/"(.+?)"/;
                 $path2fastqgz = "$1";
         }
-	elsif (/# Remote_path_to_chrLens_dat/) {
+	elsif (/# Remote_path_to_chrLens_dat\b/) {
                 $_ =~ m/"(.+?)"/;
                 $chrlens = "$1";
         }
-	elsif (/# Remote_path_to_RefGen_fasta/) {
+	elsif (/# Remote_path_to_RefGen_fasta\b/) {
                 $_ =~ m/"(.+?)"/;
                 $refGenome = "$1";
         }
-	elsif (/# Remote_path_to_ann_gtf_file/) {
+	elsif (/# Remote_path_to_ann_gtf_file\b/) {
                 $_ =~ m/"(.+?)"/;
                 $path2gtfFile = "$1";
         }
-	elsif (/# Aligner_algo_short/) {
+	elsif (/# Aligner_algo_short\b/) {
                 $_ =~ m/"(.+?)"/;
                 $aligner = "$1";
         }
-	elsif (/# Paired_end_seq_run/) {
+	elsif (/# Paired_end_seq_run\b/) {
                 $_ =~ m/"(.+?)"/;
                 $PE = "$1";
         }
-	elsif (/# Steps_to_execute_pipe/) {
+	elsif (/# Steps_to_execute_pipe\b/) {
                 $_ =~ m/"(.+?)"/;
                 @steps2execute = ();
                 if (grep /\bunzip\b/i, $_ )             { $unzip                = "TRUE"; push @steps2execute, "Unzip";         }
@@ -97,32 +97,36 @@ my ($removepcr, $makeunique, $aligncommand)                             = ("NA",
 my ($SUBkey, $SUBheader, $SUBdependCondition, $SUBcommand)		= ("NA", "NA", "NA", "NA");
 
 while(<INPUT>) {
-	if (/# Ressource_manager/) {
+	if (/# Ressource_manager\b/) {
                 $_ =~ m/"(.+?)"/;
 		if (grep /\bqsub/i, $_ )        { $SUBkey = "qsub"; $SUBheader  = "QSUB_header.sh";     $QSUBdependCondition = "afterok";    }
                 if (grep /\bbsub/i, $_ )        { $SUBkey = "bsub"; $SUBheader  = "BSUB_header.sh";     $BSUBdependCondition = "ended";      }
                 $SUBcommand = "$1";
         }
-	if (/# Unzip_comand/) {
+	if (/# Unzip_comand\b/) {
                 $_ =~ m/"(.+?)"/;
                 $unzipCommand = "$1";
         }
-	elsif (/# Zip_file_extension/) {
+	elsif (/# Zip_file_extension\b/) {
                 $_ =~ m/"(.+?)"/;
                 $zipExtension = "$1";
         }
-        elsif (/# Filter_removePCRdup/) {
+        elsif (/# Filter_removePCRdup\b/) {
                 $_ =~ m/"(.+?)"/;
                 $removepcr = "$1";
         }
-	elsif (/# Filter_makeUniqueRead/) {
+	elsif (/# Filter_makeUniqueRead\b/) {
                 $_ =~ m/"(.+?)"/;
                 $makeunique = "$1";
         }
-        elsif (/# Align_command.opt/) {
+        elsif (/# Align_command_line_1\b/) {
                 $_ =~ m/"(.+?)"/;
                 $aligncommand = "$1";
         }
+	elsif (/# Wigfile_binSize\b/) {
+                $_ =~ m/"(.+?)"/;
+                $wigBinSize = "$1";
+        }	
 
 } # end of AdvancedSettings.txt
 
@@ -162,11 +166,11 @@ if( $PE ){
 	print "\nPE experiment. \n";
         foreach my $i (0 .. $#samples) {
                 if ( grep /\_R2$/, $samples[$i] ){
-#                        print "\t '_R2' sample found. \t ($samples[$i]) \n";
+                        # print "\t '_R2' sample found. \t ($samples[$i]) \n";
                         push(@samplesPE, $samples[$i]);
                 }
                 else{
-#                     	print "\t Main sample found.  \t ($samples[$i]) \n";
+                     	# print "\t Main sample found.  \t ($samples[$i]) \n";
                         push(@samplesNoPE, $samples[$i]);
                 }
         }
@@ -221,7 +225,7 @@ print "\n";
 print "\n .........................................";
 print "\n Performing following modules:";
 print "\n .........................................";
-print "\n unzip:\t\t\t $unzip \t ($unzipCommand filename.fastq$zipExtension)";
+print "\n unzip:\t\t\t $unzip \t ($unzipCommand *filename*$zipExtension)";
 print "\n qc:\t\t\t $qc";
 print "\n map:\t\t\t $map";
 print "\n filter:\t\t $filter";
@@ -313,7 +317,7 @@ if( $unzip =~ "TRUE" ){
 		my $QSUBint  = "$tmpscr/$myJobName/$samples2unzip[$i]\_$myJobName\.sh";
 		`cp $scrhead $QSUBint`;
 
-		my $cmd         = "$unzipCommand $path2fastqgz/$orisamples[$i]\.fastq\$zipExtension > $path2fastq/$samples2unzip[$i]\.fastq";
+		my $cmd         = "$unzipCommand $path2fastqgz/$orisamples[$i]$zipExtension > $path2fastq/$samples2unzip[$i]\.fastq";
 		`echo "$cmd" >> $QSUBint`;
 		
 		#---------------------------------------------
@@ -322,8 +326,8 @@ if( $unzip =~ "TRUE" ){
 		my $jobName     = "$samples2unzip[$i]_$myJobName$i";
 
 		push(@myJobs, $jobName);
-		if($SUBkey =~ "qsub"){  $cmd            = "$jobName=`$SUBcommand -o $path2qsub -e $path2qsub $QSUBint`";}
-		if($SUBkey =~ "bsub"){  $cmd		= "$SUBcommand -J $jobName -o $path2qsub\/$jobName.out -e $path2qsub\/$jobName.err $QSUBint";} 
+		if($SUBkey =~ "qsub"){  $cmd	= "$jobName=`$SUBcommand -o $path2qsub -e $path2qsub $QSUBint`";}
+		if($SUBkey =~ "bsub"){  $cmd	= "$SUBcommand -J $jobName -o $path2qsub\/$jobName.out -e $path2qsub\/$jobName.err $QSUBint";} 
 		open $QSUB, ">>", "$QSUB" or die "Can't open '$QSUB'";
 		print $QSUB "$cmd\n";
 		close $QSUB;     
@@ -347,7 +351,7 @@ if( $unzip =~ "TRUE" ){
 	if($SUBkey =~ "bsub"){
                 foreach( @myJobs ){ $_ = "$BSUBdependCondition\(\"".$_."\")" ; }
                 my $myJobsVec   = join(" && ", @myJobs);
-                $finalcmd       = "\$SUBcommand -J $iterateJobName -o $path2qsub\/$iterateJobName.out -e $path2qsub\/$iterateJobName.err -w \'$myJobsVec\' $IterateSH";
+                $finalcmd       = "$SUBcommand -J $iterateJobName -o $path2qsub\/$iterateJobName.out -e $path2qsub\/$iterateJobName.err -w \'$myJobsVec\' $IterateSH";
         }	
 	open $QSUB, ">>", "$QSUB" or die "Can't open '$QSUB'";
 	print $QSUB "$finalcmd\n";
@@ -527,7 +531,7 @@ if( $map =~ "TRUE" ){
 			#-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+          IMPORTANT CODE HERE         -+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
 			# Lane 2 of sample i should be named the same except having a '_R2' instead od a '_R1'
-			$cmd		= "$aligncommand $path2gtfFile -o $path2Tophat/$samples[$i] $refGenome/$genome $path2fastq/$samples[$i].fastq $path2fastq/$samplesPE[$i].fastq";
+			$cmd		= "$aligncommand $path2gtfFile -o $path2Tophat/$samples[$i] $path2Tophat/$samplesPE[$i] $refGenome/$genome $path2fastq/$samples[$i].fastq $path2fastq/$samplesPE[$i].fastq";
 			`echo "$cmd" >> $QSUBint`;
 			#--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--			
 
@@ -597,7 +601,7 @@ if( $map =~ "TRUE" ){
 	if($SUBkey =~ "bsub"){
                 foreach( @myJobs ){ $_ = "$BSUBdependCondition\(\"".$_."\")" ; }
                 my $myJobsVec   = join(" && ", @myJobs);
-                $finalcmd       = "\$SUBcommand -J $iterateJobName -o $path2qsub\/$iterateJobName.out -e $path2qsub\/$iterateJobName.err -w \'$myJobsVec\' $IterateSH";
+                $finalcmd       = "$SUBcommand -J $iterateJobName -o $path2qsub\/$iterateJobName.out -e $path2qsub\/$iterateJobName.err -w \'$myJobsVec\' $IterateSH";
         }
 	open $QSUB, ">>", "$QSUB" or die "Can't open '$QSUB'";
 	print $QSUB "$finalcmd\n";
