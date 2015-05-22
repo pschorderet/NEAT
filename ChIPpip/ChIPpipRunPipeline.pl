@@ -238,9 +238,9 @@ if( $PE ){
 #print "\n\n\norisamples:   @orisamples\n";
 #print "samples2unzip:   @samples2unzip\n";
 #print "samples: \t @samples\n";
+#print "inputs: \t @inputs\n";
 #print "samplesNoPE: \t @samplesNoPE\n";
 #print "samplesPE: \t @samplesPE\n";
-
 
 #*----------------------------------------------------------------------*
 # Define paths
@@ -287,7 +287,7 @@ print "\n";
 print "\n .........................................";
 print "\n Performing following modules:";
 print "\n .........................................";
-print "\n unzip:\t\t\t $unzip \t ($unzipCommand filename.fastq$zipExtension)";
+print "\n unzip:\t\t\t $unzip \t ($unzipCommand *filename*$zipExtension)";
 print "\n qc:\t\t\t $qc";
 print "\n chiprx:\t\t $chiprx";
 print "\n map:\t\t\t $map";
