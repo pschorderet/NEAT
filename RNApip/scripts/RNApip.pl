@@ -103,7 +103,7 @@ while(<INPUT>) {
                 if (grep /\bbsub/i, $_ )        { $SUBkey = "bsub"; $SUBheader  = "BSUB_header.sh";     $BSUBdependCondition = "ended";      }
                 $SUBcommand = "$1";
         }
-	if (/# Unzip_comand\b/) {
+	elsif (/# Unzip_comand\b/) {
                 $_ =~ m/"(.+?)"/;
                 $unzipCommand = "$1";
         }
