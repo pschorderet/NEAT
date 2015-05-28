@@ -76,7 +76,9 @@ while(<INPUT>) {
         }
 	elsif (/# Aligner_algo_short\b/) {
                 $_ =~ m/"(.+?)"/;
-                $aligner = "$1";
+		if (grep /\bbwa\b/i, $_ )	{ $aligner	= "BWA"; }
+		if (grep /\bbowtie\b/i, $_ )	{ $aligner      = "BOWTIE"; }
+		if (grep /\bbowtie2\b/i, $_ )	{ $aligner      = "BOWTIE"; }
         }
 	elsif (/# Paired_end_seq_run\b/) {
                 $_ =~ m/"(.+?)"/;
@@ -127,7 +129,7 @@ while(<INPUT>) {
                 if (grep /\bbsub/i, $_ )        { $SUBkey = "bsub"; $SUBheader	= "BSUB_header.sh";	$SUBdependCondition = "done";		}
                 $SUBcommand = "$1";
         }
-	if (/# Unzip_comand\b/) {
+	elsif (/# Unzip_comand/) {
                 $_ =~ m/"(.+?)"/;
                 $unzipCommand = "$1";
         }
@@ -302,6 +304,7 @@ if($chiprx =~ "TRUE"){
         print "\n\t - refGenomeRX:\t $refGenomeRX";
 }
 print "\n";
+print "\n Unzip command:\t\t $unzipCommand";
 print "\n Paired end sequencing:\t $PE";
 print "\n Aligner algorithm:\t $aligner";
 print "\n Remove pcr dupl:\t $removepcr";
@@ -315,10 +318,10 @@ print "\n Performing following modules:";
 print "\n .........................................";
 print "\n unzip:\t\t\t $unzip \t ($unzipCommand *filename*$zipExtension)";
 print "\n qc:\t\t\t $qc";
-print "\n chiprx:\t\t $chiprx";
-print "\n map:\t\t\t $map";
+print "\n chiprx:\t\t $chiprx \t ($genomeRX)";
+print "\n map:\t\t\t $map \t ($genome) ($aligncommand1)";
 print "\n filter:\t\t $filter";
-print "\n peakcalling:\t\t $peakcalling";
+print "\n peakcalling:\t\t $peakcalling \t ($peakcaller)";
 print "\n cleanbigwig:\t\t $cleanbigwig \t (remove: @lines2remove)";
 print "\n cleanfiles:\t\t $cleanfiles";
 print "\n granges:\t\t $granges";
@@ -401,14 +404,14 @@ if( $unzip =~ "TRUE" ){
 
 		#-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
                 #-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+          IMPORTANT CODE HERE         -+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-		$cmd		= "$unzipCommand $path2fastqgz/$orisamples[$i]$zipExtension > $path2fastq/$samples2unzip[$i]\.fastq";
+		$cmd		= "gunzip -c $path2fastqgz/$orisamples[$i]$zipExtension > $path2fastq/$samples2unzip[$i]\.fastq";
 		`echo "$cmd" >> $QSUBint`;
 		#--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--
-
+		
 		#---------------------------------------------
 		# Keep track of the jobs in @myJobs
-#		my $jobName	= "Sample_$myJobName$i";
-		my $jobName     = "$samples2unzip[$i]_$myJobName$i";
+		my $jobName	= "Sample_$myJobName$i";
+#		my $jobName     = "$samples2unzip[$i]_$myJobName$i";
 		push(@myJobs, $jobName);
 		if($SUBkey =~ "qsub"){	$cmd	= "$jobName=`$SUBcommand -o $path2qsub -e $path2qsub $QSUBint`";}
 		if($SUBkey =~ "bsub"){  $cmd	= "$SUBcommand -J $jobName -o $path2qsub\/$jobName.out -e $path2qsub\/$jobName.err $QSUBint";}
@@ -433,8 +436,8 @@ if( $unzip =~ "TRUE" ){
 
 		#---------------------------------------------
 		# Keep track of the jobs in @myJobs
-#		my $jobName     = "Inp_$myJobName$i";
-		my $jobName     = "$inputs[$i]_$myJobName$i";
+		my $jobName     = "Inp_$myJobName$i";
+#		my $jobName     = "$inputs[$i]_$myJobName$i";
 		push(@myJobs, $jobName);
 		if($SUBkey =~ "qsub"){	$cmd	= "$jobName=`$SUBcommand -o $path2qsub -e $path2qsub $QSUBint`";}
 		if($SUBkey =~ "bsub"){  $cmd	= "$SUBcommand -J $jobName -o $path2qsub\/$jobName.out -e $path2qsub\/$jobName.err $QSUBint";}
@@ -632,39 +635,42 @@ if( $chiprx =~ "TRUE" ){
 
 
                 if( $PE ) {
-
-                        #-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-                        #-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+          IMPORTANT CODE HERE         -+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-                        my $cmd         = "$aligncommand1 $refGenomeRX $path2fastq/$samplesInputs[$i]\.fastq > $path2currentSampleDir/$samplesInputs[$i]\.sai";
-                        `echo "$cmd" >> $QSUBint`;
-                        $cmd            = "$aligncommand1 $refGenomeRX $path2fastq/$samplesInputsPE[$i]\.fastq > $path2currentSampleDir/$samplesInputsPE[$i]\.sai";
-                        `echo "$cmd" >> $QSUBint`;
-                        $cmd            = "bwa sampe $refGenomeRX $path2currentSampleDir/$samplesInputs[$i]\.sai $path2currentSampleDir/$samplesInputsPE[$i]\.sai $path2fastq/$samplesInputs[$i]\_1.fastq $path2fastq/$samplesInputsPE[$i]\.fastq > $path2currentSampleDir/$samplesInputs[$i]\.sam";
-                        `echo "$cmd" >> $QSUBint`;
-			# Uniquely mapped reads
-                        $cmd         = "grep -E '\\sX0:i:1\\s' $path2currentSampleDir/$samplesInputs[$i]\.sam > $path2currentSampleDir/$samplesInputs[$i]\.u.sam";
-                        `echo "$cmd" >> $QSUBint`;
-                        # sam to bam
-                        $cmd            = "samtools view -b $path2currentSampleDir/$samplesInputs[$i]\.u.sam -T $refGenomeRX -o $path2currentSampleDir/$samplesInputs[$i]\.bam";
-                        `echo "$cmd" >> $QSUBint`;
-                        #--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--
+			
+			if($aligner =~ "BWA"){
+                        	#-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+                        	#-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+          IMPORTANT CODE HERE         -+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+                        	my $cmd         = "$aligncommand1 $refGenomeRX $path2fastq/$samplesInputs[$i]\.fastq > $path2currentSampleDir/$samplesInputs[$i]\.sai";
+                        	`echo "$cmd" >> $QSUBint`;
+                	        $cmd            = "$aligncommand1 $refGenomeRX $path2fastq/$samplesInputsPE[$i]\.fastq > $path2currentSampleDir/$samplesInputsPE[$i]\.sai";
+        	                `echo "$cmd" >> $QSUBint`;
+	                        $cmd            = "bwa sampe $refGenomeRX $path2currentSampleDir/$samplesInputs[$i]\.sai $path2currentSampleDir/$samplesInputsPE[$i]\.sai $path2fastq/$samplesInputs[$i]\_1.fastq $path2fastq/$samplesInputsPE[$i]\.fastq > $path2currentSampleDir/$samplesInputs[$i]\.sam";
+	                        `echo "$cmd" >> $QSUBint`;
+				# Uniquely mapped reads
+                	        $cmd         = "grep -E '\\sX0:i:1\\s' $path2currentSampleDir/$samplesInputs[$i]\.sam > $path2currentSampleDir/$samplesInputs[$i]\.u.sam";
+                        	`echo "$cmd" >> $QSUBint`;
+                        	# sam to bam
+                	        $cmd            = "samtools view -b $path2currentSampleDir/$samplesInputs[$i]\.u.sam -T $refGenomeRX -o $path2currentSampleDir/$samplesInputs[$i]\.bam";
+        	                `echo "$cmd" >> $QSUBint`;
+	                        #--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--
+			}
 
                 } else {
-
-                        #-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-                        #-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+          IMPORTANT CODE HERE         -+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-                        my $cmd         = "$aligncommand1 $refGenomeRX $path2fastq/$samplesInputs[$i]\.fastq > $path2currentSampleDir/$samplesInputs[$i]\.sai";
-                        `echo "$cmd" >> $QSUBint`;
-                        my $cmd2        = "`bwa samse $refGenomeRX $path2currentSampleDir/$samplesInputs[$i]\.sai $path2fastq/$samplesInputs[$i]\.fastq > $path2currentSampleDir/$samplesInputs[$i]\.sam`";
-                        `echo "$cmd2" >> $QSUBint`;
-			# Uniquely mapped reads
-			$cmd         = "`grep -E '\\sX0:i:1\\s' $path2currentSampleDir/$samplesInputs[$i]\.sam > $path2currentSampleDir/$samplesInputs[$i]\.u.sam`";
-                        `echo "$cmd" >> $QSUBint`;
-			# sam to bam
-                	$cmd		= "`samtools view -b $path2currentSampleDir/$samplesInputs[$i]\.u.sam -T $refGenomeRX -o $path2currentSampleDir/$samplesInputs[$i]\.bam`";
-                	`echo "$cmd" >> $QSUBint`;
-                        #--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--
-
+			
+			if($aligner =~ "BWA"){			
+                        	#-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+                        	#-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+          IMPORTANT CODE HERE         -+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+                        	my $cmd         = "$aligncommand1 $refGenomeRX $path2fastq/$samplesInputs[$i]\.fastq > $path2currentSampleDir/$samplesInputs[$i]\.sai";
+                        	`echo "$cmd" >> $QSUBint`;
+                        	my $cmd2        = "`bwa samse $refGenomeRX $path2currentSampleDir/$samplesInputs[$i]\.sai $path2fastq/$samplesInputs[$i]\.fastq > $path2currentSampleDir/$samplesInputs[$i]\.sam`";
+                        	`echo "$cmd2" >> $QSUBint`;
+				# Uniquely mapped reads
+				$cmd         = "`grep -E '\\sX0:i:1\\s' $path2currentSampleDir/$samplesInputs[$i]\.sam > $path2currentSampleDir/$samplesInputs[$i]\.u.sam`";
+                        	`echo "$cmd" >> $QSUBint`;
+				# sam to bam
+                		$cmd		= "`samtools view -b $path2currentSampleDir/$samplesInputs[$i]\.u.sam -T $refGenomeRX -o $path2currentSampleDir/$samplesInputs[$i]\.bam`";
+                		`echo "$cmd" >> $QSUBint`;
+                        	#--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--
+			}
                 }
 
                 #---------------------------------------------
@@ -767,26 +773,51 @@ if( $map =~ "TRUE" ){
 
 
 		if( $PE ) {
-			
-			#-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-			#-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+          IMPORTANT CODE HERE         -+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-			my $cmd		= "$aligncommand1 $refGenome $path2fastq/$samplesInputs[$i]\.fastq > $path2currentSampleDir/$samplesInputs[$i]\.sai";
-			`echo "$cmd" >> $QSUBint`;
-			$cmd		= "$aligncommand1 $refGenome $path2fastq/$samplesInputsPE[$i]\.fastq > $path2currentSampleDir/$samplesInputsPE[$i]\.sai";
-			`echo "$cmd" >> $QSUBint`;
-			$cmd		= "bwa sampe $refGenome $path2currentSampleDir/$samplesInputs[$i]\.sai $path2currentSampleDir/$samplesInputsPE[$i]\.sai $path2fastq/$samplesInputs[$i]\.fastq $path2fastq/$samplesInputsPE[$i]\.fastq > $path2currentSampleDir/$samplesInputs[$i]\.sam";
-			`echo "$cmd" >> $QSUBint`;
-			#--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--
+
+			if($aligner =~ "BWA"){
+
+				#-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+				#-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+          IMPORTANT CODE HERE         -+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+				my $cmd		= "$aligncommand1 $refGenome $path2fastq/$samplesInputs[$i]\.fastq > $path2currentSampleDir/$samplesInputs[$i]\.sai";
+				`echo "$cmd" >> $QSUBint`;
+				$cmd		= "$aligncommand1 $refGenome $path2fastq/$samplesInputsPE[$i]\.fastq > $path2currentSampleDir/$samplesInputsPE[$i]\.sai";
+				`echo "$cmd" >> $QSUBint`;
+				$cmd		= "bwa sampe $refGenome $path2currentSampleDir/$samplesInputs[$i]\.sai $path2currentSampleDir/$samplesInputsPE[$i]\.sai $path2fastq/$samplesInputs[$i]\.fastq $path2fastq/$samplesInputsPE[$i]\.fastq > $path2currentSampleDir/$samplesInputs[$i]\.sam";
+				`echo "$cmd" >> $QSUBint`;
+				#--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--
+			}
+
+			if($aligner =~ "BOWTIE"){
+
+				#-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+                                #-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+          IMPORTANT CODE HERE         -+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+				my $cmd         = "$aligncommand1 $refGenome -1 $path2fastq/$samplesInputs[$i]\.fastq -2 $path2fastq/$samplesInputsPE[$i]\.fastq -S $path2currentSampleDir/$samplesInputs[$i]\.sam";
+                                `echo "$cmd" >> $QSUBint`;
+                                #--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--
+
+			}
 
 		} else {
 
-			#-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-			#-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+          IMPORTANT CODE HERE         -+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-			my $cmd		= "$aligncommand1 $refGenome $path2fastq/$samplesInputs[$i]\.fastq > $path2currentSampleDir/$samplesInputs[$i]\.sai";
-			`echo "$cmd" >> $QSUBint`;
-			my $cmd2	= "bwa samse $refGenome $path2currentSampleDir/$samplesInputs[$i]\.sai $path2fastq/$samplesInputs[$i]\.fastq > $path2currentSampleDir/$samplesInputs[$i]\.sam";
-			`echo "$cmd2" >> $QSUBint`;
-			#--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--
+			if($aligner =~ "BWA"){
+				#-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+				#-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+          IMPORTANT CODE HERE         -+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+				my $cmd		= "$aligncommand1 $refGenome $path2fastq/$samplesInputs[$i]\.fastq > $path2currentSampleDir/$samplesInputs[$i]\.sai";
+				`echo "$cmd" >> $QSUBint`;
+				my $cmd2	= "bwa samse $refGenome $path2currentSampleDir/$samplesInputs[$i]\.sai $path2fastq/$samplesInputs[$i]\.fastq > $path2currentSampleDir/$samplesInputs[$i]\.sam";
+				`echo "$cmd2" >> $QSUBint`;
+				#--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--
+			}
+			
+			if($aligner =~ "BOWTIE"){
+
+                                #-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+                                #-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+          IMPORTANT CODE HERE         -+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+                                my $cmd         = "$aligncommand1 $refGenome $path2fastq/$samplesInputs[$i]\.fastq -S $path2currentSampleDir/$samplesInputs[$i]\.sam";
+                                `echo "$cmd" >> $QSUBint`;
+                                #--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--
+
+                        }
 
 		}
 
@@ -1420,43 +1451,4 @@ if( $granges =~ "TRUE" ){
 
                 my $cmd         = "Rscript $code $path2expFolder $path2bam $path2GRanges $path2CustFct $wigBinSize &>> $path2qsub/GRanges.log";
 		`echo "$cmd" >> $QSUBint`;
-                #--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--
-
-
-		#---------------------------------------------
-                # Keep track of the jobs in @myJobs
-                my $jobName     = "$myJobName$i";
-                push(@myJobs, "$jobName");
-		if($SUBkey =~ "qsub"){  $cmd	= "$jobName=`$SUBcommand -o $path2qsub -e $path2qsub $QSUBint`";}
-		if($SUBkey =~ "bsub"){  $cmd    = "$SUBcommand -J $jobName -o $path2qsub\/$jobName.out -e $path2qsub\/$jobName.err $QSUBint";}
-                open $QSUB, ">>", "$QSUB" or die "Can't open '$QSUB'";
-                print $QSUB "$cmd\n";
-                close $QSUB;
-
-	}
-
-        #*----------------------------------------------------------------------*
-        # Change Targets.txt file for next iteration
-        print "\n--------------------------------------------------------------------------------------------------\n";
-        print "\n Changing '$myJobName' variable to FALSE and proceed";
-        `/usr/bin/perl -p -i -e "s/$myJobName/$myJobName\_DONE/gi" $Targets`;
-
-        #*----------------------------------------------------------------------*
-        # Prepar file containing the jobs to run
-        # Add the next job line to the $QSUB
-	if($SUBkey =~ "qsub"){
-                foreach( @myJobs ){ $_ = "\$".$_ ; }
-                my $myJobsVec   = join(":", @myJobs);
-                $finalcmd	= "FINAL=\`$SUBcommand -N $iterateJobName -o $path2qsub -e $path2qsub -W depend=$SUBdependCondition\:$myJobsVec $IterateSH`";
-        }
-	if($SUBkey =~ "bsub"){
-                foreach( @myJobs ){ $_ = "$SUBdependCondition\(\"".$_."\")" ; }
-                my $myJobsVec   = join(" && ", @myJobs);
-                $finalcmd       = "$SUBcommand -J $iterateJobName -o $path2qsub\/$iterateJobName.out -e $path2qsub\/$iterateJobName.err -w \'$myJobsVec\' $IterateSH";
-        }
-
-	open $QSUB, ">>", "$QSUB" or die "Can't open '$QSUB'";
-        print $QSUB "$finalcmd\n";
-        close $QSUB;
-
-        #*---------------                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              
+                #--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              

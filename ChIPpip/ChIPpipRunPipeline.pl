@@ -280,7 +280,6 @@ print "\n Paired end sequencing:\t $PE";
 print "\n Aligner algorithm:\t $aligner";
 print "\n Remove pcr dupl:\t $removepcr";
 print "\n Make unique reads:\t $makeunique";
-print "\n Peak caller algo:\t $peakcaller";
 print "\n";
 #print "\n Current working dir:\t $path2expFolder";
 #print "\n";
@@ -289,10 +288,10 @@ print "\n Performing following modules:";
 print "\n .........................................";
 print "\n unzip:\t\t\t $unzip \t ($unzipCommand *filename*$zipExtension)";
 print "\n qc:\t\t\t $qc";
-print "\n chiprx:\t\t $chiprx";
-print "\n map:\t\t\t $map";
+print "\n chiprx:\t\t $chiprx \t ($genomeRX)";
+print "\n map:\t\t\t $map \t ($genome) ($aligncommand1)";
 print "\n filter:\t\t $filter";
-print "\n peakcalling:\t\t $peakcalling";
+print "\n peakcalling:\t\t $peakcalling \t ($peakcaller)";
 print "\n cleanbigwig:\t\t $cleanbigwig \t (remove: @lines2remove)";
 print "\n cleanfiles:\t\t $cleanfiles";
 print "\n granges:\t\t $granges";
@@ -391,5 +390,5 @@ print "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 print "\n Exiting INITIAL section with no known error \n";
 print "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n\n\n";
 
-exit 1;
+exit 0;
 

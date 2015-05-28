@@ -51,7 +51,7 @@
 # Remove_from_bigwig	=	"random, chrM"
 # PeakCaller_R_script	=	"PeakCaller_SPP.R"
 #
-# Steps_to_execute_pipe	=	"unzip + qc + chiprx + map_D + filter_D + peakcalling_D + cleanbigwig_D + granges_D"
+# Steps_to_execute_pipe	=	"unzip + qc + chiprx + map_D + filter_D + peakcalling_D + cleanbigwig_D + cleanfiles_D + granges_D"
 #
 #
 #
