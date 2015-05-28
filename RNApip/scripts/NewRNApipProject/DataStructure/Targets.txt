@@ -23,7 +23,7 @@
 #----------------- LOCAL INFO -------------------
 #
 # Local_path_to_proj	=	"<LOCAL_PATH_TO_PROJECT>"
-# Local_path_to_NEAT	=	"/Users/patrick/Desktop/NEAT"
+# Local_path_to_NEAT	=	"/Users/Desktop/NEAT"
 # Proj_TaxonDatabase	=	"TxDb.Mmusculus.UCSC.mm9.knownGene"
 # Proj_TaxonDatabaseDic	=	"org.Mm.eg.db"
 # Proj_TaxonBSgenome	=	"BSgenome.Mmusculus.UCSC.mm9"
@@ -32,13 +32,13 @@
 #------------------------------------------------
 #---------------- REMOTE INFO -------------------
 #
-# Remote_path_to_proj	=	"/data/schorderet/NEAT/RNApip"
-# Remote_path_to_NEAT	=	"/data/schorderet/NEAT/"
+# Remote_path_to_proj	=	"/path2/NEAT/RNApip"
+# Remote_path_to_NEAT	=	"/path2/NEAT/"
 #
-# Remote_path_to_orifastq_gz	=	"/data/schorderet/NEAT/RNApip/scripts/testdata"
-# Remote_path_to_chrLens_dat	=	"/data/schorderet/reference_files/mm9/chr_lens.dat"
-# Remote_path_to_RefGen_fasta	=	"/data/ergun/ref/mm9/bowtie/"
-# Remote_path_to_ann_gtf_file	=	"/data/ergun/ref/mm9/mm9_gtf/Mus_musculus.NCBIM37.67.allchr.gtf";
+# Remote_path_to_orifastq_gz	=	"/path2/NEAT/RNApip/scripts/testdata"
+# Remote_path_to_chrLens_dat	=	"/path2/reference_files/mm9/chr_lens.dat"
+# Remote_path_to_RefGen_fasta	=	"/path2/ref/mm9/bowtie/"
+# Remote_path_to_ann_gtf_file	=	"/path2/Mus_musculus.NCBIM37.67.allchr.gtf";
 #
 #------------------------------------------------
 #----------------- PARAMETERS -------------------
