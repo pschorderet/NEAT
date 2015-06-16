@@ -6,8 +6,10 @@
 #
 # Remote Server
 #
+# Ressource_manager	=	"qsub"
+#
 # Unzip_comand_line	=	"gunzip -c"
-# Zip_file_extension	=	".gz"
+# Zip_file_extension	=	".fastq.gz"
 #
 # Filter_removePCRdup	=	"1"
 # Filter_makeUniqueRead	=	"1"

@@ -504,7 +504,7 @@ if( $qc =~ "TRUE" ) {
 	#-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-
         # Create folders
 	unless( -d "$path2QC" ) { `mkdir $path2QC`; }
-        `cp $path2ChIPseqScripts/QC.R $tmpscr`;
+        `cp $path2CustFct/QC.R $tmpscr`;
 
 	#-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-
 	# Create file to store jobs in
