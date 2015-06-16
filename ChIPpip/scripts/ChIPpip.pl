@@ -675,8 +675,8 @@ if( $chiprx =~ "TRUE" ){
 
                 #---------------------------------------------
                 # Keep track of the jobs in @myJobs
-#		my $jobName     = "$myJobName$i";
-		my $jobName     = "$samplesInputs[$i]_$myJobName$i";
+		my $jobName     = "$myJobName$i";
+#		my $jobName     = "$samplesInputs[$i]_$myJobName$i";
                 push(@myJobs, $jobName);
 		if($SUBkey =~ "qsub"){  $cmd	= "$jobName=`$SUBcommand -o $path2qsub -e $path2qsub $QSUBint`";}
 		if($SUBkey =~ "bsub"){  $cmd    = "$SUBcommand -J $jobName -o $path2qsub\/$jobName.out -e $path2qsub\/$jobName.err $QSUBint";}
@@ -823,8 +823,8 @@ if( $map =~ "TRUE" ){
 
 		#---------------------------------------------
 		# Keep track of the jobs in @myJobs
-#		my $jobName     = "$myJobName$i";
-		my $jobName     = "$samplesInputs[$i]_$myJobName$i";
+		my $jobName     = "$myJobName$i";
+#		my $jobName     = "$samplesInputs[$i]_$myJobName$i";
 		push(@myJobs, $jobName);
 		if($SUBkey =~ "qsub"){  $cmd	= "$jobName=`$SUBcommand -o $path2qsub -e $path2qsub $QSUBint`";}
 		if($SUBkey =~ "bsub"){  $cmd	= "$SUBcommand -J $jobName -o $path2qsub\/$jobName.out -e $path2qsub\/$jobName.err $QSUBint";}
@@ -974,8 +974,8 @@ if( $filter =~ "TRUE" ){
 		
 		#---------------------------------------------
 		# Keep track of the jobs in @myJobs
-#		my $jobName	= "$myJobName$i";
-		my $jobName     = "$samplesInputs[$i]_$myJobName$i";
+		my $jobName	= "$myJobName$i";
+#		my $jobName     = "$samplesInputs[$i]_$myJobName$i";
 		push(@myJobs, "$jobName");
 		if($SUBkey =~ "qsub"){  $cmd	= "$jobName=`$SUBcommand -o $path2qsub -e $path2qsub $QSUBint`";}
 		if($SUBkey =~ "bsub"){  $cmd    = "$SUBcommand -J $jobName -o $path2qsub\/$jobName.out -e $path2qsub\/$jobName.err $QSUBint";}
@@ -1095,9 +1095,9 @@ if( $peakcalling =~ "TRUE" ){
 
 		#---------------------------------------------
 		# Keep track of the jobs in @myJobs
-#		my $jobName	= "$myJobName$i";
-		my $jobName     = "$samples[$i]_$myJobName$i";
-		push(@myJobsSamples, "$jobName");
+		my $jobName	= "$myJobName$i";
+#		my $jobName     = "$samples[$i]_$myJobName$i";
+		push(@myJobs, "$jobName");
 		if($SUBkey =~ "qsub"){  $cmd	= "$jobName=`$SUBcommand -o $path2qsub -e $path2qsub $QSUBint`";}
 		if($SUBkey =~ "bsub"){  $cmd    = "$SUBcommand -J $jobName -o $path2qsub\/$jobName.out -e $path2qsub\/$jobName.err $QSUBint";}
 		open $QSUB, ">>", "$QSUB" or die "Can't open '$QSUB'";
@@ -1119,7 +1119,7 @@ if( $peakcalling =~ "TRUE" ){
                 foreach( @myJobs ){ $_ = "\$".$_ ; }
                 my $myJobsVec   = join(":", @myJobs);
                 $finalcmd	= "FINAL=\`$SUBcommand -N $iterateJobName -o $path2qsub -e $path2qsub -W depend=$SUBdependCondition\:$myJobsVec $IterateSH`";
-        }
+	}
 	if($SUBkey =~ "bsub"){
                 foreach( @myJobs ){ $_ = "$SUBdependCondition\(\"".$_."\")" ; }
                 my $myJobsVec   = join(" && ", @myJobs);
@@ -1232,8 +1232,8 @@ if( $cleanbigwig =~ "TRUE" ){
 
 		# Keep track of the jobs in @myJobs
 		#---------------------------------------------
-#		my $jobName	= "$myJobName$i";
-		my $jobName     = "$samples[$i]_$myJobName$i";
+		my $jobName	= "$myJobName$i";
+#		my $jobName     = "$samples[$i]_$myJobName$i";
 		push(@myJobs, $jobName);
 		if($SUBkey =~ "qsub"){  $cmd	= "$jobName=`$SUBcommand -o $path2qsub -e $path2qsub $QSUBint`";}
 		if($SUBkey =~ "bsub"){  $cmd    = "$SUBcommand -J $jobName -o $path2qsub\/$jobName.out -e $path2qsub\/$jobName.err $QSUBint";}
@@ -1345,8 +1345,8 @@ if($cleanfiles =~ "TRUE"){
 		}
 		#---------------------------------------------
 		# Keep track of the jobs in @myJobs
-#		my $jobName     = "$myJobName$i";
-		my $jobName     = "$samplesInputs[$i]_$myJobName$i";
+		my $jobName     = "$myJobName$i";
+#		my $jobName     = "$samplesInputs[$i]_$myJobName$i";
 		push(@myJobs, "$jobName");
 		if($SUBkey =~ "qsub"){  $cmd	= "$jobName=`$SUBcommand -o $path2qsub -e $path2qsub $QSUBint`";}
 		if($SUBkey =~ "bsub"){  $cmd    = "$SUBcommand -J $jobName -o $path2qsub\/$jobName.out -e $path2qsub\/$jobName.err $QSUBint";}
@@ -1433,7 +1433,7 @@ if( $granges =~ "TRUE" ){
         my @myJobs;
 
 	#<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
-        foreach my $i (0) {
+	       foreach my $i (0) {
 
                 #-----------------------------------------------------------
                 # Prepare a personal qsub script
@@ -1518,13 +1518,4 @@ print "\n*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-\n\n";
 #*----------------------------------------------------------------------*
 
            
-                
-                
-                
-                
-                
-                
-                
-                
-                
-                
+            
