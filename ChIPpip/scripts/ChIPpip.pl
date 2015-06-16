@@ -654,6 +654,22 @@ if( $chiprx =~ "TRUE" ){
 	                        #--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--
 			}
 
+			if($aligner =~ "BOWTIE"){
+				
+				#-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+                                #-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+          IMPORTANT CODE HERE         -+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+                                my $cmd         = "$aligncommand1 $refGenomeRX -1 $path2fastq/$samplesInputs[$i]\.fastq -2 $path2fastq/$samplesInputsPE[$i]\.fastq -S $path2currentSampleDir/$samplesInputs[$i]\.sam";
+                                `echo "$cmd" >> $QSUBint`;
+				# Uniquely mapped reads
+                                $cmd         = "grep -E '\\sX0:i:1\\s' $path2currentSampleDir/$samplesInputs[$i]\.sam > $path2currentSampleDir/$samplesInputs[$i]\.u.sam";
+                                `echo "$cmd" >> $QSUBint`;
+                                # sam to bam
+                                $cmd            = "samtools view -b $path2currentSampleDir/$samplesInputs[$i]\.u.sam -T $refGenomeRX -o $path2currentSampleDir/$samplesInputs[$i]\.bam";
+                                `echo "$cmd" >> $QSUBint`;
+                                #--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--
+
+			}
+
                 } else {
 			
 			if($aligner =~ "BWA"){			
@@ -671,6 +687,23 @@ if( $chiprx =~ "TRUE" ){
                 		`echo "$cmd" >> $QSUBint`;
                         	#--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--
 			}
+			
+			if($aligner =~ "BOWTIE"){
+
+                                #-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+                                #-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+          IMPORTANT CODE HERE         -+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+				my $cmd         = "$aligncommand1 $refGenomeRX $path2fastq/$samplesInputs[$i]\.fastq -S $path2currentSampleDir/$samplesInputs[$i]\.sam";
+                                `echo "$cmd" >> $QSUBint`;
+
+                                # Uniquely mapped reads
+                                $cmd         = "grep -E '\\sX0:i:1\\s' $path2currentSampleDir/$samplesInputs[$i]\.sam > $path2currentSampleDir/$samplesInputs[$i]\.u.sam";
+                                `echo "$cmd" >> $QSUBint`;
+                                # sam to bam
+                                $cmd            = "samtools view -b $path2currentSampleDir/$samplesInputs[$i]\.u.sam -T $refGenomeRX -o $path2currentSampleDir/$samplesInputs[$i]\.bam";
+                                `echo "$cmd" >> $QSUBint`;
+                                #--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--
+                        }
+
                 }
 
                 #---------------------------------------------
@@ -1390,114 +1423,7 @@ if($cleanfiles =~ "TRUE"){
         print "\n Submitting job to $SUBkey cluster: \t `sh $QSUB` \n";
         `sh $QSUB`;
 
-        #*----------------------------------------------------------------------*
-        # Exit script
-
-        print "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n";
-        print "\n Exiting $myJobName section with no known error \n";
-        print "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n\n\n";
-
-        exit 0;
-
-}
-
-
-#*----------------------------------------------------------------------*
-# Normalize bam files using the chiprx genome reads
-
-if( $granges =~ "TRUE" ){
-
-        print "\n\n*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-\n";
-        print "\n Creating GRanges\n";
-	
-	#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-        my $myJobName           = "granges";
-	my $iterateJobName	= "Iterate_$myJobName\_$expFolder";
-        my $path2qsub           = "$tmpscr/$myJobName/$SUBkey";
-
-	#-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-
-	# Create folders
-        unless( -d "$path2GRanges" )	{ `mkdir $path2GRanges`; }
-        unless( -d "$path2GRangesRX" )	{ `mkdir $path2GRangesRX`; }	
-
-	#-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-
-        # Create file to store jobs in
-        unless( -d "$tmpscr/$myJobName" )	{ `mkdir $tmpscr/$myJobName`; }
-        unless( -d "$path2qsub" )               { `mkdir $path2qsub`; }
-        my $QSUB        = "$tmpscr/$myJobName/$myJobName\.sh";
-        open $QSUB, ">", "$QSUB" or die "Can't open '$QSUB'";
-        print $QSUB "#!/bin/bash\n";
-        close $QSUB;
-        `chmod 777 $QSUB`;
-        print "\n Store all of the following '$myJobName' jobs in $QSUB \n";
-        my @myJobs;
-
-	#<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
-	       foreach my $i (0) {
-
-                #-----------------------------------------------------------
-                # Prepare a personal qsub script
-                my $QSUBint     = "$tmpscr/$myJobName/$myJobName\_qsub.sh";
-                `cp $scrhead $QSUBint`;
-                `chmod 777 $QSUBint`;
-
-                #-----------------------------------------------------------
-                # Parameters
-                `cp $path2CustFct/Bam2GRangesRemote.R $tmpscr/`;
-                my $code        = "$tmpscr/Bam2GRangesRemote.R";
-
-                #-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-                #-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+          IMPORTANT CODE HERE         -+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-
-                my $cmd         = "Rscript $code $path2expFolder $path2bam $path2GRanges $path2CustFct $wigBinSize &>> $path2qsub/GRanges.log";
-                `echo "$cmd" >> $QSUBint`;
-                #--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--
-
-
-                #---------------------------------------------
-                # Keep track of the jobs in @myJobs
-                my $jobName     = "$myJobName$i";
-                push(@myJobs, "$jobName");
-                if($SUBkey =~ "qsub"){  $cmd    = "$jobName=`$SUBcommand -o $path2qsub -e $path2qsub $QSUBint`";}
-                if($SUBkey =~ "bsub"){  $cmd    = "$SUBcommand -J $jobName -o $path2qsub\/$jobName.out -e $path2qsub\/$jobName.err $QSUBint";}
-                open $QSUB, ">>", "$QSUB" or die "Can't open '$QSUB'";
-                print $QSUB "$cmd\n";
-                close $QSUB;
-
-        }
-	
-	#*----------------------------------------------------------------------*
-        # Change Targets.txt file for next iteration
-        print "\n--------------------------------------------------------------------------------------------------\n";
-        print "\n Changing '$myJobName' variable to FALSE and proceed";
-        `/usr/bin/perl -p -i -e "s/$myJobName/$myJobName\_DONE/gi" $Targets`;
-
-        #*----------------------------------------------------------------------*
-        # Prepar file containing the jobs to run
-        # Add the next job line to the $QSUB
-        if($SUBkey =~ "qsub"){
-                foreach( @myJobs ){ $_ = "\$".$_ ; }
-                my $myJobsVec   = join(":", @myJobs);
-                $finalcmd	= "FINAL=\`$SUBcommand -N $iterateJobName -o $path2qsub -e $path2qsub -W depend=$SUBdependCondition\:$myJobsVec $IterateSH`";
-        }
-	if($SUBkey =~ "bsub"){
-                foreach( @myJobs ){ $_ = "$SUBdependCondition\(\"".$_."\")" ; }
-                my $myJobsVec   = join(" && ", @myJobs);
-                $finalcmd	= "$SUBcommand -J $iterateJobName -o $path2qsub\/$iterateJobName.out -e $path2qsub\/$iterateJobName.err -w \'$myJobsVec\' $IterateSH";
-        }
-
-	open $QSUB, ">>", "$QSUB" or die "Can't open '$QSUB'";
-        print $QSUB "$finalcmd\n";
-        close $QSUB;
-
-        #*----------------------------------------------------------------------*
-        # Submit jobs to run
-
-        print "\n\n--------------------------------------------------------------------------------------------------\n";
-        print "\n Submitting job to $SUBkey cluster: \t `sh $QSUB` \n";
-        `sh $QSUB`;
-
-        #*----------------------------------------------------------------------*
+         #*----------------------------------------------------------------------*
         # Exit script
 
         #*----------------------------------------------------------------------*
