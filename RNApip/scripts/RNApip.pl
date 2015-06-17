@@ -103,7 +103,7 @@ while(<INPUT>) {
                 if (grep /\bbsub/i, $_ )        { $SUBkey = "bsub"; $SUBheader  = "BSUB_header.sh";     $BSUBdependCondition = "ended";      }
                 $SUBcommand = "$1";
         }
-	elsif (/# Unzip_comand\b/) {
+	elsif (/# Unzip_comand_line\b/) {
                 $_ =~ m/"(.+?)"/;
                 $unzipCommand = "$1";
         }
@@ -316,15 +316,15 @@ if( $unzip =~ "TRUE" ){
 		# Prepare a personal qsub script
 		my $QSUBint  = "$tmpscr/$myJobName/$samples2unzip[$i]\_$myJobName\.sh";
 		`cp $scrhead $QSUBint`;
+		`chmod 777 $QSUBint`;		
 
 		my $cmd         = "$unzipCommand $path2fastqgz/$orisamples[$i]$zipExtension > $path2fastq/$samples2unzip[$i]\.fastq";
 		`echo "$cmd" >> $QSUBint`;
 		
 		#---------------------------------------------
 		# Keep track of the jobs in @myJobs
-#		my $jobName	= "Sample_$myJobName$i";
-		my $jobName     = "$samples2unzip[$i]_$myJobName$i";
-
+		my $jobName	= "Sample_$myJobName$i";
+#		my $jobName     = "$samples2unzip[$i]_$myJobName$i";
 		push(@myJobs, $jobName);
 		if($SUBkey =~ "qsub"){  $cmd	= "$jobName=`$SUBcommand -o $path2qsub -e $path2qsub $QSUBint`";}
 		if($SUBkey =~ "bsub"){  $cmd	= "$SUBcommand -J $jobName -o $path2qsub\/$jobName.out -e $path2qsub\/$jobName.err $QSUBint";} 
@@ -346,7 +346,7 @@ if( $unzip =~ "TRUE" ){
 	if($SUBkey =~ "qsub"){
                 foreach( @myJobs ){ $_ = "\$".$_ ; }
                 my $myJobsVec   = join(":", @myJobs);
-                $finalcmd	= "FINAL=\`$SUBcommand -N $iterateJobName -o $path2qsub -e $path2qsub -W depend=$QSUBdependCondition\:$myJobsVec $IterateSH`";
+                $finalcmd	= "FINAL=\`$SUBcommand -o $path2qsub -e $path2qsub -W depend=$QSUBdependCondition\:$myJobsVec $IterateSH`";
         }
 	if($SUBkey =~ "bsub"){
                 foreach( @myJobs ){ $_ = "$BSUBdependCondition\(\"".$_."\")" ; }
@@ -391,7 +391,7 @@ if( $qc =~ "TRUE" ) {
 	#-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-
         # Create folders
         unless( -d "$path2QC" ) { `mkdir $path2QC`; }
-	`cp $path2RNAseqScripts/QC.R $tmpscr`;
+	`cp $path2CustFct/QC.R $tmpscr`;
 	
 	#-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-
 	# Create file to store jobs in
@@ -411,6 +411,7 @@ if( $qc =~ "TRUE" ) {
 		# Prepare a personal qsub script
                 my $QSUBint     = "$tmpscr/$myJobName/$myJobName\_qsub.sh";
                `cp $scrhead $QSUBint`;
+		`chmod 777 $QSUBint`;
 	
 		#-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 		#-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+          IMPORTANT CODE HERE         -+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -519,9 +520,10 @@ if( $map =~ "TRUE" ){
 		# Prepare a personal qsub script
 		my $QSUBint		= "$tmpscr/$myJobName/$samples[$i]\_$myJobName\.sh";
 		`cp $scrhead $QSUBint`;
+		`chmod 777 $QSUBint`;
 		my $QSUBintRename	= "$tmpscr/$myJobName/$samples[$i]\_$myJobName2\.sh";
 		`cp $scrhead $QSUBintRename`;
-
+		`chmod 777 $QSUBintRename`;
 
 		# Create a folder for each sample to store files
 		unless (-d "$path2Tophat/$samples[$i]")		{`mkdir $path2Tophat/$samples[$i]`;}
@@ -531,7 +533,7 @@ if( $map =~ "TRUE" ){
 			#-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+          IMPORTANT CODE HERE         -+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
 			# Lane 2 of sample i should be named the same except having a '_R2' instead od a '_R1'
-			$cmd		= "$aligncommand $path2gtfFile -o $path2Tophat/$samples[$i] $path2Tophat/$samplesPE[$i] $refGenome/$genome $path2fastq/$samples[$i].fastq $path2fastq/$samplesPE[$i].fastq";
+			$cmd          = "$aligncommand $path2gtfFile -o $path2Tophat/$samples[$i] $path2Tophat/$samplesPE[$i] $refGenome/$genome $path2fastq/$samples[$i].fastq $path2fastq/$samplesPE[$i].fastq";
 			`echo "$cmd" >> $QSUBint`;
 			#--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--			
 
@@ -539,7 +541,7 @@ if( $map =~ "TRUE" ){
 			
 			#-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 			#-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+          IMPORTANT CODE HERE         -+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-			$cmd		= "$aligncommand $path2gtfFile -o $path2Tophat/$samples[$i] $refGenome/$genome $path2fastq/$samples[$i].fastq";
+			$cmd           = "$aligncommand $path2gtfFile -o $path2Tophat/$samples[$i] $refGenome/$genome $path2fastq/$samples[$i].fastq";
 			`echo "$cmd" >> $QSUBint`;
 			#--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--++--
 
@@ -553,24 +555,21 @@ if( $map =~ "TRUE" ){
 
 		#---------------------------------------------
 		# Keep track of the jobs in @myJobs
-#		my $jobName	= "$myJobName$i";
-		my $jobName     = "$samples[$i]_$myJobName$i";
+		my $jobName	= "$myJobName$i";
 		push(@myJobs, $jobName);
-#		my $jobName2	= "$myJobName2$i";
-		my $jobName2     = "$samples[$i]_$myJobName2$i";
+		my $jobName2	= "$myJobName2$i";
 		push(@myJobs2, $jobName2);
 		
 		if($SUBkey =~ "qsub"){  $cmd1           = "$jobName=`$SUBcommand -o $path2qsub -e $path2qsub $QSUBint`";}
 		if($SUBkey =~ "bsub"){  $cmd1		= "$SUBcommand -J $jobName -o $path2qsub\/$jobName.out -e $path2qsub\/$jobName.err $QSUBint";}
 
+
+		$jobName = "\$".$jobName ;
+
 		if($SUBkey =~ "qsub"){
-#			foreach( @myJobs2 ){ $_ = "\$".$_ ; }
-#			my $myJobsVec2  = join(":", @myJobs2);
                 	$cmd2		= "$jobName2=\`$SUBcommand -o $path2qsub -e $path2qsub -W depend=$QSUBdependCondition\:$jobName $QSUBintRename`";
         	}
 		if($SUBkey =~ "bsub"){
-#			foreach( @myJobs2 ){ $_ = "$BSUBdependCondition\(\"".$_."\")" ; }
-#			my $myJobsVec2   = join(" && ", @myJobs2);
 			$cmd2		= "$SUBcommand -J $jobName2 -o $path2qsub\/$jobName2.out -e $path2qsub\/$jobName2.err -w $BSUBdependCondition\(\"$jobName\") $QSUBintRename";
         	}
 
@@ -596,8 +595,9 @@ if( $map =~ "TRUE" ){
 	if($SUBkey =~ "qsub"){
                 foreach( @myJobs2 ){ $_ = "\$".$_ ; }
                 my $myJobsVec   = join(":", @myJobs2);
-                $finalcmd	= "FINAL=\`$SUBcommand -N $iterateJobName -o $path2qsub -e $path2qsub -W depend=$QSUBdependCondition\:$myJobsVec $IterateSH`";
-        }
+             #  $finalcmd	= "FINAL=\`$SUBcommand -N $iterateJobName -o $path2qsub -e $path2qsub -W depend=$QSUBdependCondition\:$myJobsVec $IterateSH`";
+        	$finalcmd       = "FINAL=\`$SUBcommand -o $path2qsub -e $path2qsub -W depend=$QSUBdependCondition\:$myJobsVec $IterateSH`";
+	}
 	if($SUBkey =~ "bsub"){
                 foreach( @myJobs ){ $_ = "$BSUBdependCondition\(\"".$_."\")" ; }
                 my $myJobsVec   = join(" && ", @myJobs);
@@ -666,6 +666,7 @@ if( $filter =~ "TRUE" ){
 		# Prepare a personal qsub script
 		my $QSUBint	= "$tmpscr/$myJobName/$samples[$i]\_$myJobName\.sh";
 		`cp $scrhead $QSUBint`;
+		`chmod 777 $QSUBint`;
 
 		# -----------------------------------------
                 # Remove pcr duplications
@@ -696,8 +697,8 @@ if( $filter =~ "TRUE" ){
 		
 		#---------------------------------------------
 		# Keep track of the jobs in @myJobs
-#		my $jobName	= "$myJobName$i";
-		my $jobName     = "$samples[$i]_$myJobName$i";
+		my $jobName	= "$myJobName$i";
+#		my $jobName     = "$samples[$i]_$myJobName$i";
 
 		push(@myJobs, "$jobName");
 		#$cmd        	= "$jobName=`qsub -o $path2qsub -e $path2qsub $QSUBint`";
@@ -796,6 +797,7 @@ if($cleanfiles =~ "TRUE"){
                 # Prepare a personal qsub script
                 my $QSUBint     = "$tmpscr/$myJobName/$samples[$i]\_$myJobName\.sh";
                `cp $scrhead $QSUBint`;
+		`chmod 777 $QSUBint`;
 
 		#-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
                 #-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+          IMPORTANT CODE HERE         -+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -807,8 +809,8 @@ if($cleanfiles =~ "TRUE"){
 
                 #---------------------------------------------
                 # Keep track of the jobs in @myJobs
-#               my $jobName     = "$myJobName$i";
-		my $jobName     = "$samples[$i]_$myJobName$i";
+		my $jobName     = "$myJobName$i";
+#		my $jobName     = "$samples[$i]_$myJobName$i";
 
                 push(@myJobs, "$jobName");
 		if($SUBkey =~ "qsub"){  $cmd           = "$jobName=`$SUBcommand -o $path2qsub -e $path2qsub $QSUBint`";}
@@ -912,6 +914,7 @@ if( $granges =~ "TRUE" ){
                 # Prepare a personal qsub script
                 my $QSUBint  = "$tmpscr/$myJobName/$myJobName\_qsub.sh";
                 `cp $scrhead $QSUBint`;
+		`chmod 777 $QSUBint`;
 
                 #-----------------------------------------------------------
                 # Parameters

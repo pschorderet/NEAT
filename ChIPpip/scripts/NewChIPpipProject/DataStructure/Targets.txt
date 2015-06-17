@@ -18,7 +18,7 @@
 # 
 # My_project_title	=	"<PROJECT_NAME>"
 # Reference_genome	=	"mm9"
-# Reference_genome_rx	=	"dm9"
+# Reference_genome_rx	=	"-"
 #
 #------------------------------------------------
 #----------------- LOCAL INFO -------------------
@@ -33,15 +33,15 @@
 #------------------------------------------------
 #---------------- REMOTE INFO -------------------
 #
-# Remote_path_to_proj	=	"/data/schorderet/NEAT/ChIPpip"
-# Remote_path_to_NEAT	=	"/data/schorderet/NEAT/"
+# Remote_path_to_proj	=	"/path/to/NEAT/ChIPpip"
+# Remote_path_to_NEAT	=	"/path/to/NEAT/"
 #
-# Remote_path_to_orifastq_gz	=	"/data/schorderet/NEAT/ChIPpip/scripts/testdata"
-# Remote_path_to_chrLens_dat	=	"/data/schorderet/reference_files/mm9/chr_lens.dat"
-# Remote_path_to_RefGen_fasta	=	"/data/ref/mm9/bwa/mm9.fa"
+# Remote_path_to_orifastq_gz	=	"/path/to/NEAT/ChIPpip/scripts/testdata"
+# Remote_path_to_chrLens_dat	=	"/path/to/chr_lens.dat"
+# Remote_path_to_RefGen_fasta	=	"/path/to/NEAT/bwa/mm9.fa"
 #
-# Remote_path_to_chrLens_dat_ChIP_rx	=	"/data/schorderet/reference_files/dm3/chr_lens.dat"
-# Remote_path_to_RefGen_fasta_ChIP_rx	=	"/data/ref/dm3/bwa/dm3.fa"
+# Remote_path_to_chrLens_dat_ChIP_rx	=	"-"
+# Remote_path_to_RefGen_fasta_ChIP_rx	=	"-"
 #
 #------------------------------------------------
 #----------------- PARAMETERS -------------------
