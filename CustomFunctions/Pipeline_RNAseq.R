@@ -17,7 +17,7 @@
 #                                                                 #
 #     path2NEAT <- "~/NEAT/"                                      #
 #     MainFolder <- "Britta_UPR_2014_01_01/"; path2MainFolder <- paste("~/Desktop/", MainFolder, sep="")
-#     MainFolder <- "Britta_UPR_2014_01_01/"; path2MainFolder <- paste("~/Documents/Sciences/Kingston/RNApip_projects/", MainFolder, sep="")
+#     MainFolder <- "MY_NEW_RNA_PROJECT/"; path2MainFolder <- paste("~/Desktop/NEAT_Github/", MainFolder, sep="")
 #     topNgenes <- 2000; toHighlight <- 20;
 #                                                                 #
 # * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * #
@@ -140,10 +140,13 @@ print(Targets)
 res <- readLines(path2Targets)
 
 # Figure out which lines contain the SAMPLES INFO
-sample_start_line <- grep("SAMPLES INFO", res)+3
-sample_end_line <- grep("PE CORRESPONDING SECTION", res)-2
-TargetsTrimmed <- NULL
+sample_start_line <- grep("OriFileName", res)+1
+sample_end_line <- sample_start_line + nrow(Targets) - 1
+if(SE=="FALSE"){
+  sample_end_line <- grep("PE corresponding samples", res)-2
+}
 
+TargetsTrimmed <- NULL
 int <- res[sample_start_line:sample_end_line]; intsplit <- strsplit(int, split='\t')
 TargetsTrimmed <- data.frame(matrix(unlist(intsplit), nrow=length(int), byrow=T))
 colnames(TargetsTrimmed) <- colnames(Targets)
@@ -160,6 +163,8 @@ for(i in 1:length(res)){
     refGenome <- unlist(strsplit(currentline, split = "\\="))[2]
   }
 }
+
+Targets <- TargetsTrimmed 
 
 #------------------------------------------------------------
 # Read the chr_lens.dat
@@ -237,7 +242,9 @@ OutputNumberOfReadsFromGRanges(GRangesSamples)
 #
 #------------------------------------------------------------
 # Load .sqlite file
+# Key = "SYMBOL"
 exonRanges <- Sqlite2Bed(TaxonDatabaseKG=TaxonDatabaseKG, TaxonDatabaseDict=TaxonDatabaseDict, Key=Key)
+#class(exonRanges)
 
 #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 #                                                                 #

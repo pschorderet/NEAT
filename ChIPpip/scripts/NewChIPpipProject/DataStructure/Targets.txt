@@ -28,6 +28,7 @@
 # Proj_TaxonDatabase	=	"TxDb.Mmusculus.UCSC.mm9.knownGene"
 # Proj_TaxonDatabaseDic	=	"org.Mm.eg.db"
 # Proj_TaxonBSgenome	=	"BSgenome.Mmusculus.UCSC.mm9"
+# Proj_TaxonDatabaseKey	=	"GENEID"
 #
 #
 #------------------------------------------------

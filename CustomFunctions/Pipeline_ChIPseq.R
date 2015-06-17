@@ -75,6 +75,23 @@ if(file.exists(path2Logs)==FALSE){cat(" \n Creating\t", path2Logs, "\n\n", sep="
 sink(paste(path2Logs, Sys.Date(), "_", format(Sys.time(), "%X"), ".txt", sep=""), append=FALSE, split=FALSE)
 #sink()
 
+# Find Taxon Db name and dictionary
+res <- readLines(path2Targets)
+tDb <- res[grep("Proj_TaxonDatabase", res)]; tDb <- gsub("# ","",tDb); tDb <- gsub("\t","",tDb); tDb <- gsub("\"","",tDb)
+TaxonDatabaseKG <- unlist(strsplit(tDb, split = "\\="))[2]
+tDbDict <- res[grep("Proj_TaxonDatabaseDic", res)]; tDbDict <- gsub("# ","",tDbDict); tDbDict <- gsub("\t","",tDbDict); tDbDict <- gsub("\"","",tDbDict)
+TaxonDatabaseDict <- unlist(strsplit(tDbDict, split = "\\="))[2]
+tDbKey <- res[grep("Proj_TaxonDatabaseKey", res)]; tDbKey <- gsub("# ","",tDbKey); tDbKey <- gsub("\t","",tDbKey); tDbKey <- gsub("\"","",tDbKey)
+Key <- unlist(strsplit(tDbKey, split = "\\="))[2]
+
+# Find if run is SE or PE
+SE <- res[grep("Paired_end_seq_run", res)]; SE <- gsub("# ","",SE); SE <- gsub("\t","",SE); SE <- gsub("\"","",SE)
+SE <- unlist(strsplit(SE, split = "\\="))[2];
+if(SE=="0"){ SE <- "TRUE" }
+if(SE=="1"){ SE <- "FALSE" }
+
+
+
 #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 #*                                                                *
 #*                Create proper arborescence                      *
@@ -151,6 +168,22 @@ Targets <- read.delim(path2Targets, comment.char="#")
 print(Targets)
 
 res <- readLines(path2Targets)
+
+
+# Figure out which lines contain the SAMPLES INFO
+sample_start_line <- grep("OriFileName", res)+1
+sample_end_line <- sample_start_line + nrow(Targets) - 1
+if(SE=="FALSE"){
+  sample_end_line <- grep("PE corresponding samples", res)-2
+}
+
+TargetsTrimmed <- NULL
+int <- res[sample_start_line:sample_end_line]; intsplit <- strsplit(int, split='\t')
+TargetsTrimmed <- data.frame(matrix(unlist(intsplit), nrow=length(int), byrow=T))
+colnames(TargetsTrimmed) <- colnames(Targets)
+#TargetsTrimmed
+
+# Other parameters
 for(i in 1:length(res)){
   newLine <- res[i]
   # Store some variables
@@ -159,6 +192,8 @@ for(i in 1:length(res)){
     refGenome <- unlist(strsplit(currentline, split = "\\="))[2]
   }    
 }
+
+Targets <- TargetsTrimmed 
 
 #------------------------------------------------------------
 # Read the chr_lens.dat
