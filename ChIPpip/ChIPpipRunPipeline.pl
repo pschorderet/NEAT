@@ -217,16 +217,18 @@ foreach $line (@Targets4) {
 my @samplesPE;
 my @samplesNoPE;
 my @samples2unzip = @samples;
+my @inputs2unzip = @inputs;
+
 if( $PE ){
 
 	print "\nPE experiment. \n";
         foreach my $i (0 .. $#samples) {
                 if ( grep /\_R2$/, $samples[$i] ){
-                        # print "\t $i\. '_R2' sample found. \t ($samples[$i]) \n";
+                        # print "\t $i+1\. '_R2' sample found. \t ($samples[$i]) \n";
                         push(@samplesPE, $samples[$i]);
                 }
                 else{
-                     	# print "\t $i\. Main sample found.  \t ($samples[$i]) \n";
+                     	# print "\t $i+1\. Main sample found.  \t ($samples[$i]) \n";
                         push(@samplesNoPE, $samples[$i]);
                 }
         }
@@ -236,6 +238,9 @@ if( $PE ){
 }
 
 #print "\n\n\norisamples:   @orisamples\n";
+foreach my $i (0 .. $#samples2unzip) {
+        print "\n\t $samples2unzip[$i] \t - \t $inputs2unzip[$i]";
+}
 #print "samples2unzip:   @samples2unzip\n";
 #print "samples: \t @samples\n";
 #print "inputs: \t @inputs\n";
