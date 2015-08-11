@@ -36,11 +36,13 @@ Mart2GRanges <- function(martReply, chromosomes=0, binNumber){
     # endsvector = Create a vector countaining the ends of the genes
     # geneNames = Store geneNames for further use
     chrvector <- startsvector <- endsvector <- geneNames <- NULL
-    for(i in 1:length(chromosomes)){
+    # for(i in 1:length(chromosomes)){
+    for(i in 1:length(startsfiltered)){
       chrvector <- c(chrvector, rep(names(startsfiltered[i]), length(startsfiltered[[i]])*binNumber))
       startsvector <- c(startsvector, as.numeric(startsfiltered[[i]]))
       endsvector <- c(endsvector, as.numeric(endsfiltered[[i]]))
       geneNames <- c(geneNames, genenamesfiltered[[i]])
+      print(i)
     }
     length(startsvector)
     length(geneNames)

@@ -18,11 +18,12 @@
 #                                                                 #
 #     path2NEAT <- "~/NEAT/"                                      #
 #     MainFolder <- "EXAMPLE/"; path2MainFolder <- paste("~/Desktop/", MainFolder, sep="")
-#     path2NEAT='/Users/patrick/NEAT/'; path2MainFolder ='~/Documents/Sciences/Kingston/DIPG/DIPG_consolidated_ChIPseq/';
-#     nameOfBed <- "mm9_TSS_10kb.bed" ; binNumber = 100 ; strand <- "+" ; Venn <- FALSE ; normInp <- FALSE
+#     MainFolder <- "MY_NEW_CHIP_PROJECT/"; path2MainFolder <- paste("~/Desktop/NEAT_Github/", MainFolder, sep="")
+#     MainFolder <- "DIPG_2014-11-18_ChIPseq/"; path2MainFolder <- paste("~/Desktop/NEAT_Github/", MainFolder, sep="")
+#     path2NEAT='/Users/patrick/NEAT/'; path2MainFolder ='~/Documents/Sciences/Kingston/DIPG/DIPG_2014-07-07_ChIPseq/';
+#     nameOfBed <- "mm9_TSS_10kb.bed";
+#     nameOfBed <- "mm9_PRC1.bed";
 #     binNumber = 100 ; strand <- "+" ; Venn <- FALSE ; normInp <- FALSE
-#     nameOfBed <- "mm9_Transcripts.bed" ;
-#     nameOfBed <- "mm9_Enhancers" ;
 #     runmeank <- 5
 #                                                                 #
 # * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * #
@@ -303,6 +304,7 @@ cat(" \n || .-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-
 
 # Open pdf to store the plots
 pdf(paste(path2Plots, sub(".bed", "", nameOfBed), "_", strand,"_", runmeank, ".pdf", sep=""), paper='USr', useDingbats=FALSE, width = 27, height = 21) 
+# dev.off()
 
 # Compute and store countTables, pdf, etc
 cols <- c("Black", "Blue", "Red", "Green", "Yellow", "Purple", "Cyan", "Grey")
