@@ -17,12 +17,11 @@
 # parameters first:                                               #
 #                                                                 #
 #     path2NEAT <- "~/NEAT/"                                      #
-#     MainFolder <- "EXAMPLE/"; path2MainFolder <- paste("~/Desktop/", MainFolder, sep="")
+#     MainFolder <- "DIPG_consolidated_ChIPseq/"; path2MainFolder <- paste("~/Desktop/", MainFolder, sep="")
+#     MainFolder <- "2015_10_05_BEa10/"; path2MainFolder <- paste("~/Documents/Sciences/Kingston/ChIPpip_projects/", MainFolder, sep="")
 #     MainFolder <- "MY_NEW_CHIP_PROJECT/"; path2MainFolder <- paste("~/Desktop/NEAT_Github/", MainFolder, sep="")
-#     MainFolder <- "DIPG_2014-11-18_ChIPseq/"; path2MainFolder <- paste("~/Desktop/NEAT_Github/", MainFolder, sep="")
-#     path2NEAT='/Users/patrick/NEAT/'; path2MainFolder ='~/Documents/Sciences/Kingston/DIPG/DIPG_2014-07-07_ChIPseq/';
 #     nameOfBed <- "mm9_TSS_10kb.bed";
-#     nameOfBed <- "mm9_PRC1.bed";
+#     nameOfBed <- "mm9_Transcripts.bed";
 #     binNumber = 100 ; strand <- "+" ; Venn <- FALSE ; normInp <- FALSE
 #     runmeank <- 5
 #                                                                 #
@@ -177,7 +176,7 @@ sample_end_line <- sample_start_line + nrow(Targets) - 1
 if(SE=="FALSE"){
   sample_end_line <- grep("PE corresponding samples", res)-2
 }
-
+Targets
 TargetsTrimmed <- NULL
 int <- res[sample_start_line:sample_end_line]; intsplit <- strsplit(int, split='\t')
 TargetsTrimmed <- data.frame(matrix(unlist(intsplit), nrow=length(int), byrow=T))
@@ -252,7 +251,9 @@ if(DoesTheFileExist(path2file=bamGRangesRDataPath)!=TRUE){
 }
 
 # Check if .bam.GRanges.RData files exists, load them
-GRangesSamples <- list.files(path2GRangesRData, pattern = "*.bam.GRanges.RData$")  
+#GRangesSamples <- list.files(path2GRangesRData, pattern = "*.bam.GRanges.RData$")  
+GRangesSamples <- paste(Targets$FileName, ".bam.GRanges.RData", sep="")
+
 if(DoesTheFileExist(path2file=paste(paste(path2GRangesRData, allsamples, sep=""), ".bam.GRanges.RData", sep=""))==TRUE){
   # This doesn't work if put in a function!!  
   # Load each sample into its .GRanges named object
@@ -309,30 +310,43 @@ pdf(paste(path2Plots, sub(".bed", "", nameOfBed), "_", strand,"_", runmeank, ".p
 # Compute and store countTables, pdf, etc
 cols <- c("Black", "Blue", "Red", "Green", "Yellow", "Purple", "Cyan", "Grey")
 for(i in levels(Targets$Factor)){
+  #print(i) 
+  #}
   cat(" \n\n **********************************************************", sep="")  
   cat(" \n *", sep="")
   cat(" \n *\tFactor: \t", i, sep="")
   cat(" \n *", sep="")
   cat(" \n * * * * * * * * * * * * * * * * * * * * * * * * * * * * *", sep="")
-  # i = levels(Targets$Factor)[1]
+  #i = levels(Targets$Factor)[1]
+  #i = levels(Targets$Factor)[2]
   sameFactorSamples <- Targets$FileName[which(Targets$Factor==i)]
-  
+
+  #---------------------------------------------------------------------------------------------------
   # For each sample with the same Factor, compute overlap and plot
   activeCTNames <- activeCTNamesRep <- NULL
   for(j in sameFactorSamples){
+    # print(j)
+    #}
     # j =  sameFactorSamples[1]
+    # j =  sameFactorSamples[2]
+    # j =  sameFactorSamples[3]
     cat(" \n\n Sample: \t", j, "\n", sep="")    
     
     #--------------------------------------------------------
     #----------------   Replicates   ------------------------
     # If there is a Replicate corresponding to the current sample, average the countTable
-    currentDupNum <- Targets$Replicate[which(Targets$FileName == j)]
+    # OLD # currentDupNum <- Targets$Replicate[which(Targets$FileName == j)]
+    currentDupNum <- which(Targets$FileName == j)
     possibleDupIndex <- NULL
     for(y in sameFactorSamples){
-      possibleDupIndex <- c(possibleDupIndex, Targets$Replicate[which(Targets$FileName == y)])
+      # y=sameFactorSamples[1]
+      newindex <- which(Targets$FileName == y)
+      #newindex <- Targets$Replicate[which(Targets$FileName == y)]
+      possibleDupIndex <- c(possibleDupIndex, newindex)
     }
     #DupNumSameFactorSamples <- Targets$Replicate[which(Targets$FileName == sameFactorSamples)]
-    dupindex <- which(possibleDupIndex==currentDupNum)
+    # OLD # dupindex <- which(possibleDupIndex==currentDupNum)
+    dupindex <- intersect(possibleDupIndex,currentDupNum)
     
     # 3 Replicates
     if(length(dupindex)==3){ ErrorOutput("Pipeline cannot deal with more than 2 replicates per condition. \nCheck your Target.txt file for details.") }
@@ -377,7 +391,8 @@ for(i in levels(Targets$Factor)){
     
     #--------------------------------------------------------
     # Replicates
-    for(k in sameFactorSamples[dupindex]){
+    #for(k in sameFactorSamples[dupindex]){
+    for(k in samples[dupindex]){
 
       nameCountTable <- paste("CountTable_", k, "_", nameOfBed, sep="")
       currentGR <- get(paste(k, ".bam.GRanges.RData", sep=""))
@@ -436,9 +451,9 @@ for(i in levels(Targets$Factor)){
       write.table(get(nameCountTable), paste(path2CountTables, nameCountTable, sep=""), sep = "\t", row.names = TRUE, col.names=TRUE, quote=FALSE, na="")      
       
       cat("\n\n +++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n ", sep="")
-    } # end of if
+    } # end of if duplicate exists
   } # end of j (go through samples that have the same factor)
-  
+  #---------------------------------------------------------------------------------------------------
   # If there is more than one one samples in sameFactorSamples (independently of whether there are replicates...)
   #     Consolidate all active countTable names
   if(length(sameFactorSamples)>1){
